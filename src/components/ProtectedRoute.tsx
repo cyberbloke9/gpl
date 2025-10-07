@@ -11,7 +11,7 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children, requireAdmin = false, requireOperator = false }: ProtectedRouteProps) => {
   const { user, loading, userRole } = useAuth();
 
-  if (loading || (user && userRole === null)) {
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="space-y-4">
@@ -24,6 +24,18 @@ export const ProtectedRoute = ({ children, requireAdmin = false, requireOperator
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // Wait for role to load after user is authenticated
+  if (userRole === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-64" />
+          <Skeleton className="h-64 w-96" />
+        </div>
+      </div>
+    );
   }
 
   if (requireAdmin && userRole !== 'admin') {
