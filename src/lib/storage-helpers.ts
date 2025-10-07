@@ -53,9 +53,12 @@ export const uploadMedia = async (
   
   if (error) throw error;
   
-  const { data: urlData } = supabase.storage
+  // Use signed URL for secure, time-limited access (24 hours)
+  const { data: urlData, error: signedUrlError } = await supabase.storage
     .from('checklist-media')
-    .getPublicUrl(data.path);
+    .createSignedUrl(data.path, 86400); // 24 hours expiry
   
-  return urlData.publicUrl;
+  if (signedUrlError) throw signedUrlError;
+  
+  return urlData.signedUrl;
 };
