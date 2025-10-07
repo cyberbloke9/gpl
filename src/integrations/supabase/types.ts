@@ -251,6 +251,7 @@ export type Database = {
           frequency: number | null
           hour: number
           id: string
+          logged_at: string | null
           oil_temperature: number | null
           reactive_power: number | null
           remarks: string | null
@@ -272,6 +273,7 @@ export type Database = {
           frequency?: number | null
           hour: number
           id?: string
+          logged_at?: string | null
           oil_temperature?: number | null
           reactive_power?: number | null
           remarks?: string | null
@@ -293,6 +295,7 @@ export type Database = {
           frequency?: number | null
           hour?: number
           id?: string
+          logged_at?: string | null
           oil_temperature?: number | null
           reactive_power?: number | null
           remarks?: string | null
@@ -348,6 +351,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_admin_role: {
+        Args: { _user_email: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

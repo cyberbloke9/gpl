@@ -115,14 +115,22 @@ export const ChecklistHistory = ({ userId }: { userId?: string }) => {
                     </p>
                   </div>
                 </div>
-                <Button
-                  onClick={() => handleViewReport(checklist)}
-                  variant="outline"
-                  className="w-full gap-2"
-                >
-                  <Eye className="h-4 w-4" />
-                  View Full Report
-                </Button>
+                {checklist.submitted ? (
+                  <Button
+                    onClick={() => handleViewReport(checklist)}
+                    variant="outline"
+                    className="w-full gap-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    View Full Report
+                  </Button>
+                ) : (
+                  <div className="p-3 bg-muted rounded-lg text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Complete and submit all 4 modules to view the full report
+                    </p>
+                  </div>
+                )}
               </AccordionContent>
             </AccordionItem>
           ))}
