@@ -26,18 +26,6 @@ export const ProtectedRoute = ({ children, requireAdmin = false, requireOperator
     return <Navigate to="/auth" replace />;
   }
 
-  // Wait for role to load after user is authenticated
-  if (userRole === null) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="space-y-4">
-          <Skeleton className="h-12 w-64" />
-          <Skeleton className="h-64 w-96" />
-        </div>
-      </div>
-    );
-  }
-
   if (requireAdmin && userRole !== 'admin') {
     return <Navigate to="/" replace />;
   }
