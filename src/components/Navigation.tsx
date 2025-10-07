@@ -9,7 +9,8 @@ import {
   LogOut,
   User,
   Menu,
-  X
+  X,
+  AlertCircle
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -31,17 +32,29 @@ export const Navigation = () => {
   const NavLinks = ({ mobile = false }: { mobile?: boolean }) => (
     <div className={mobile ? "flex flex-col gap-2 mt-8" : "flex gap-2"}>
       {userRole === 'admin' ? (
-        // Admin only sees Admin Dashboard
-        <Link to="/admin" onClick={() => mobile && setIsOpen(false)}>
-          <Button 
-            variant={isActive('/admin') ? 'default' : 'ghost'} 
-            size="sm"
-            className={mobile ? "w-full justify-start" : ""}
-          >
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            Admin Dashboard
-          </Button>
-        </Link>
+        // Admin sees Admin Dashboard and Issues
+        <>
+          <Link to="/admin" onClick={() => mobile && setIsOpen(false)}>
+            <Button 
+              variant={isActive('/admin') ? 'default' : 'ghost'} 
+              size="sm"
+              className={mobile ? "w-full justify-start" : ""}
+            >
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Admin Dashboard
+            </Button>
+          </Link>
+          <Link to="/issues" onClick={() => mobile && setIsOpen(false)}>
+            <Button 
+              variant={isActive('/issues') ? 'default' : 'ghost'} 
+              size="sm"
+              className={mobile ? "w-full justify-start" : ""}
+            >
+              <AlertCircle className="mr-2 h-4 w-4" />
+              Issues
+            </Button>
+          </Link>
+        </>
       ) : (
         // Operators see all operational links
         <>
@@ -65,14 +78,14 @@ export const Navigation = () => {
               Transformer
             </Button>
           </Link>
-          <Link to="/reminders" onClick={() => mobile && setIsOpen(false)}>
+          <Link to="/issues" onClick={() => mobile && setIsOpen(false)}>
             <Button 
-              variant={isActive('/reminders') ? 'default' : 'ghost'} 
+              variant={isActive('/issues') ? 'default' : 'ghost'} 
               size="sm"
               className={mobile ? "w-full justify-start" : ""}
             >
-              <Gauge className="mr-2 h-4 w-4" />
-              Reminders
+              <AlertCircle className="mr-2 h-4 w-4" />
+              Issues
             </Button>
           </Link>
         </>

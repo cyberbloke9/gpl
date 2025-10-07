@@ -9,7 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import Checklist from "./pages/Checklist";
 import Transformer from "./pages/Transformer";
-import Reminders from "./pages/Reminders";
+import Issues from "./pages/Issues";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
@@ -27,7 +27,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/checklist" element={<ProtectedRoute requireOperator><Checklist /></ProtectedRoute>} />
             <Route path="/transformer" element={<ProtectedRoute requireOperator><Transformer /></ProtectedRoute>} />
-            <Route path="/reminders" element={<ProtectedRoute requireOperator><Reminders /></ProtectedRoute>} />
+            <Route path="/issues" element={<ProtectedRoute><Issues /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
