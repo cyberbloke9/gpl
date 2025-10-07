@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ODYardSection } from './module4/ODYardSection';
+import { ControlRoomSection } from './module4/ControlRoomSection';
 
 interface Module4Props {
   checklistId: string | null;
@@ -16,19 +17,45 @@ export const ChecklistModule4 = ({ checklistId, data, onSave }: Module4Props) =>
     setFormData(data);
   }, [data]);
 
+  const updateSection = (section: string, field: string, value: any) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value
+      }
+    }));
+  };
+
   return (
     <div className="space-y-6 p-4">
-      <h2 className="text-2xl font-bold">Module 4: Final Inspection</h2>
-      <div className="space-y-4">
-        <div>
-          <Label>Final Notes</Label>
-          <Input
-            value={formData.final_notes || ''}
-            onChange={(e) => setFormData({ ...formData, final_notes: e.target.value })}
+      <h2 className="text-2xl font-bold">Module 4: Electrical Systems</h2>
+      
+      <Tabs defaultValue="od-yard">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="od-yard">Section 1: OD Yard</TabsTrigger>
+          <TabsTrigger value="control-room">Section 2: Control Room</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="od-yard">
+          <ODYardSection
+            data={formData.section1_od_yard || {}}
+            onChange={(field, value) => updateSection('section1_od_yard', field, value)}
+            checklistId={checklistId}
           />
-        </div>
-        <Button onClick={() => onSave(formData)}>Save Module 4</Button>
-      </div>
+        </TabsContent>
+
+        <TabsContent value="control-room">
+          <ControlRoomSection
+            data={formData.section2_control_room || {}}
+            onChange={(field, value) => updateSection('section2_control_room', field, value)}
+          />
+        </TabsContent>
+      </Tabs>
+
+      <Button onClick={() => onSave(formData)} size="lg" className="w-full">
+        Save Module 4
+      </Button>
     </div>
   );
 };
