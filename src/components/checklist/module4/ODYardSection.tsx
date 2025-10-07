@@ -9,9 +9,10 @@ interface ODYardSectionProps {
   data: any;
   onChange: (field: string, value: any) => void;
   checklistId: string | null;
+  userId: string;
 }
 
-export const ODYardSection = ({ data, onChange }: ODYardSectionProps) => {
+export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSectionProps) => {
   const updateNested = (parent: string, field: string, value: any) => {
     onChange(parent, { ...data[parent], [field]: value });
   };
@@ -73,6 +74,9 @@ export const ODYardSection = ({ data, onChange }: ODYardSectionProps) => {
               value={data.ptr?.rtcc_photo}
               onChange={(url) => updateNested('ptr', 'rtcc_photo', url)}
               required
+              userId={userId}
+              checklistId={checklistId || ''}
+              fieldName="ptr_rtcc"
             />
           </AccordionContent>
         </AccordionItem>
@@ -130,6 +134,9 @@ export const ODYardSection = ({ data, onChange }: ODYardSectionProps) => {
               value={data.diesel_gen?.battery_water_photo}
               onChange={(url) => updateNested('diesel_gen', 'battery_water_photo', url)}
               required
+              userId={userId}
+              checklistId={checklistId || ''}
+              fieldName="diesel_battery_water"
             />
           </AccordionContent>
         </AccordionItem>
@@ -143,6 +150,9 @@ export const ODYardSection = ({ data, onChange }: ODYardSectionProps) => {
               value={data.landscape_photo}
               onChange={(url) => onChange('landscape_photo', url)}
               required
+              userId={userId}
+              checklistId={checklistId || ''}
+              fieldName="landscape"
             />
           </AccordionContent>
         </AccordionItem>

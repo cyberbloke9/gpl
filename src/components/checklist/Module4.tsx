@@ -6,11 +6,12 @@ import { ControlRoomSection } from './module4/ControlRoomSection';
 
 interface Module4Props {
   checklistId: string | null;
+  userId: string;
   data: any;
   onSave: (data: any) => void;
 }
 
-export const ChecklistModule4 = ({ checklistId, data, onSave }: Module4Props) => {
+export const ChecklistModule4 = ({ checklistId, userId, data, onSave }: Module4Props) => {
   const [formData, setFormData] = useState(data);
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export const ChecklistModule4 = ({ checklistId, data, onSave }: Module4Props) =>
             data={formData.section1_od_yard || {}}
             onChange={(field, value) => updateSection('section1_od_yard', field, value)}
             checklistId={checklistId}
+            userId={userId}
           />
         </TabsContent>
 

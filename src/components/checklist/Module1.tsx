@@ -10,11 +10,12 @@ import { Textarea } from '@/components/ui/textarea';
 
 interface Module1Props {
   checklistId: string | null;
+  userId: string;
   data: any;
   onSave: (data: any) => void;
 }
 
-export const ChecklistModule1 = ({ checklistId, data, onSave }: Module1Props) => {
+export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1Props) => {
   const [formData, setFormData] = useState(data);
 
   useEffect(() => {
@@ -64,6 +65,9 @@ export const ChecklistModule1 = ({ checklistId, data, onSave }: Module1Props) =>
           value={formData[unit]?.turbine?.servomotor_photo}
           onChange={(url) => updateUnit(unit, 'turbine', 'servomotor_photo', url)}
           required
+          userId={userId}
+          checklistId={checklistId || ''}
+          fieldName={`${unit}_turbine_servomotor`}
         />
 
         <div>
@@ -164,6 +168,9 @@ export const ChecklistModule1 = ({ checklistId, data, onSave }: Module1Props) =>
           value={formData[unit]?.gearbox?.los_pressure_photo}
           onChange={(url) => updateUnit(unit, 'gearbox', 'los_pressure_photo', url)}
           required
+          userId={userId}
+          checklistId={checklistId || ''}
+          fieldName={`${unit}_gearbox_los_pressure`}
         />
 
         <div>
@@ -236,6 +243,9 @@ export const ChecklistModule1 = ({ checklistId, data, onSave }: Module1Props) =>
           value={formData[unit]?.cooling?.flow_indicators_photo}
           onChange={(url) => updateUnit(unit, 'cooling', 'flow_indicators_photo', url)}
           required
+          userId={userId}
+          checklistId={checklistId || ''}
+          fieldName={`${unit}_cooling_flow_indicators`}
         />
 
         <div>
@@ -259,6 +269,9 @@ export const ChecklistModule1 = ({ checklistId, data, onSave }: Module1Props) =>
                 value={formData[unit]?.cooling?.filter_photo}
                 onChange={(url) => updateUnit(unit, 'cooling', 'filter_photo', url)}
                 required
+                userId={userId}
+                checklistId={checklistId || ''}
+                fieldName={`${unit}_cooling_filter`}
               />
             </ConditionalField>
           )}

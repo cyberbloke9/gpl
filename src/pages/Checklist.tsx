@@ -154,42 +154,32 @@ export default function Checklist() {
   const handleSubmitChecklist = async () => {
     if (!currentChecklistId) return;
 
-    console.log('Submitting checklist with data:', {
-      module1_data: module1Data,
-      module2_data: module2Data,
-      module3_data: module3Data,
-      module4_data: module4Data,
-      problem_fields: problemFields
-    });
+    try {
+      const submissionTime = new Date().toISOString();
+      const { error } = await supabase
+        .from('checklists')
+        .update({
+          status: 'completed',
+          submitted: true,
+          submitted_at: submissionTime,
+          completion_time: submissionTime,
+          completion_percentage: 100,
+          module1_data: module1Data,
+          module2_data: module2Data,
+          module3_data: module3Data,
+          module4_data: module4Data,
+        })
+        .eq('id', currentChecklistId);
 
-    const submissionTime = new Date().toISOString();
-    const { error } = await supabase
-      .from('checklists')
-      .update({
-        status: 'completed',
-        submitted: true,
-        submitted_at: submissionTime,
-        completion_time: submissionTime,
-        completion_percentage: 100,
-        module1_data: module1Data,
-        module2_data: module2Data,
-        module3_data: module3Data,
-        module4_data: module4Data,
-      })
-      .eq('id', currentChecklistId);
-
-    if (error) {
-      console.error('Checklist submission error:', error);
-      toast.error('Failed to submit checklist: ' + error.message);
-    } else {
-      console.log('Checklist submitted successfully');
-      setIsSubmitted(true);
-      setSubmittedAt(submissionTime);
-      setShowSubmitDialog(false);
-      toast.success('Checklist submitted successfully! Admin has been notified.');
+      if (error) throw error;
       
-      // Redirect to history tab to view submitted report
+      await loadOrCreateTodayChecklist();
+      setShowSubmitDialog(false);
+      toast.success('Checklist submitted successfully!');
       setActiveModule('history');
+    } catch (error: any) {
+      console.error('Submission error:', error);
+      toast.error('Failed to submit: ' + error.message);
     }
   };
 
@@ -235,6 +225,7 @@ export default function Checklist() {
               ) : (
                 <ChecklistModule1
                   checklistId={currentChecklistId}
+                  userId={user?.id || ''}
                   data={module1Data}
                   onSave={(data) => {
                     setModule1Data(data);
@@ -254,6 +245,7 @@ export default function Checklist() {
               ) : (
                 <ChecklistModule2
                   checklistId={currentChecklistId}
+                  userId={user?.id || ''}
                   data={module2Data}
                   onSave={(data) => {
                     setModule2Data(data);
@@ -273,6 +265,7 @@ export default function Checklist() {
               ) : (
                 <ChecklistModule3
                   checklistId={currentChecklistId}
+                  userId={user?.id || ''}
                   data={module3Data}
                   onSave={(data) => {
                     setModule3Data(data);
@@ -292,6 +285,7 @@ export default function Checklist() {
               ) : (
                 <ChecklistModule4
                   checklistId={currentChecklistId}
+                  userId={user?.id || ''}
                   data={module4Data}
                   onSave={(data) => {
                     setModule4Data(data);

@@ -8,11 +8,12 @@ import { Textarea } from '@/components/ui/textarea';
 
 interface Module2Props {
   checklistId: string | null;
+  userId: string;
   data: any;
   onSave: (data: any) => void;
 }
 
-export const ChecklistModule2 = ({ checklistId, data, onSave }: Module2Props) => {
+export const ChecklistModule2 = ({ checklistId, userId, data, onSave }: Module2Props) => {
   const [formData, setFormData] = useState(data);
 
   useEffect(() => {
@@ -99,6 +100,9 @@ export const ChecklistModule2 = ({ checklistId, data, onSave }: Module2Props) =>
           label="Power cable inspection (Terminal Box)"
           value={formData[unit]?.interval?.power_cable_photo}
           onChange={(url) => updateUnit(unit, 'interval', 'power_cable_photo', url)}
+          userId={userId}
+          checklistId={checklistId || ''}
+          fieldName={`${unit}_interval_power_cable`}
         />
 
         <div>

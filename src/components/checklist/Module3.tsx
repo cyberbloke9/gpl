@@ -7,11 +7,12 @@ import { NumericInput } from './NumericInput';
 
 interface Module3Props {
   checklistId: string | null;
+  userId: string;
   data: any;
   onSave: (data: any) => void;
 }
 
-export const ChecklistModule3 = ({ checklistId, data, onSave }: Module3Props) => {
+export const ChecklistModule3 = ({ checklistId, userId, data, onSave }: Module3Props) => {
   const [formData, setFormData] = useState(data);
 
   useEffect(() => {
@@ -32,6 +33,9 @@ export const ChecklistModule3 = ({ checklistId, data, onSave }: Module3Props) =>
           value={formData.sump_level_photo}
           onChange={(url) => updateField('sump_level_photo', url)}
           required
+          userId={userId}
+          checklistId={checklistId || ''}
+          fieldName="sump_level"
         />
 
         <div>
@@ -80,6 +84,9 @@ export const ChecklistModule3 = ({ checklistId, data, onSave }: Module3Props) =>
             value={formData.gv_sump_unit1_photo}
             onChange={(url) => updateField('gv_sump_unit1_photo', url)}
             required
+            userId={userId}
+            checklistId={checklistId || ''}
+            fieldName="gv_sump_unit1"
           />
         </div>
 
@@ -96,6 +103,9 @@ export const ChecklistModule3 = ({ checklistId, data, onSave }: Module3Props) =>
             value={formData.gv_sump_unit2_photo}
             onChange={(url) => updateField('gv_sump_unit2_photo', url)}
             required
+            userId={userId}
+            checklistId={checklistId || ''}
+            fieldName="gv_sump_unit2"
           />
         </div>
       </div>

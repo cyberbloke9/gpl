@@ -20,34 +20,48 @@ export const ChecklistHistory = ({ userId }: { userId?: string }) => {
   }, [userId]);
 
   const loadHistory = async () => {
+    if (!userId) return;
+    
+    // Only fetch metadata, not module data (for performance)
     const { data, error } = await supabase
       .from('checklists')
-      .select('id, date, shift, submitted, status, completion_percentage, problem_count, problem_fields, flagged_issues_count, start_time, completion_time, submitted_at, module1_data, module2_data, module3_data, module4_data, user_id')
+      .select('id, date, shift, submitted, status, completion_percentage, problem_count, problem_fields, flagged_issues_count, start_time, completion_time, submitted_at, user_id')
       .eq('user_id', userId)
       .order('date', { ascending: false })
       .limit(30);
-    
+
     if (error) {
-      console.error('Error loading checklist history:', error);
+      console.error('Error loading history:', error);
+      return;
     }
-    if (data) {
-      console.log('Loaded checklists with module data:', data);
-      setChecklists(data);
-    }
+
+    setChecklists(data || []);
   };
 
   const handleViewReport = async (checklist: any) => {
-    // Fetch user profile data for PDF
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('full_name, employee_id')
-      .eq('id', checklist.user_id)
+    // Fetch full checklist data including module data
+    const { data: fullChecklist, error: checklistError } = await supabase
+      .from('checklists')
+      .select('*')
+      .eq('id', checklist.id)
       .single();
 
-    setSelectedChecklist({ 
-      ...checklist, 
-      userName: profile?.full_name,
-      employeeId: profile?.employee_id 
+    if (checklistError) {
+      console.error('Error loading full checklist:', checklistError);
+      return;
+    }
+
+    // Fetch user profile info
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('full_name, employee_id')
+      .eq('id', userId)
+      .single();
+
+    setSelectedChecklist({
+      ...fullChecklist,
+      userName: profileData?.full_name,
+      employeeId: profileData?.employee_id
     });
     setIsViewerOpen(true);
   };
