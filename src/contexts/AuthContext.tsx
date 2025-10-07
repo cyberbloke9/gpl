@@ -71,22 +71,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string, fullName: string, employeeId?: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/`,
-        data: {
-          full_name: fullName,
-          employee_id: employeeId
-        }
+    try {
+      if (!fullName || fullName.trim().length === 0) {
+        const error = new Error('Full name is required');
+        toast.error('Please provide your full name');
+        return { error };
       }
-    });
-    if (!error) {
+
+      console.log('Attempting signup for:', email);
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: fullName.trim(),
+            employee_id: employeeId?.trim() || null
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Signup error:', error);
+        if (error.message.includes('timeout')) {
+          toast.error('Server is taking too long to respond. Please try again.');
+        } else if (error.message.includes('already registered')) {
+          toast.error('This email is already registered. Please sign in instead.');
+        } else {
+          toast.error(`Failed to create account: ${error.message}`);
+        }
+        return { error };
+      }
+
+      console.log('Signup successful:', data);
       toast.success('Account created successfully!');
       navigate('/');
+      return { error: null };
+    } catch (err: any) {
+      console.error('Unexpected signup error:', err);
+      toast.error('An unexpected error occurred. Please try again.');
+      return { error: err };
     }
-    return { error };
   };
 
   const signOut = async () => {

@@ -20,14 +20,20 @@ export const ChecklistHistory = ({ userId }: { userId?: string }) => {
   }, [userId]);
 
   const loadHistory = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('checklists')
-      .select('*')
+      .select('id, date, shift, submitted, status, completion_percentage, problem_count, problem_fields, flagged_issues_count, start_time, completion_time, submitted_at, module1_data, module2_data, module3_data, module4_data, user_id')
       .eq('user_id', userId)
       .order('date', { ascending: false })
       .limit(30);
     
-    if (data) setChecklists(data);
+    if (error) {
+      console.error('Error loading checklist history:', error);
+    }
+    if (data) {
+      console.log('Loaded checklists with module data:', data);
+      setChecklists(data);
+    }
   };
 
   const handleViewReport = async (checklist: any) => {

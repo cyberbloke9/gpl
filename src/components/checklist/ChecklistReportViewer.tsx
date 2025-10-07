@@ -144,28 +144,44 @@ export const ChecklistReportViewer = ({ checklist, isOpen, onClose, userName, em
             <TabsContent value="module1" className="mt-4">
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold">Module 1: Turbine, OPU & Cooling System</h3>
-                <Module1DataDisplay data={checklist.module1_data} />
+                {checklist.module1_data && Object.keys(checklist.module1_data).length > 0 ? (
+                  <Module1DataDisplay data={checklist.module1_data} />
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">No data available for Module 1</p>
+                )}
               </div>
             </TabsContent>
 
             <TabsContent value="module2" className="mt-4">
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold">Module 2: Generator</h3>
-                <Module2DataDisplay data={checklist.module2_data} />
+                {checklist.module2_data && Object.keys(checklist.module2_data).length > 0 ? (
+                  <Module2DataDisplay data={checklist.module2_data} />
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">No data available for Module 2</p>
+                )}
               </div>
             </TabsContent>
 
             <TabsContent value="module3" className="mt-4">
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold">Module 3: De-watering Sump</h3>
-                <Module3DataDisplay data={checklist.module3_data} />
+                {checklist.module3_data && Object.keys(checklist.module3_data).length > 0 ? (
+                  <Module3DataDisplay data={checklist.module3_data} />
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">No data available for Module 3</p>
+                )}
               </div>
             </TabsContent>
 
             <TabsContent value="module4" className="mt-4">
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold">Module 4: Electrical Systems</h3>
-                <Module4DataDisplay data={checklist.module4_data} />
+                {checklist.module4_data && Object.keys(checklist.module4_data).length > 0 ? (
+                  <Module4DataDisplay data={checklist.module4_data} />
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">No data available for Module 4</p>
+                )}
               </div>
             </TabsContent>
           </Tabs>

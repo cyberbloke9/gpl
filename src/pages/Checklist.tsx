@@ -154,6 +154,14 @@ export default function Checklist() {
   const handleSubmitChecklist = async () => {
     if (!currentChecklistId) return;
 
+    console.log('Submitting checklist with data:', {
+      module1_data: module1Data,
+      module2_data: module2Data,
+      module3_data: module3Data,
+      module4_data: module4Data,
+      problem_fields: problemFields
+    });
+
     const submissionTime = new Date().toISOString();
     const { error } = await supabase
       .from('checklists')
@@ -163,12 +171,18 @@ export default function Checklist() {
         submitted_at: submissionTime,
         completion_time: submissionTime,
         completion_percentage: 100,
+        module1_data: module1Data,
+        module2_data: module2Data,
+        module3_data: module3Data,
+        module4_data: module4Data,
       })
       .eq('id', currentChecklistId);
 
     if (error) {
-      toast.error('Failed to submit checklist');
+      console.error('Checklist submission error:', error);
+      toast.error('Failed to submit checklist: ' + error.message);
     } else {
+      console.log('Checklist submitted successfully');
       setIsSubmitted(true);
       setSubmittedAt(submissionTime);
       setShowSubmitDialog(false);

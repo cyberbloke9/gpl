@@ -214,7 +214,10 @@ export const TransformerLogForm = () => {
                   mode="single"
                   selected={selectedDate}
                   onSelect={(date) => date && setSelectedDate(date)}
-                  disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                  disabled={(date) => 
+                    date > new Date() || 
+                    date < new Date(new Date().setHours(0, 0, 0, 0))
+                  }
                   initialFocus
                 />
               </PopoverContent>
@@ -230,8 +233,10 @@ export const TransformerLogForm = () => {
               <SelectContent>
                 {Array.from({ length: 24 }, (_, i) => i).map((hour) => {
                   const isLogged = loggedHours[currentTransformerKey].includes(hour);
-                  const isFuture = hour > currentHour;
-                  const isDisabled = isLogged || isFuture;
+                  const isCurrentDate = format(selectedDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+                  const isPast = isCurrentDate && hour < currentHour;
+                  const isFuture = isCurrentDate && hour > currentHour;
+                  const isDisabled = isLogged || isPast;
                   
                   return (
                     <SelectItem 
@@ -242,7 +247,8 @@ export const TransformerLogForm = () => {
                       <div className="flex items-center gap-2">
                         {isLogged && <CheckCircle2 className="h-3 w-3 text-green-600" />}
                         {hour.toString().padStart(2, '0')}:00
-                        {isFuture && <span className="text-xs text-muted-foreground">(future)</span>}
+                        {isPast && !isLogged && <span className="text-xs text-red-500">(missed)</span>}
+                        {isFuture && <span className="text-xs text-muted-foreground">(upcoming)</span>}
                       </div>
                     </SelectItem>
                   );
