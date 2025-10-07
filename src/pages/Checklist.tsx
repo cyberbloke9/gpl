@@ -4,6 +4,7 @@ import { Navigation } from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ChecklistModule1 } from '@/components/checklist/Module1';
@@ -12,6 +13,7 @@ import { ChecklistModule3 } from '@/components/checklist/Module3';
 import { ChecklistModule4 } from '@/components/checklist/Module4';
 import { ChecklistHistory } from '@/components/checklist/ChecklistHistory';
 import { SubmitBar } from '@/components/checklist/SubmitBar';
+import { Lock } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +38,8 @@ export default function Checklist() {
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [overallProgress, setOverallProgress] = useState(0);
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submittedAt, setSubmittedAt] = useState<string | null>(null);
 
   useEffect(() => {
     loadOrCreateTodayChecklist();
@@ -64,6 +68,14 @@ export default function Checklist() {
       setModule2Data(data.module2_data || {});
       setModule3Data(data.module3_data || {});
       setModule4Data(data.module4_data || {});
+      setIsSubmitted(data.submitted || false);
+      setSubmittedAt(data.submitted_at);
+      
+      // If already submitted, redirect to history
+      if (data.submitted) {
+        setActiveModule('history');
+        toast.info('This checklist has already been submitted');
+      }
     } else {
       const { data: newChecklist, error: createError } = await supabase
         .from('checklists')
@@ -142,13 +154,14 @@ export default function Checklist() {
   const handleSubmitChecklist = async () => {
     if (!currentChecklistId) return;
 
+    const submissionTime = new Date().toISOString();
     const { error } = await supabase
       .from('checklists')
       .update({
         status: 'completed',
         submitted: true,
-        submitted_at: new Date().toISOString(),
-        completion_time: new Date().toISOString(),
+        submitted_at: submissionTime,
+        completion_time: submissionTime,
         completion_percentage: 100,
       })
       .eq('id', currentChecklistId);
@@ -156,9 +169,13 @@ export default function Checklist() {
     if (error) {
       toast.error('Failed to submit checklist');
     } else {
-      toast.success('Checklist submitted successfully! Admin has been notified.');
+      setIsSubmitted(true);
+      setSubmittedAt(submissionTime);
       setShowSubmitDialog(false);
-      // Optionally redirect to dashboard
+      toast.success('Checklist submitted successfully! Admin has been notified.');
+      
+      // Redirect to history tab to view submitted report
+      setActiveModule('history');
     }
   };
 
@@ -175,6 +192,15 @@ export default function Checklist() {
           </p>
         </div>
 
+        {isSubmitted && submittedAt && (
+          <Alert className="mb-4 border-green-500 bg-green-50 dark:bg-green-950">
+            <Lock className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800 dark:text-green-200">
+              This checklist was submitted on {new Date(submittedAt).toLocaleString()} - View only mode
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Card className="p-3 sm:p-6 mb-24 sm:mb-28">
           <Tabs value={activeModule} onValueChange={setActiveModule}>
             <TabsList className="grid w-full grid-cols-5 h-auto">
@@ -186,47 +212,79 @@ export default function Checklist() {
             </TabsList>
 
             <TabsContent value="1">
-              <ChecklistModule1
-                checklistId={currentChecklistId}
-                data={module1Data}
-                onSave={(data) => {
-                  setModule1Data(data);
-                  saveModuleData(1, data);
-                }}
-              />
+              {isSubmitted ? (
+                <Alert>
+                  <AlertDescription>
+                    Module data is locked. View the submitted report in the History tab.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <ChecklistModule1
+                  checklistId={currentChecklistId}
+                  data={module1Data}
+                  onSave={(data) => {
+                    setModule1Data(data);
+                    saveModuleData(1, data);
+                  }}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="2">
-              <ChecklistModule2
-                checklistId={currentChecklistId}
-                data={module2Data}
-                onSave={(data) => {
-                  setModule2Data(data);
-                  saveModuleData(2, data);
-                }}
-              />
+              {isSubmitted ? (
+                <Alert>
+                  <AlertDescription>
+                    Module data is locked. View the submitted report in the History tab.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <ChecklistModule2
+                  checklistId={currentChecklistId}
+                  data={module2Data}
+                  onSave={(data) => {
+                    setModule2Data(data);
+                    saveModuleData(2, data);
+                  }}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="3">
-              <ChecklistModule3
-                checklistId={currentChecklistId}
-                data={module3Data}
-                onSave={(data) => {
-                  setModule3Data(data);
-                  saveModuleData(3, data);
-                }}
-              />
+              {isSubmitted ? (
+                <Alert>
+                  <AlertDescription>
+                    Module data is locked. View the submitted report in the History tab.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <ChecklistModule3
+                  checklistId={currentChecklistId}
+                  data={module3Data}
+                  onSave={(data) => {
+                    setModule3Data(data);
+                    saveModuleData(3, data);
+                  }}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="4">
-              <ChecklistModule4
-                checklistId={currentChecklistId}
-                data={module4Data}
-                onSave={(data) => {
-                  setModule4Data(data);
-                  saveModuleData(4, data);
-                }}
-              />
+              {isSubmitted ? (
+                <Alert>
+                  <AlertDescription>
+                    Module data is locked. View the submitted report in the History tab.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <ChecklistModule4
+                  checklistId={currentChecklistId}
+                  data={module4Data}
+                  onSave={(data) => {
+                    setModule4Data(data);
+                    saveModuleData(4, data);
+                  }}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="history">
@@ -236,7 +294,7 @@ export default function Checklist() {
         </Card>
       </main>
 
-      {activeModule !== 'history' && (
+      {activeModule !== 'history' && !isSubmitted && (
         <SubmitBar
           overallProgress={overallProgress}
           problemCount={problemFields.length}

@@ -3,6 +3,9 @@ import { Navigation } from '@/components/Navigation';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminOverviewCards } from '@/components/admin/AdminOverviewCards';
 import { TodaysChecklistsTable } from '@/components/admin/TodaysChecklistsTable';
+import { AdminTransformerLogsTable } from '@/components/admin/AdminTransformerLogsTable';
+import { ChecklistReportViewer } from '@/components/checklist/ChecklistReportViewer';
+import { TransformerReportViewer } from '@/components/transformer/TransformerReportViewer';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +19,11 @@ export default function Admin() {
     activeProblems: 0,
   });
   const [todaysChecklists, setTodaysChecklists] = useState<any[]>([]);
+  const [transformerLogs, setTransformerLogs] = useState<any[]>([]);
+  const [selectedChecklist, setSelectedChecklist] = useState<any>(null);
+  const [isChecklistViewerOpen, setIsChecklistViewerOpen] = useState(false);
+  const [selectedTransformerReport, setSelectedTransformerReport] = useState<any>(null);
+  const [isTransformerViewerOpen, setIsTransformerViewerOpen] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -29,6 +37,17 @@ export default function Admin() {
           event: '*',
           schema: 'public',
           table: 'checklists',
+        },
+        () => {
+          loadDashboardData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'transformer_logs',
         },
         () => {
           loadDashboardData();
@@ -87,11 +106,71 @@ export default function Admin() {
     })) || [];
 
     setTodaysChecklists(formattedChecklists);
+
+    // Get today's transformer logs
+    const { data: transformerData } = await supabase
+      .from('transformer_logs')
+      .select(`
+        *,
+        profiles:user_id (
+          full_name,
+          employee_id
+        )
+      `)
+      .eq('date', today)
+      .order('logged_at', { ascending: false });
+
+    // Group transformer logs by date, transformer_number, and user
+    const groupedTransformerLogs = transformerData?.reduce((acc: any, log: any) => {
+      const key = `${log.date}-${log.transformer_number}-${log.user_id}`;
+      if (!acc[key]) {
+        acc[key] = {
+          date: log.date,
+          transformer_number: log.transformer_number,
+          user_name: log.profiles?.full_name || 'Unknown',
+          employee_id: log.profiles?.employee_id || '',
+          hours_logged: 0,
+          logs: []
+        };
+      }
+      acc[key].hours_logged++;
+      acc[key].logs.push(log);
+      return acc;
+    }, {}) || {};
+
+    const formattedTransformerLogs = Object.values(groupedTransformerLogs).map((group: any) => ({
+      ...group,
+      completion_percentage: Math.round((group.hours_logged / 24) * 100)
+    }));
+
+    setTransformerLogs(formattedTransformerLogs);
   };
 
-  const handleViewReport = (checklistId: string) => {
-    // Navigate to detailed report view (to be implemented in Phase 3)
-    console.log('View report:', checklistId);
+  const handleViewReport = async (checklistId: string) => {
+    const { data, error } = await supabase
+      .from('checklists')
+      .select('*')
+      .eq('id', checklistId)
+      .single();
+
+    if (!error && data) {
+      setSelectedChecklist(data);
+      setIsChecklistViewerOpen(true);
+    }
+  };
+
+  const handleViewTransformerReport = async (date: string, transformerNumber: number) => {
+    const { data, error } = await supabase
+      .from('transformer_logs')
+      .select('*')
+      .eq('date', date)
+      .eq('transformer_number', transformerNumber)
+      .order('hour', { ascending: true });
+
+    if (!error && data) {
+      setSelectedTransformerReport({ date, transformerNumber, logs: data });
+      setIsTransformerViewerOpen(true);
+    }
   };
 
   return (
@@ -108,8 +187,9 @@ export default function Admin() {
         />
 
         <Tabs defaultValue="today" className="space-y-4">
-          <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 h-auto">
+          <TabsList className="w-full grid grid-cols-2 sm:grid-cols-5 h-auto">
             <TabsTrigger value="today" className="text-xs sm:text-sm">Checklists</TabsTrigger>
+            <TabsTrigger value="transformer" className="text-xs sm:text-sm">Transformer</TabsTrigger>
             <TabsTrigger value="problems" className="text-xs sm:text-sm">Problems</TabsTrigger>
             <TabsTrigger value="issues" className="text-xs sm:text-sm">Issues</TabsTrigger>
             <TabsTrigger value="history" className="text-xs sm:text-sm">History</TabsTrigger>
@@ -122,6 +202,18 @@ export default function Admin() {
                 <TodaysChecklistsTable
                   checklists={todaysChecklists}
                   onViewReport={handleViewReport}
+                />
+              </div>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="transformer">
+            <Card className="p-3 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Today's Transformer Logs</h2>
+              <div className="overflow-x-auto -mx-3 sm:mx-0">
+                <AdminTransformerLogsTable
+                  logs={transformerLogs}
+                  onViewReport={handleViewTransformerReport}
                 />
               </div>
             </Card>
@@ -149,6 +241,18 @@ export default function Admin() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <ChecklistReportViewer
+        checklist={selectedChecklist}
+        isOpen={isChecklistViewerOpen}
+        onClose={() => setIsChecklistViewerOpen(false)}
+      />
+
+      <TransformerReportViewer
+        isOpen={isTransformerViewerOpen}
+        onClose={() => setIsTransformerViewerOpen(false)}
+        report={selectedTransformerReport}
+      />
     </div>
   );
 }
