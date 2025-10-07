@@ -5,9 +5,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  requireOperator?: boolean;
 }
 
-export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ children, requireAdmin = false, requireOperator = false }: ProtectedRouteProps) => {
   const { user, loading, userRole } = useAuth();
 
   if (loading) {
@@ -27,6 +28,10 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
 
   if (requireAdmin && userRole !== 'admin') {
     return <Navigate to="/" replace />;
+  }
+
+  if (requireOperator && userRole === 'admin') {
+    return <Navigate to="/admin" replace />;
   }
 
   return <>{children}</>;

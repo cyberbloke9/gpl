@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Zap } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CalendarIcon, Zap, CheckCircle2, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -35,6 +35,10 @@ export const TransformerLogForm = () => {
   const [currentHour, setCurrentHour] = useState<number>(new Date().getHours());
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
   const [saving, setSaving] = useState(false);
+  const [loggedHours, setLoggedHours] = useState<{
+    transformer1: number[];
+    transformer2: number[];
+  }>({ transformer1: [], transformer2: [] });
 
   const [formData, setFormData] = useState<TransformerData>({
     frequency: 0,
@@ -51,6 +55,21 @@ export const TransformerLogForm = () => {
     remarks: '',
   });
 
+  // Load logged hours for selected date
+  const loadLoggedHours = async () => {
+    const { data, error } = await supabase
+      .from('transformer_logs')
+      .select('transformer_number, hour')
+      .eq('date', format(selectedDate, 'yyyy-MM-dd'));
+
+    if (!error && data) {
+      const t1Hours = data.filter(d => d.transformer_number === 1).map(d => d.hour);
+      const t2Hours = data.filter(d => d.transformer_number === 2).map(d => d.hour);
+      setLoggedHours({ transformer1: t1Hours, transformer2: t2Hours });
+    }
+  };
+
+  // Update current hour every minute
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
@@ -58,6 +77,16 @@ export const TransformerLogForm = () => {
     }, 60000);
     return () => clearInterval(timer);
   }, []);
+
+  // Load logged hours when date or transformer changes
+  useEffect(() => {
+    loadLoggedHours();
+  }, [selectedDate, transformerNumber]);
+
+  // Check if current selection is already logged
+  const currentTransformerKey = `transformer${transformerNumber}` as keyof typeof loggedHours;
+  const isCurrentHourLogged = loggedHours[currentTransformerKey].includes(selectedHour);
+  const isFormDisabled = isCurrentHourLogged;
 
   const updateField = (field: keyof TransformerData, value: number | string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -87,6 +116,9 @@ export const TransformerLogForm = () => {
         title: 'Entry Logged',
         description: `Transformer ${transformerNumber} - Hour ${selectedHour}:00 saved successfully`,
       });
+
+      // Reload logged hours
+      await loadLoggedHours();
 
       // Reset form
       setFormData({
@@ -124,11 +156,23 @@ export const TransformerLogForm = () => {
               <Zap className="h-6 w-6 text-primary" />
               Transformer Hourly Log
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+              <Clock className="h-4 w-4" />
               Current Time: {format(new Date(), 'PPpp')} | Current Hour: {currentHour}:00
             </p>
           </div>
         </div>
+
+        {/* Status Alert */}
+        {isCurrentHourLogged && (
+          <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800 dark:text-green-200">
+              Hour {selectedHour}:00 already logged for Transformer {transformerNumber}. 
+              Select a different hour or transformer to continue.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Selection Controls */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -173,11 +217,25 @@ export const TransformerLogForm = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Array.from({ length: 24 }, (_, i) => (
-                  <SelectItem key={i} value={i.toString()}>
-                    {i.toString().padStart(2, '0')}:00
-                  </SelectItem>
-                ))}
+                {Array.from({ length: 24 }, (_, i) => i).map((hour) => {
+                  const isLogged = loggedHours[currentTransformerKey].includes(hour);
+                  const isFuture = hour > currentHour;
+                  const isDisabled = isLogged || isFuture;
+                  
+                  return (
+                    <SelectItem 
+                      key={hour} 
+                      value={hour.toString()}
+                      disabled={isDisabled}
+                    >
+                      <div className="flex items-center gap-2">
+                        {isLogged && <CheckCircle2 className="h-3 w-3 text-green-600" />}
+                        {hour.toString().padStart(2, '0')}:00
+                        {isFuture && <span className="text-xs text-muted-foreground">(future)</span>}
+                      </div>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
@@ -192,6 +250,7 @@ export const TransformerLogForm = () => {
             range={{ min: 49.5, max: 50.5 }}
             unit="Hz"
             required
+            disabled={isFormDisabled}
           />
 
           <NumericInput
@@ -200,6 +259,7 @@ export const TransformerLogForm = () => {
             onChange={(v) => updateField('voltage_r', v)}
             range={{ min: 10000, max: 12000 }}
             unit="V"
+            disabled={isFormDisabled}
           />
 
           <NumericInput
@@ -208,6 +268,7 @@ export const TransformerLogForm = () => {
             onChange={(v) => updateField('voltage_y', v)}
             range={{ min: 10000, max: 12000 }}
             unit="V"
+            disabled={isFormDisabled}
           />
 
           <NumericInput
@@ -216,6 +277,7 @@ export const TransformerLogForm = () => {
             onChange={(v) => updateField('voltage_b', v)}
             range={{ min: 10000, max: 12000 }}
             unit="V"
+            disabled={isFormDisabled}
           />
 
           <NumericInput
@@ -224,6 +286,7 @@ export const TransformerLogForm = () => {
             onChange={(v) => updateField('current_r', v)}
             range={{ min: 0, max: 500 }}
             unit="A"
+            disabled={isFormDisabled}
           />
 
           <NumericInput
@@ -232,6 +295,7 @@ export const TransformerLogForm = () => {
             onChange={(v) => updateField('current_y', v)}
             range={{ min: 0, max: 500 }}
             unit="A"
+            disabled={isFormDisabled}
           />
 
           <NumericInput
@@ -240,6 +304,7 @@ export const TransformerLogForm = () => {
             onChange={(v) => updateField('current_b', v)}
             range={{ min: 0, max: 500 }}
             unit="A"
+            disabled={isFormDisabled}
           />
 
           <NumericInput
@@ -248,6 +313,7 @@ export const TransformerLogForm = () => {
             onChange={(v) => updateField('active_power', v)}
             range={{ min: 0, max: 5000 }}
             unit="kW"
+            disabled={isFormDisabled}
           />
 
           <NumericInput
@@ -256,6 +322,7 @@ export const TransformerLogForm = () => {
             onChange={(v) => updateField('reactive_power', v)}
             range={{ min: -2000, max: 2000 }}
             unit="kVAR"
+            disabled={isFormDisabled}
           />
 
           <NumericInput
@@ -264,6 +331,7 @@ export const TransformerLogForm = () => {
             onChange={(v) => updateField('winding_temperature', v)}
             range={{ min: 0, max: 100 }}
             unit="°C"
+            disabled={isFormDisabled}
           />
 
           <NumericInput
@@ -272,6 +340,7 @@ export const TransformerLogForm = () => {
             onChange={(v) => updateField('oil_temperature', v)}
             range={{ min: 0, max: 100 }}
             unit="°C"
+            disabled={isFormDisabled}
           />
         </div>
 
@@ -282,16 +351,17 @@ export const TransformerLogForm = () => {
             onChange={(e) => updateField('remarks', e.target.value)}
             placeholder="Any observations or notes..."
             rows={3}
+            disabled={isFormDisabled}
           />
         </div>
 
         <Button
           onClick={handleLogEntry}
-          disabled={saving}
+          disabled={saving || isFormDisabled}
           size="lg"
           className="w-full"
         >
-          {saving ? 'Logging Entry...' : 'Log Entry'}
+          {saving ? 'Logging Entry...' : isFormDisabled ? 'Already Logged' : 'Log Entry'}
         </Button>
       </div>
     </Card>

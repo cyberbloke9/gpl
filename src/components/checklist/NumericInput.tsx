@@ -14,6 +14,7 @@ interface NumericInputProps {
   required?: boolean;
   onProblemDetected?: (isProblem: boolean, details?: any) => void;
   fieldKey?: string;
+  disabled?: boolean;
 }
 
 export const NumericInput = ({ 
@@ -24,7 +25,8 @@ export const NumericInput = ({
   unit, 
   required,
   onProblemDetected,
-  fieldKey
+  fieldKey,
+  disabled = false
 }: NumericInputProps) => {
   const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
   const validation = range ? validateRange(numValue, range) : { valid: true, status: 'normal' as const };
@@ -87,6 +89,7 @@ export const NumericInput = ({
             onChange(isNaN(parsed) ? 0 : parsed);
           }}
           onFocus={(e) => e.target.select()}
+          disabled={disabled}
           className={`${getBgColor()} ${validation.status !== 'normal' ? getRangeColor(validation.status) : ''}`}
         />
         {unit && (

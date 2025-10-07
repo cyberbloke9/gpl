@@ -30,37 +30,8 @@ export const Navigation = () => {
 
   const NavLinks = ({ mobile = false }: { mobile?: boolean }) => (
     <div className={mobile ? "flex flex-col gap-2 mt-8" : "flex gap-2"}>
-      <Link to="/checklist" onClick={() => mobile && setIsOpen(false)}>
-        <Button 
-          variant={isActive('/checklist') ? 'default' : 'ghost'} 
-          size="sm"
-          className={mobile ? "w-full justify-start" : ""}
-        >
-          <ClipboardCheck className="mr-2 h-4 w-4" />
-          Checklist
-        </Button>
-      </Link>
-      <Link to="/transformer" onClick={() => mobile && setIsOpen(false)}>
-        <Button 
-          variant={isActive('/transformer') ? 'default' : 'ghost'} 
-          size="sm"
-          className={mobile ? "w-full justify-start" : ""}
-        >
-          <Gauge className="mr-2 h-4 w-4" />
-          Transformer
-        </Button>
-      </Link>
-      <Link to="/reminders" onClick={() => mobile && setIsOpen(false)}>
-        <Button 
-          variant={isActive('/reminders') ? 'default' : 'ghost'} 
-          size="sm"
-          className={mobile ? "w-full justify-start" : ""}
-        >
-          <Gauge className="mr-2 h-4 w-4" />
-          Reminders
-        </Button>
-      </Link>
-      {userRole === 'admin' && (
+      {userRole === 'admin' ? (
+        // Admin only sees Admin Dashboard
         <Link to="/admin" onClick={() => mobile && setIsOpen(false)}>
           <Button 
             variant={isActive('/admin') ? 'default' : 'ghost'} 
@@ -68,9 +39,43 @@ export const Navigation = () => {
             className={mobile ? "w-full justify-start" : ""}
           >
             <LayoutDashboard className="mr-2 h-4 w-4" />
-            Admin
+            Admin Dashboard
           </Button>
         </Link>
+      ) : (
+        // Operators see all operational links
+        <>
+          <Link to="/checklist" onClick={() => mobile && setIsOpen(false)}>
+            <Button 
+              variant={isActive('/checklist') ? 'default' : 'ghost'} 
+              size="sm"
+              className={mobile ? "w-full justify-start" : ""}
+            >
+              <ClipboardCheck className="mr-2 h-4 w-4" />
+              Checklist
+            </Button>
+          </Link>
+          <Link to="/transformer" onClick={() => mobile && setIsOpen(false)}>
+            <Button 
+              variant={isActive('/transformer') ? 'default' : 'ghost'} 
+              size="sm"
+              className={mobile ? "w-full justify-start" : ""}
+            >
+              <Gauge className="mr-2 h-4 w-4" />
+              Transformer
+            </Button>
+          </Link>
+          <Link to="/reminders" onClick={() => mobile && setIsOpen(false)}>
+            <Button 
+              variant={isActive('/reminders') ? 'default' : 'ghost'} 
+              size="sm"
+              className={mobile ? "w-full justify-start" : ""}
+            >
+              <Gauge className="mr-2 h-4 w-4" />
+              Reminders
+            </Button>
+          </Link>
+        </>
       )}
     </div>
   );

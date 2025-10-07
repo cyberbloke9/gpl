@@ -1,12 +1,26 @@
+import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { ClipboardCheck, Gauge, LayoutDashboard, Calendar } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ClipboardCheck, Gauge, Calendar } from 'lucide-react';
 
 export default function Dashboard() {
   const { userRole } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect admins to admin dashboard
+  useEffect(() => {
+    if (userRole === 'admin') {
+      navigate('/admin', { replace: true });
+    }
+  }, [userRole, navigate]);
+
+  // Only render for operators
+  if (userRole === 'admin') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -64,23 +78,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </Link>
-
-          {userRole === 'admin' && (
-            <Link to="/admin">
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer border-primary">
-                <CardHeader>
-                  <LayoutDashboard className="h-10 w-10 text-primary mb-2" />
-                  <CardTitle>Admin Dashboard</CardTitle>
-                  <CardDescription>
-                    View all checklists, issues, and generate reports
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full">Admin Panel</Button>
-                </CardContent>
-              </Card>
-            </Link>
-          )}
         </div>
       </main>
     </div>

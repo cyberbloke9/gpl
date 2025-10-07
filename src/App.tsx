@@ -25,9 +25,9 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/checklist" element={<ProtectedRoute><Checklist /></ProtectedRoute>} />
-            <Route path="/transformer" element={<ProtectedRoute><Transformer /></ProtectedRoute>} />
-            <Route path="/reminders" element={<ProtectedRoute><Reminders /></ProtectedRoute>} />
+            <Route path="/checklist" element={<ProtectedRoute requireOperator><Checklist /></ProtectedRoute>} />
+            <Route path="/transformer" element={<ProtectedRoute requireOperator><Transformer /></ProtectedRoute>} />
+            <Route path="/reminders" element={<ProtectedRoute requireOperator><Reminders /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
