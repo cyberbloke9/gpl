@@ -26,9 +26,13 @@ export type Database = {
           module2_data: Json | null
           module3_data: Json | null
           module4_data: Json | null
+          problem_count: number | null
+          problem_fields: Json | null
           shift: string | null
           start_time: string | null
           status: string | null
+          submitted: boolean | null
+          submitted_at: string | null
           updated_at: string | null
           user_id: string
         }
@@ -43,9 +47,13 @@ export type Database = {
           module2_data?: Json | null
           module3_data?: Json | null
           module4_data?: Json | null
+          problem_count?: number | null
+          problem_fields?: Json | null
           shift?: string | null
           start_time?: string | null
           status?: string | null
+          submitted?: boolean | null
+          submitted_at?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -60,9 +68,13 @@ export type Database = {
           module2_data?: Json | null
           module3_data?: Json | null
           module4_data?: Json | null
+          problem_count?: number | null
+          problem_fields?: Json | null
           shift?: string | null
           start_time?: string | null
           status?: string | null
+          submitted?: boolean | null
+          submitted_at?: string | null
           updated_at?: string | null
           user_id?: string
         }

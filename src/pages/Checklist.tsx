@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigation } from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,17 @@ import { ChecklistModule2 } from '@/components/checklist/Module2';
 import { ChecklistModule3 } from '@/components/checklist/Module3';
 import { ChecklistModule4 } from '@/components/checklist/Module4';
 import { ChecklistHistory } from '@/components/checklist/ChecklistHistory';
+import { SubmitBar } from '@/components/checklist/SubmitBar';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function Checklist() {
   const { user } = useAuth();
@@ -20,6 +31,11 @@ export default function Checklist() {
   const [module2Data, setModule2Data] = useState({});
   const [module3Data, setModule3Data] = useState({});
   const [module4Data, setModule4Data] = useState({});
+  const [problemFields, setProblemFields] = useState<any[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [overallProgress, setOverallProgress] = useState(0);
+  const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     loadOrCreateTodayChecklist();
@@ -70,12 +86,23 @@ export default function Checklist() {
   const saveModuleData = async (moduleNum: number, data: any) => {
     if (!currentChecklistId) return;
 
+    setIsSaving(true);
     const updateField = `module${moduleNum}_data`;
+    
+    // Calculate progress and update problem tracking
+    const progress = calculateProgress();
+    
     const { error } = await supabase
       .from('checklists')
-      .update({ [updateField]: data })
+      .update({ 
+        [updateField]: data,
+        problem_fields: problemFields,
+        problem_count: problemFields.length,
+        completion_percentage: progress,
+      })
       .eq('id', currentChecklistId);
 
+    setIsSaving(false);
     if (error) {
       toast.error('Failed to save module data');
     } else {
@@ -83,8 +110,62 @@ export default function Checklist() {
     }
   };
 
+  // Auto-save with debounce
+  const scheduleAutoSave = useCallback((moduleNum: number, data: any) => {
+    if (autoSaveTimeout) {
+      clearTimeout(autoSaveTimeout);
+    }
+    
+    const timeout = setTimeout(() => {
+      saveModuleData(moduleNum, data);
+    }, 30000); // 30 seconds
+    
+    setAutoSaveTimeout(timeout);
+  }, [autoSaveTimeout, currentChecklistId, problemFields]);
+
+  // Calculate overall progress
+  const calculateProgress = () => {
+    // Simple calculation based on modules with data
+    let progress = 0;
+    if (Object.keys(module1Data).length > 0) progress += 25;
+    if (Object.keys(module2Data).length > 0) progress += 25;
+    if (Object.keys(module3Data).length > 0) progress += 25;
+    if (Object.keys(module4Data).length > 0) progress += 25;
+    return progress;
+  };
+
+  useEffect(() => {
+    const progress = calculateProgress();
+    setOverallProgress(progress);
+  }, [module1Data, module2Data, module3Data, module4Data]);
+
+  const handleSubmitChecklist = async () => {
+    if (!currentChecklistId) return;
+
+    const { error } = await supabase
+      .from('checklists')
+      .update({
+        status: 'completed',
+        submitted: true,
+        submitted_at: new Date().toISOString(),
+        completion_time: new Date().toISOString(),
+        completion_percentage: 100,
+      })
+      .eq('id', currentChecklistId);
+
+    if (error) {
+      toast.error('Failed to submit checklist');
+    } else {
+      toast.success('Checklist submitted successfully! Admin has been notified.');
+      setShowSubmitDialog(false);
+      // Optionally redirect to dashboard
+    }
+  };
+
+  const isComplete = overallProgress === 100;
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-32">
       <Navigation />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
@@ -94,7 +175,7 @@ export default function Checklist() {
           </p>
         </div>
 
-        <Card className="p-6">
+        <Card className="p-6 mb-24">
           <Tabs value={activeModule} onValueChange={setActiveModule}>
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="1">Module 1</TabsTrigger>
@@ -154,6 +235,38 @@ export default function Checklist() {
           </Tabs>
         </Card>
       </main>
+
+      {activeModule !== 'history' && (
+        <SubmitBar
+          overallProgress={overallProgress}
+          problemCount={problemFields.length}
+          isComplete={isComplete}
+          onSubmit={() => setShowSubmitDialog(true)}
+          isSaving={isSaving}
+        />
+      )}
+
+      <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Submit Complete Checklist?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will mark your daily checklist as complete and notify the admin for review.
+              {problemFields.length > 0 && (
+                <span className="block mt-2 text-red-600 font-semibold">
+                  ⚠️ Note: {problemFields.length} problem(s) detected will be highlighted for admin attention.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSubmitChecklist}>
+              Submit Checklist
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
