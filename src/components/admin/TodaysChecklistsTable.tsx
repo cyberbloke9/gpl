@@ -40,74 +40,76 @@ export const TodaysChecklistsTable = ({ checklists, onViewReport }: TodaysCheckl
   };
 
   return (
-    <div className="border rounded-lg">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Operator</TableHead>
-            <TableHead>Employee ID</TableHead>
-            <TableHead>Start Time</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Progress</TableHead>
-            <TableHead>Problems</TableHead>
-            <TableHead>Issues</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {checklists.length === 0 ? (
+    <div className="border rounded-lg overflow-hidden">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                No checklists for today yet
-              </TableCell>
+              <TableHead className="whitespace-nowrap">Operator</TableHead>
+              <TableHead className="hidden sm:table-cell whitespace-nowrap">Employee ID</TableHead>
+              <TableHead className="whitespace-nowrap">Start</TableHead>
+              <TableHead className="whitespace-nowrap">Status</TableHead>
+              <TableHead className="whitespace-nowrap">Progress</TableHead>
+              <TableHead className="whitespace-nowrap">Problems</TableHead>
+              <TableHead className="hidden md:table-cell whitespace-nowrap">Issues</TableHead>
+              <TableHead className="whitespace-nowrap">Actions</TableHead>
             </TableRow>
-          ) : (
-            checklists.map((checklist) => (
-              <TableRow key={checklist.id}>
-                <TableCell className="font-medium">{checklist.user_name}</TableCell>
-                <TableCell>{checklist.employee_id || 'N/A'}</TableCell>
-                <TableCell className="text-sm">
-                  {checklist.start_time ? format(new Date(checklist.start_time), 'hh:mm a') : '-'}
-                </TableCell>
-                <TableCell>{getStatusBadge(checklist.status, checklist.submitted)}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Progress value={checklist.completion_percentage || 0} className="w-20 h-2" />
-                    <span className="text-sm">{checklist.completion_percentage || 0}%</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {checklist.problem_count > 0 ? (
-                    <ProblemBadge count={checklist.problem_count} />
-                  ) : (
-                    <span className="text-sm text-muted-foreground">-</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {checklist.flagged_issues_count > 0 ? (
-                    <Badge variant="outline" className="bg-orange-50 text-orange-700">
-                      ⚠️ {checklist.flagged_issues_count}
-                    </Badge>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">-</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onViewReport(checklist.id)}
-                    className="gap-2"
-                  >
-                    <Eye className="h-4 w-4" />
-                    View
-                  </Button>
+          </TableHeader>
+          <TableBody>
+            {checklists.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center text-muted-foreground py-8 text-sm">
+                  No checklists for today yet
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : (
+              checklists.map((checklist) => (
+                <TableRow key={checklist.id}>
+                  <TableCell className="font-medium text-sm whitespace-nowrap">{checklist.user_name}</TableCell>
+                  <TableCell className="hidden sm:table-cell text-sm">{checklist.employee_id || 'N/A'}</TableCell>
+                  <TableCell className="text-xs sm:text-sm whitespace-nowrap">
+                    {checklist.start_time ? format(new Date(checklist.start_time), 'hh:mm a') : '-'}
+                  </TableCell>
+                  <TableCell>{getStatusBadge(checklist.status, checklist.submitted)}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 min-w-[100px]">
+                      <Progress value={checklist.completion_percentage || 0} className="w-16 sm:w-20 h-2" />
+                      <span className="text-xs sm:text-sm whitespace-nowrap">{checklist.completion_percentage || 0}%</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {checklist.problem_count > 0 ? (
+                      <ProblemBadge count={checklist.problem_count} />
+                    ) : (
+                      <span className="text-xs sm:text-sm text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    {checklist.flagged_issues_count > 0 ? (
+                      <Badge variant="outline" className="bg-orange-50 text-orange-700 text-xs">
+                        ⚠️ {checklist.flagged_issues_count}
+                      </Badge>
+                    ) : (
+                      <span className="text-xs sm:text-sm text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onViewReport(checklist.id)}
+                      className="gap-1 sm:gap-2 text-xs sm:text-sm"
+                    >
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">View</span>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };

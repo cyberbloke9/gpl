@@ -28,13 +28,13 @@ export const ChecklistModule4 = ({ checklistId, data, onSave }: Module4Props) =>
   };
 
   return (
-    <div className="space-y-6 p-4">
-      <h2 className="text-2xl font-bold">Module 4: Electrical Systems</h2>
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4">
+      <h2 className="text-xl sm:text-2xl font-bold">Module 4: Electrical Systems</h2>
       
       <Tabs defaultValue="od-yard">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="od-yard">Section 1: OD Yard</TabsTrigger>
-          <TabsTrigger value="control-room">Section 2: Control Room</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 h-auto">
+          <TabsTrigger value="od-yard" className="text-xs sm:text-sm">OD Yard</TabsTrigger>
+          <TabsTrigger value="control-room" className="text-xs sm:text-sm">Control Room</TabsTrigger>
         </TabsList>
 
         <TabsContent value="od-yard">

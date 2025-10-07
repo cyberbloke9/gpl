@@ -97,8 +97,8 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+      <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Admin Dashboard</h1>
 
         <AdminOverviewCards
           totalUsers={stats.totalUsers}
@@ -108,41 +108,43 @@ export default function Admin() {
         />
 
         <Tabs defaultValue="today" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="today">Today's Checklists</TabsTrigger>
-            <TabsTrigger value="problems">Problem Detection</TabsTrigger>
-            <TabsTrigger value="issues">Flagged Issues</TabsTrigger>
-            <TabsTrigger value="history">Historical Reports</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 h-auto">
+            <TabsTrigger value="today" className="text-xs sm:text-sm">Checklists</TabsTrigger>
+            <TabsTrigger value="problems" className="text-xs sm:text-sm">Problems</TabsTrigger>
+            <TabsTrigger value="issues" className="text-xs sm:text-sm">Issues</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs sm:text-sm">History</TabsTrigger>
           </TabsList>
 
           <TabsContent value="today">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Today's Operator Checklists</h2>
-              <TodaysChecklistsTable
-                checklists={todaysChecklists}
-                onViewReport={handleViewReport}
-              />
+            <Card className="p-3 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Today's Operator Checklists</h2>
+              <div className="overflow-x-auto -mx-3 sm:mx-0">
+                <TodaysChecklistsTable
+                  checklists={todaysChecklists}
+                  onViewReport={handleViewReport}
+                />
+              </div>
             </Card>
           </TabsContent>
 
           <TabsContent value="problems">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Problem Detection Dashboard</h2>
-              <p className="text-muted-foreground">Coming soon - detailed problem tracking</p>
+            <Card className="p-3 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Problem Detection Dashboard</h2>
+              <p className="text-sm text-muted-foreground">Coming soon - detailed problem tracking</p>
             </Card>
           </TabsContent>
 
           <TabsContent value="issues">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Flagged Issues Management</h2>
-              <p className="text-muted-foreground">Coming soon - issue management interface</p>
+            <Card className="p-3 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Flagged Issues Management</h2>
+              <p className="text-sm text-muted-foreground">Coming soon - issue management interface</p>
             </Card>
           </TabsContent>
 
           <TabsContent value="history">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Historical Reports</h2>
-              <p className="text-muted-foreground">Coming soon - date range reports and analytics</p>
+            <Card className="p-3 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Historical Reports</h2>
+              <p className="text-sm text-muted-foreground">Coming soon - date range reports and analytics</p>
             </Card>
           </TabsContent>
         </Tabs>

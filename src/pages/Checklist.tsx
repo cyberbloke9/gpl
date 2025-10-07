@@ -165,24 +165,24 @@ export default function Checklist() {
   const isComplete = overallProgress === 100;
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background pb-32 sm:pb-28">
       <Navigation />
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Daily Checklist</h1>
-          <p className="text-muted-foreground mt-2">
+      <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">Daily Checklist</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
             Complete all four modules for today's inspection
           </p>
         </div>
 
-        <Card className="p-6 mb-24">
+        <Card className="p-3 sm:p-6 mb-24 sm:mb-28">
           <Tabs value={activeModule} onValueChange={setActiveModule}>
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="1">Module 1</TabsTrigger>
-              <TabsTrigger value="2">Module 2</TabsTrigger>
-              <TabsTrigger value="3">Module 3</TabsTrigger>
-              <TabsTrigger value="4">Module 4</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-5 h-auto">
+              <TabsTrigger value="1" className="text-xs sm:text-sm px-1 sm:px-3">M1</TabsTrigger>
+              <TabsTrigger value="2" className="text-xs sm:text-sm px-1 sm:px-3">M2</TabsTrigger>
+              <TabsTrigger value="3" className="text-xs sm:text-sm px-1 sm:px-3">M3</TabsTrigger>
+              <TabsTrigger value="4" className="text-xs sm:text-sm px-1 sm:px-3">M4</TabsTrigger>
+              <TabsTrigger value="history" className="text-xs sm:text-sm px-1 sm:px-3">History</TabsTrigger>
             </TabsList>
 
             <TabsContent value="1">
