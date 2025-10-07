@@ -9,8 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 
 export default function Auth() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [signInEmail, setSignInEmail] = useState('');
+  const [signInPassword, setSignInPassword] = useState('');
+  const [signUpEmail, setSignUpEmail] = useState('');
+  const [signUpPassword, setSignUpPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [employeeId, setEmployeeId] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +27,7 @@ export default function Auth() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(signInEmail, signInPassword);
     if (error) {
       toast.error(error.message);
     }
@@ -39,7 +41,7 @@ export default function Auth() {
       return;
     }
     setLoading(true);
-    const { error } = await signUp(email, password, fullName, employeeId);
+    const { error } = await signUp(signUpEmail, signUpPassword, fullName, employeeId);
     if (error) {
       toast.error(error.message);
     }
@@ -66,8 +68,8 @@ export default function Auth() {
                   <Input
                     id="signin-email"
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={signInEmail}
+                    onChange={(e) => setSignInEmail(e.target.value)}
                     required
                   />
                 </div>
@@ -76,8 +78,8 @@ export default function Auth() {
                   <Input
                     id="signin-password"
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={signInPassword}
+                    onChange={(e) => setSignInPassword(e.target.value)}
                     required
                   />
                 </div>
@@ -112,8 +114,8 @@ export default function Auth() {
                   <Input
                     id="signup-email"
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={signUpEmail}
+                    onChange={(e) => setSignUpEmail(e.target.value)}
                     required
                   />
                 </div>
@@ -122,8 +124,8 @@ export default function Auth() {
                   <Input
                     id="signup-password"
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={signUpPassword}
+                    onChange={(e) => setSignUpPassword(e.target.value)}
                     required
                     minLength={6}
                   />
