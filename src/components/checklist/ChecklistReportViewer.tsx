@@ -1,5 +1,7 @@
+import { useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ProblemBadge } from '@/components/ui/status-badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
@@ -7,15 +9,28 @@ import { Module1DataDisplay } from './reports/Module1DataDisplay';
 import { Module2DataDisplay } from './reports/Module2DataDisplay';
 import { Module3DataDisplay } from './reports/Module3DataDisplay';
 import { Module4DataDisplay } from './reports/Module4DataDisplay';
-import { AlertCircle } from 'lucide-react';
+import { ChecklistPrintView } from '@/components/reports/ChecklistPrintView';
+import { AlertCircle, Download } from 'lucide-react';
+import { useReactToPrint } from 'react-to-print';
+import { toast } from 'sonner';
 
 interface ChecklistReportViewerProps {
   checklist: any;
   isOpen: boolean;
   onClose: () => void;
+  userName?: string;
+  employeeId?: string;
 }
 
-export const ChecklistReportViewer = ({ checklist, isOpen, onClose }: ChecklistReportViewerProps) => {
+export const ChecklistReportViewer = ({ checklist, isOpen, onClose, userName, employeeId }: ChecklistReportViewerProps) => {
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `Checklist_${employeeId || 'Report'}_${format(new Date(checklist?.date || new Date()), 'yyyy-MM-dd')}`,
+    onAfterPrint: () => toast.success('PDF downloaded successfully'),
+  });
+
   if (!checklist) return null;
 
   // Only show report for submitted checklists
@@ -41,14 +56,28 @@ export const ChecklistReportViewer = ({ checklist, isOpen, onClose }: ChecklistR
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">Checklist Inspection Report</DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            Generated on {format(new Date(), 'PPP')} at {format(new Date(), 'pp')}
-          </p>
-        </DialogHeader>
+    <>
+      {/* Hidden print view */}
+      <div className="hidden">
+        <ChecklistPrintView ref={printRef} checklist={checklist} userName={userName} employeeId={employeeId} />
+      </div>
+
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle className="text-2xl">Checklist Inspection Report</DialogTitle>
+                <p className="text-sm text-muted-foreground">
+                  Generated on {format(new Date(), 'PPP')} at {format(new Date(), 'pp')}
+                </p>
+              </div>
+              <Button onClick={handlePrint} variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Download PDF
+              </Button>
+            </div>
+          </DialogHeader>
 
         <div className="space-y-6">
           {/* Summary Header */}
@@ -143,5 +172,6 @@ export const ChecklistReportViewer = ({ checklist, isOpen, onClose }: ChecklistR
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 };

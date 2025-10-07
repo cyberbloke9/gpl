@@ -8,10 +8,12 @@ import { ChecklistReportViewer } from '@/components/checklist/ChecklistReportVie
 import { TransformerReportViewer } from '@/components/transformer/TransformerReportViewer';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 
 export default function Admin() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalUsers: 0,
     todaysChecklists: 0,
@@ -61,25 +63,27 @@ export default function Admin() {
   }, []);
 
   const loadDashboardData = async () => {
-    const today = new Date().toISOString().split('T')[0];
+    setLoading(true);
+    try {
+      const today = new Date().toISOString().split('T')[0];
 
-    // Get total users count
-    const { count: usersCount } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true });
+      // Get total users count
+      const { count: usersCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
 
-    // Get today's checklists with user details
-    const { data: checklists } = await supabase
-      .from('checklists')
-      .select(`
-        *,
-        profiles:user_id (
-          full_name,
-          employee_id
-        )
-      `)
-      .eq('date', today)
-      .order('start_time', { ascending: false });
+      // Get today's checklists with user details
+      const { data: checklists } = await supabase
+        .from('checklists')
+        .select(`
+          *,
+          profiles:user_id (
+            full_name,
+            employee_id
+          )
+        `)
+        .eq('date', today)
+        .order('start_time', { ascending: false });
 
     // Calculate stats
     const completed = checklists?.filter((c) => c.submitted || c.status === 'completed').length || 0;
@@ -144,17 +148,30 @@ export default function Admin() {
     }));
 
     setTransformerLogs(formattedTransformerLogs);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleViewReport = async (checklistId: string) => {
     const { data, error } = await supabase
       .from('checklists')
-      .select('*')
+      .select(`
+        *,
+        profiles:user_id (
+          full_name,
+          employee_id
+        )
+      `)
       .eq('id', checklistId)
       .single();
 
     if (!error && data) {
-      setSelectedChecklist(data);
+      setSelectedChecklist({
+        ...data,
+        userName: data.profiles?.full_name,
+        employeeId: data.profiles?.employee_id
+      });
       setIsChecklistViewerOpen(true);
     }
   };
@@ -162,13 +179,25 @@ export default function Admin() {
   const handleViewTransformerReport = async (date: string, transformerNumber: number) => {
     const { data, error } = await supabase
       .from('transformer_logs')
-      .select('*')
+      .select(`
+        *,
+        profiles:user_id (
+          full_name,
+          employee_id
+        )
+      `)
       .eq('date', date)
       .eq('transformer_number', transformerNumber)
       .order('hour', { ascending: true });
 
-    if (!error && data) {
-      setSelectedTransformerReport({ date, transformerNumber, logs: data });
+    if (!error && data && data.length > 0) {
+      setSelectedTransformerReport({ 
+        date, 
+        transformerNumber, 
+        logs: data,
+        userName: data[0].profiles?.full_name,
+        employeeId: data[0].profiles?.employee_id
+      });
       setIsTransformerViewerOpen(true);
     }
   };
@@ -179,12 +208,23 @@ export default function Admin() {
       <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
         <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Admin Dashboard</h1>
 
-        <AdminOverviewCards
-          totalUsers={stats.totalUsers}
-          todaysChecklists={stats.todaysChecklists}
-          completedToday={stats.completedToday}
-          activeProblems={stats.activeProblems}
-        />
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="p-4">
+                <Skeleton className="h-4 w-24 mb-2" />
+                <Skeleton className="h-8 w-16" />
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <AdminOverviewCards
+            totalUsers={stats.totalUsers}
+            todaysChecklists={stats.todaysChecklists}
+            completedToday={stats.completedToday}
+            activeProblems={stats.activeProblems}
+          />
+        )}
 
         <Tabs defaultValue="today" className="space-y-4">
           <TabsList className="w-full grid grid-cols-2 sm:grid-cols-5 h-auto">
@@ -246,12 +286,16 @@ export default function Admin() {
         checklist={selectedChecklist}
         isOpen={isChecklistViewerOpen}
         onClose={() => setIsChecklistViewerOpen(false)}
+        userName={selectedChecklist?.userName}
+        employeeId={selectedChecklist?.employeeId}
       />
 
       <TransformerReportViewer
         isOpen={isTransformerViewerOpen}
         onClose={() => setIsTransformerViewerOpen(false)}
         report={selectedTransformerReport}
+        userName={selectedTransformerReport?.userName}
+        employeeId={selectedTransformerReport?.employeeId}
       />
     </div>
   );

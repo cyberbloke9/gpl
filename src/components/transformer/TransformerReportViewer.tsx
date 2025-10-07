@@ -1,8 +1,13 @@
+import { useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, Download } from 'lucide-react';
+import { TransformerPrintView } from '@/components/reports/TransformerPrintView';
+import { useReactToPrint } from 'react-to-print';
+import { toast } from 'sonner';
 
 interface TransformerLog {
   hour: number;
@@ -28,9 +33,19 @@ interface TransformerReportViewerProps {
     transformerNumber: number;
     logs: TransformerLog[];
   } | null;
+  userName?: string;
+  employeeId?: string;
 }
 
-export const TransformerReportViewer = ({ isOpen, onClose, report }: TransformerReportViewerProps) => {
+export const TransformerReportViewer = ({ isOpen, onClose, report, userName, employeeId }: TransformerReportViewerProps) => {
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `Transformer${report?.transformerNumber}_${format(new Date(report?.date || new Date()), 'yyyy-MM-dd')}_${employeeId || 'Report'}`,
+    onAfterPrint: () => toast.success('PDF downloaded successfully'),
+  });
+
   if (!report) return null;
 
   const { date, transformerNumber, logs } = report;
@@ -42,13 +57,32 @@ export const TransformerReportViewer = ({ isOpen, onClose, report }: Transformer
   const allHours = Array.from({ length: 24 }, (_, i) => i);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">
-            Transformer {transformerNumber} Report - {format(new Date(date), 'MMMM d, yyyy')}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      {/* Hidden print view */}
+      <div className="hidden">
+        <TransformerPrintView 
+          ref={printRef} 
+          date={date} 
+          transformerNumber={transformerNumber} 
+          logs={logs}
+          userName={userName}
+          employeeId={employeeId}
+        />
+      </div>
+
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-2xl">
+                Transformer {transformerNumber} Report - {format(new Date(date), 'MMMM d, yyyy')}
+              </DialogTitle>
+              <Button onClick={handlePrint} variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Download PDF
+              </Button>
+            </div>
+          </DialogHeader>
 
         <div className="space-y-4">
           <div className="flex items-center gap-4">
@@ -128,5 +162,6 @@ export const TransformerReportViewer = ({ isOpen, onClose, report }: Transformer
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 };

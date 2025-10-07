@@ -119,6 +119,17 @@ export const TransformerLogForm = () => {
 
       // Reload logged hours
       await loadLoggedHours();
+      
+      // Calculate and show daily progress
+      const updatedHours = transformerNumber === 1 
+        ? [...loggedHours.transformer1, selectedHour]
+        : [...loggedHours.transformer2, selectedHour];
+      const progress = Math.round((updatedHours.length / 24) * 100);
+      
+      toast({
+        title: `Daily Progress: ${progress}%`,
+        description: `${updatedHours.length}/24 hours logged for Transformer ${transformerNumber}`,
+      });
 
       // Reset form
       setFormData({

@@ -30,8 +30,19 @@ export const ChecklistHistory = ({ userId }: { userId?: string }) => {
     if (data) setChecklists(data);
   };
 
-  const handleViewReport = (checklist: any) => {
-    setSelectedChecklist(checklist);
+  const handleViewReport = async (checklist: any) => {
+    // Fetch user profile data for PDF
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, employee_id')
+      .eq('id', checklist.user_id)
+      .single();
+
+    setSelectedChecklist({ 
+      ...checklist, 
+      userName: profile?.full_name,
+      employeeId: profile?.employee_id 
+    });
     setIsViewerOpen(true);
   };
 
@@ -141,6 +152,8 @@ export const ChecklistHistory = ({ userId }: { userId?: string }) => {
         checklist={selectedChecklist}
         isOpen={isViewerOpen}
         onClose={() => setIsViewerOpen(false)}
+        userName={selectedChecklist?.userName}
+        employeeId={selectedChecklist?.employeeId}
       />
     </div>
   );

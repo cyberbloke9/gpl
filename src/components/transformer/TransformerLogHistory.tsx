@@ -34,9 +34,17 @@ interface GroupedLogs {
   };
 }
 
+interface SelectedReport {
+  date: string;
+  transformerNumber: number;
+  logs: TransformerLog[];
+  userName?: string;
+  employeeId?: string;
+}
+
 export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
   const [groupedLogs, setGroupedLogs] = useState<GroupedLogs>({});
-  const [selectedReport, setSelectedReport] = useState<{ date: string; transformerNumber: number; logs: TransformerLog[] } | null>(null);
+  const [selectedReport, setSelectedReport] = useState<SelectedReport | null>(null);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   useEffect(() => {
@@ -70,11 +78,30 @@ export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
     }
   };
 
-  const handleViewReport = (date: string, transformerNumber: number) => {
+  const handleViewReport = async (date: string, transformerNumber: number) => {
     const logs = transformerNumber === 1 
       ? groupedLogs[date].transformer1 
       : groupedLogs[date].transformer2;
-    setSelectedReport({ date, transformerNumber, logs });
+    
+    // Fetch user profile data for PDF
+    if (logs.length > 0 && userId) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, employee_id')
+        .eq('id', userId)
+        .single();
+
+      setSelectedReport({ 
+        date, 
+        transformerNumber, 
+        logs,
+        userName: profile?.full_name,
+        employeeId: profile?.employee_id
+      });
+    } else {
+      setSelectedReport({ date, transformerNumber, logs });
+    }
+    
     setIsViewerOpen(true);
   };
 
@@ -168,6 +195,8 @@ export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
         isOpen={isViewerOpen}
         onClose={() => setIsViewerOpen(false)}
         report={selectedReport}
+        userName={selectedReport?.userName}
+        employeeId={selectedReport?.employeeId}
       />
     </>
   );
