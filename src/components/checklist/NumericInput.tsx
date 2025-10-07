@@ -77,7 +77,16 @@ export const NumericInput = ({
           type="number"
           step="0.01"
           value={value}
-          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          onChange={(e) => {
+            const inputValue = e.target.value;
+            if (inputValue === '' || inputValue === '-') {
+              onChange(0);
+              return;
+            }
+            const parsed = parseFloat(inputValue);
+            onChange(isNaN(parsed) ? 0 : parsed);
+          }}
+          onFocus={(e) => e.target.select()}
           className={`${getBgColor()} ${validation.status !== 'normal' ? getRangeColor(validation.status) : ''}`}
         />
         {unit && (
