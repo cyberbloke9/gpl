@@ -1,29 +1,45 @@
 import { useState } from 'react';
-import { Camera, X } from 'lucide-react';
+import { Camera, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { uploadMedia } from '@/lib/storage-helpers';
+import { toast } from 'sonner';
 
 interface PhotoUploadProps {
   label: string;
   value?: string;
   onChange: (url: string) => void;
   required?: boolean;
+  userId: string;
+  checklistId: string;
+  fieldName: string;
 }
 
-export const PhotoUpload = ({ label, value, onChange, required }: PhotoUploadProps) => {
+export const PhotoUpload = ({ label, value, onChange, required, userId, checklistId, fieldName }: PhotoUploadProps) => {
   const [preview, setPreview] = useState<string | undefined>(value);
+  const [uploading, setUploading] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      setPreview(result);
-      onChange(result);
-    };
-    reader.readAsDataURL(file);
+    setUploading(true);
+    try {
+      // Create preview immediately for better UX
+      const previewUrl = URL.createObjectURL(file);
+      setPreview(previewUrl);
+
+      // Upload to Supabase Storage
+      const url = await uploadMedia(file, userId, checklistId, fieldName);
+      onChange(url);
+      toast.success('Photo uploaded successfully');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload photo');
+      setPreview(undefined);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleRemove = () => {
@@ -44,6 +60,7 @@ export const PhotoUpload = ({ label, value, onChange, required }: PhotoUploadPro
             variant="destructive"
             className="absolute -top-2 -right-2 h-6 w-6"
             onClick={handleRemove}
+            disabled={uploading}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -56,13 +73,23 @@ export const PhotoUpload = ({ label, value, onChange, required }: PhotoUploadPro
             capture="environment"
             onChange={handleFileChange}
             className="hidden"
-            id={`photo-${label}`}
+            id={`photo-${fieldName}`}
+            disabled={uploading}
           />
-          <label htmlFor={`photo-${label}`}>
-            <Button type="button" variant="outline" asChild>
+          <label htmlFor={`photo-${fieldName}`}>
+            <Button type="button" variant="outline" asChild disabled={uploading}>
               <span>
-                <Camera className="mr-2 h-4 w-4" />
-                Capture Photo
+                {uploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Camera className="mr-2 h-4 w-4" />
+                    Capture Photo
+                  </>
+                )}
               </span>
             </Button>
           </label>

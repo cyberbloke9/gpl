@@ -288,6 +288,7 @@ export default function Admin() {
         onClose={() => setIsChecklistViewerOpen(false)}
         userName={selectedChecklist?.userName}
         employeeId={selectedChecklist?.employeeId}
+        isAdminView={true}
       />
 
       <TransformerReportViewer

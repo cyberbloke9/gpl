@@ -11,7 +11,7 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children, requireAdmin = false, requireOperator = false }: ProtectedRouteProps) => {
   const { user, loading, userRole } = useAuth();
 
-  if (loading) {
+  if (loading || (user && userRole === null)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="space-y-4">

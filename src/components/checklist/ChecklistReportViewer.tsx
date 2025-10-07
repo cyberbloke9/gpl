@@ -20,9 +20,10 @@ interface ChecklistReportViewerProps {
   onClose: () => void;
   userName?: string;
   employeeId?: string;
+  isAdminView?: boolean;
 }
 
-export const ChecklistReportViewer = ({ checklist, isOpen, onClose, userName, employeeId }: ChecklistReportViewerProps) => {
+export const ChecklistReportViewer = ({ checklist, isOpen, onClose, userName, employeeId, isAdminView = false }: ChecklistReportViewerProps) => {
   const printRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = useReactToPrint({
@@ -44,7 +45,9 @@ export const ChecklistReportViewer = ({ checklist, isOpen, onClose, userName, em
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <AlertCircle className="h-12 w-12 text-yellow-500 mb-4" />
             <p className="text-muted-foreground mb-2">
-              Complete and submit all 4 modules to view the full report.
+              {isAdminView 
+                ? `${userName || 'User'} has not submitted this report yet.`
+                : 'Complete and submit all 4 modules to view the full report.'}
             </p>
             <Badge variant="secondary">
               Current Progress: {checklist.completion_percentage}%
