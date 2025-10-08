@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { NumericInput } from '../checklist/NumericInput';
+import { IssueFlagger } from '../checklist/IssueFlagger';
 
 interface TransformerData {
   frequency: number;
@@ -35,6 +36,7 @@ export const TransformerLogForm = () => {
   const [currentHour, setCurrentHour] = useState<number>(new Date().getHours());
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
   const [saving, setSaving] = useState(false);
+  const [currentLogId, setCurrentLogId] = useState<string | null>(null);
   const [loggedHours, setLoggedHours] = useState<{
     transformer1: number[];
     transformer2: number[];
@@ -59,12 +61,27 @@ export const TransformerLogForm = () => {
   const loadLoggedHours = async () => {
     const { data, error } = await supabase
       .from('transformer_logs')
+      .select('id, transformer_number, hour')
+      .eq('date', format(selectedDate, 'yyyy-MM-dd'))
+      .eq('transformer_number', transformerNumber)
+      .eq('hour', selectedHour)
+      .maybeSingle();
+
+    if (!error && data) {
+      setCurrentLogId(data.id);
+    } else {
+      setCurrentLogId(null);
+    }
+
+    // Also load all logged hours for the day
+    const { data: allLogs, error: logsError } = await supabase
+      .from('transformer_logs')
       .select('transformer_number, hour')
       .eq('date', format(selectedDate, 'yyyy-MM-dd'));
 
-    if (!error && data) {
-      const t1Hours = data.filter(d => d.transformer_number === 1).map(d => d.hour);
-      const t2Hours = data.filter(d => d.transformer_number === 2).map(d => d.hour);
+    if (!logsError && allLogs) {
+      const t1Hours = allLogs.filter(d => d.transformer_number === 1).map(d => d.hour);
+      const t2Hours = allLogs.filter(d => d.transformer_number === 2).map(d => d.hour);
       setLoggedHours({ transformer1: t1Hours, transformer2: t2Hours });
     }
   };
@@ -81,7 +98,7 @@ export const TransformerLogForm = () => {
   // Load logged hours when date or transformer changes
   useEffect(() => {
     loadLoggedHours();
-  }, [selectedDate, transformerNumber]);
+  }, [selectedDate, transformerNumber, selectedHour]);
 
   // Check if current selection is already logged
   const currentTransformerKey = `transformer${transformerNumber}` as keyof typeof loggedHours;
@@ -371,6 +388,17 @@ export const TransformerLogForm = () => {
             disabled={isFormDisabled}
           />
         </div>
+
+        {currentLogId && (
+          <div className="pt-2 border-t">
+            <IssueFlagger
+              transformerLogId={currentLogId}
+              module="Transformer Logs"
+              section={`Transformer ${transformerNumber}`}
+              item={`Hour ${selectedHour}:00`}
+            />
+          </div>
+        )}
 
         <Button
           onClick={handleLogEntry}

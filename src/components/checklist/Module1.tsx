@@ -58,6 +58,17 @@ export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1P
               <SelectItem value="high">High</SelectItem>
             </SelectContent>
           </Select>
+          {checklistId && (
+            <div className="mt-2">
+              <IssueFlagger
+                checklistId={checklistId}
+                module="Module 1"
+                section="Turbine Visual Inspection"
+                item="Guide bearing oil level"
+                unit={unitName}
+              />
+            </div>
+          )}
         </div>
 
         <PhotoUpload
@@ -85,6 +96,17 @@ export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1P
               <SelectItem value="major">Major Leakage</SelectItem>
             </SelectContent>
           </Select>
+          {checklistId && (
+            <div className="mt-2">
+              <IssueFlagger
+                checklistId={checklistId}
+                module="Module 1"
+                section="Turbine Visual Inspection"
+                item="Union Leakage (Runner Hub)"
+                unit={unitName}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -140,6 +162,17 @@ export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1P
               <SelectItem value="abnormal">Abnormal</SelectItem>
             </SelectContent>
           </Select>
+          {checklistId && (
+            <div className="mt-2">
+              <IssueFlagger
+                checklistId={checklistId}
+                module="Module 1"
+                section="Oil Pressure Unit (OPU)"
+                item="Pump motor sound"
+                unit={unitName}
+              />
+            </div>
+          )}
         </div>
 
         <div>
@@ -156,6 +189,17 @@ export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1P
               <SelectItem value="abnormal">Abnormal</SelectItem>
             </SelectContent>
           </Select>
+          {checklistId && (
+            <div className="mt-2">
+              <IssueFlagger
+                checklistId={checklistId}
+                module="Module 1"
+                section="Oil Pressure Unit (OPU)"
+                item="OPU motor condition"
+                unit={unitName}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -262,6 +306,17 @@ export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1P
               <SelectItem value="unclean">Unclean</SelectItem>
             </SelectContent>
           </Select>
+          {checklistId && (
+            <div className="mt-2">
+              <IssueFlagger
+                checklistId={checklistId}
+                module="Module 1"
+                section="Cooling System"
+                item="Filter Inspection"
+                unit={unitName}
+              />
+            </div>
+          )}
           {formData[unit]?.cooling?.filter_condition === 'clean' && (
             <ConditionalField condition={true}>
               <PhotoUpload

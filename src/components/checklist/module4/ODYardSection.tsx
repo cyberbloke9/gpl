@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { NumericInput } from '../NumericInput';
 import { PhotoUpload } from '../PhotoUpload';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { IssueFlagger } from '../IssueFlagger';
 
 interface ODYardSectionProps {
   data: any;
@@ -59,6 +60,16 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
                   <SelectItem value="blue">Blue</SelectItem>
                 </SelectContent>
               </Select>
+              {checklistId && (
+                <div className="mt-2">
+                  <IssueFlagger
+                    checklistId={checklistId}
+                    module="Module 4"
+                    section="Power Transformers (PTR)"
+                    item="Breather Silica gel"
+                  />
+                </div>
+              )}
             </div>
             <div>
               <Label>Tap Position</Label>
@@ -112,6 +123,16 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
                   <SelectItem value="no">Not Charging</SelectItem>
                 </SelectContent>
               </Select>
+              {checklistId && (
+                <div className="mt-2">
+                  <IssueFlagger
+                    checklistId={checklistId}
+                    module="Module 4"
+                    section="Diesel Generator"
+                    item="Battery Charging Status"
+                  />
+                </div>
+              )}
             </div>
             <div>
               <Label>Engine Oil Level</Label>
@@ -128,6 +149,16 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
                   <SelectItem value="high">High</SelectItem>
                 </SelectContent>
               </Select>
+              {checklistId && (
+                <div className="mt-2">
+                  <IssueFlagger
+                    checklistId={checklistId}
+                    module="Module 4"
+                    section="Diesel Generator"
+                    item="Engine Oil Level"
+                  />
+                </div>
+              )}
             </div>
             <PhotoUpload
               label="Battery Water Level"

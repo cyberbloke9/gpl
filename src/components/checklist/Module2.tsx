@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { NumericInput } from './NumericInput';
 import { PhotoUpload } from './PhotoUpload';
 import { Textarea } from '@/components/ui/textarea';
+import { IssueFlagger } from './IssueFlagger';
 
 interface Module2Props {
   checklistId: string | null;
@@ -73,6 +74,17 @@ export const ChecklistModule2 = ({ checklistId, userId, data, onSave }: Module2P
               <SelectItem value="abnormal">Abnormal</SelectItem>
             </SelectContent>
           </Select>
+          {checklistId && (
+            <div className="mt-2">
+              <IssueFlagger
+                checklistId={checklistId}
+                module="Module 2"
+                section="Generator Daily Checks"
+                item="Vibration & Sound"
+                unit={unitName}
+              />
+            </div>
+          )}
         </div>
 
         <div>
@@ -89,6 +101,17 @@ export const ChecklistModule2 = ({ checklistId, userId, data, onSave }: Module2P
               <SelectItem value="abnormal">Abnormal</SelectItem>
             </SelectContent>
           </Select>
+          {checklistId && (
+            <div className="mt-2">
+              <IssueFlagger
+                checklistId={checklistId}
+                module="Module 2"
+                section="Generator Daily Checks"
+                item="Generator cover bolt"
+                unit={unitName}
+              />
+            </div>
+          )}
         </div>
       </div>
 

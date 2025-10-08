@@ -4,13 +4,15 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { NumericInput } from '../NumericInput';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ConditionalField } from '../ConditionalField';
+import { IssueFlagger } from '../IssueFlagger';
 
 interface ControlRoomSectionProps {
   data: any;
   onChange: (field: string, value: any) => void;
+  checklistId?: string | null;
 }
 
-export const ControlRoomSection = ({ data, onChange }: ControlRoomSectionProps) => {
+export const ControlRoomSection = ({ data, onChange, checklistId }: ControlRoomSectionProps) => {
   const updateNested = (parent: string, field: string, value: any) => {
     onChange(parent, { ...data[parent], [field]: value });
   };
@@ -37,6 +39,16 @@ export const ControlRoomSection = ({ data, onChange }: ControlRoomSectionProps) 
                   <SelectItem value="fail">Fail</SelectItem>
                 </SelectContent>
               </Select>
+              {checklistId && (
+                <div className="mt-2">
+                  <IssueFlagger
+                    checklistId={checklistId}
+                    module="Module 4"
+                    section="Battery Bank Panel"
+                    item="FC Charger"
+                  />
+                </div>
+              )}
             </div>
             <NumericInput
               label="DC Voltage"
@@ -148,6 +160,16 @@ export const ControlRoomSection = ({ data, onChange }: ControlRoomSectionProps) 
                   <SelectItem value="fail">Fail</SelectItem>
                 </SelectContent>
               </Select>
+              {checklistId && (
+                <div className="mt-2">
+                  <IssueFlagger
+                    checklistId={checklistId}
+                    module="Module 4"
+                    section="Battery Charger"
+                    item="Variac voltage stabilizer"
+                  />
+                </div>
+              )}
             </div>
             <NumericInput
               label="AC Input Voltage"

@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PhotoUpload } from './PhotoUpload';
 import { NumericInput } from './NumericInput';
+import { IssueFlagger } from './IssueFlagger';
 
 interface Module3Props {
   checklistId: string | null;
@@ -53,6 +54,16 @@ export const ChecklistModule3 = ({ checklistId, userId, data, onSave }: Module3P
               <SelectItem value="poor">Poor</SelectItem>
             </SelectContent>
           </Select>
+          {checklistId && (
+            <div className="mt-2">
+              <IssueFlagger
+                checklistId={checklistId}
+                module="Module 3"
+                section="De-watering Sump"
+                item="Sump Condition Assessment"
+              />
+            </div>
+          )}
         </div>
 
         <div>
@@ -69,6 +80,16 @@ export const ChecklistModule3 = ({ checklistId, userId, data, onSave }: Module3P
               <SelectItem value="not_working">Not Working</SelectItem>
             </SelectContent>
           </Select>
+          {checklistId && (
+            <div className="mt-2">
+              <IssueFlagger
+                checklistId={checklistId}
+                module="Module 3"
+                section="De-watering Sump"
+                item="1 Hp Motors Condition"
+              />
+            </div>
+          )}
         </div>
 
         <div className="p-4 bg-muted/30 rounded-lg space-y-4">

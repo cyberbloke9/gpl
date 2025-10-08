@@ -91,7 +91,7 @@ export type Database = {
       flagged_issues: {
         Row: {
           assigned_to: string | null
-          checklist_id: string
+          checklist_id: string | null
           created_at: string | null
           description: string
           id: string
@@ -104,13 +104,14 @@ export type Database = {
           section: string
           severity: string
           status: string | null
+          transformer_log_id: string | null
           unit: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           assigned_to?: string | null
-          checklist_id: string
+          checklist_id?: string | null
           created_at?: string | null
           description: string
           id?: string
@@ -123,13 +124,14 @@ export type Database = {
           section: string
           severity: string
           status?: string | null
+          transformer_log_id?: string | null
           unit?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           assigned_to?: string | null
-          checklist_id?: string
+          checklist_id?: string | null
           created_at?: string | null
           description?: string
           id?: string
@@ -142,6 +144,7 @@ export type Database = {
           section?: string
           severity?: string
           status?: string | null
+          transformer_log_id?: string | null
           unit?: string | null
           updated_at?: string | null
           user_id?: string
@@ -152,6 +155,13 @@ export type Database = {
             columns: ["checklist_id"]
             isOneToOne: false
             referencedRelation: "checklists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flagged_issues_transformer_log_id_fkey"
+            columns: ["transformer_log_id"]
+            isOneToOne: false
+            referencedRelation: "transformer_logs"
             referencedColumns: ["id"]
           },
           {

@@ -14,14 +14,25 @@ interface FlaggedIssue {
   module: string;
   section: string;
   item: string;
+  unit?: string;
   severity: string;
   description: string;
   status: string;
   reported_at: string;
   user_id: string;
+  checklist_id?: string;
+  transformer_log_id?: string;
   profiles?: {
     full_name: string;
     employee_id: string;
+  };
+  checklists?: {
+    date: string;
+  };
+  transformer_logs?: {
+    date: string;
+    hour: number;
+    transformer_number: number;
   };
 }
 
@@ -42,7 +53,9 @@ export default function Issues() {
             profiles:user_id (
               full_name,
               employee_id
-            )
+            ),
+            checklists:checklist_id (date),
+            transformer_logs:transformer_log_id (date, hour, transformer_number)
           `)
           .order('reported_at', { ascending: false });
 
@@ -84,6 +97,16 @@ export default function Issues() {
       supabase.removeChannel(channel);
     };
   }, [user, userRole]);
+
+  const getIssueContext = (issue: FlaggedIssue) => {
+    if (issue.checklist_id && issue.checklists) {
+      return `Checklist - ${format(new Date(issue.checklists.date), 'PP')}`;
+    } else if (issue.transformer_log_id && issue.transformer_logs) {
+      const log = issue.transformer_logs;
+      return `Transformer ${log.transformer_number} - Hour ${log.hour}:00 - ${format(new Date(log.date), 'PP')}`;
+    }
+    return 'Unknown source';
+  };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -153,10 +176,15 @@ export default function Issues() {
               }}>
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <AlertCircle className="h-5 w-5" />
-                      {issue.issue_code}
-                    </CardTitle>
+                    <div className="flex-1">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <AlertCircle className="h-5 w-5" />
+                        {issue.issue_code}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {getIssueContext(issue)}
+                      </p>
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       <Badge variant={getSeverityColor(issue.severity)}>
                         {issue.severity}
@@ -172,6 +200,7 @@ export default function Issues() {
                     <p className="text-sm font-medium mb-1">Location:</p>
                     <p className="text-sm text-muted-foreground">
                       {issue.module} → {issue.section} → {issue.item}
+                      {issue.unit && ` → ${issue.unit}`}
                     </p>
                   </div>
 

@@ -11,13 +11,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
 interface IssueFlaggerProps {
-  checklistId: string;
+  checklistId?: string;
+  transformerLogId?: string;
   module: string;
   section: string;
   item: string;
+  unit?: string;
 }
 
-export const IssueFlagger = ({ checklistId, module, section, item }: IssueFlaggerProps) => {
+export const IssueFlagger = ({ checklistId, transformerLogId, module, section, item, unit }: IssueFlaggerProps) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [severity, setSeverity] = useState<string>('medium');
@@ -29,14 +31,17 @@ export const IssueFlagger = ({ checklistId, module, section, item }: IssueFlagge
 
     setLoading(true);
     try {
-      const issueCode = `CHK-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Date.now().toString().slice(-4)}`;
+      const prefix = transformerLogId ? 'TRF' : 'CHK';
+      const issueCode = `${prefix}-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Date.now().toString().slice(-4)}`;
       
       const { error } = await supabase.from('flagged_issues').insert({
-        checklist_id: checklistId,
+        checklist_id: checklistId || null,
+        transformer_log_id: transformerLogId || null,
         user_id: user.id,
         module,
         section,
         item,
+        unit,
         severity,
         description,
         issue_code: issueCode,
@@ -69,8 +74,8 @@ export const IssueFlagger = ({ checklistId, module, section, item }: IssueFlagge
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Module</Label>
-              <Input value={`${module} - ${section} - ${item}`} disabled />
+              <Label>Location</Label>
+              <Input value={`${module} - ${section} - ${item}${unit ? ` - ${unit}` : ''}`} disabled />
             </div>
             <div>
               <Label>Severity</Label>
