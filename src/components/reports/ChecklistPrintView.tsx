@@ -9,10 +9,11 @@ interface ChecklistPrintViewProps {
   checklist: any;
   userName?: string;
   employeeId?: string;
+  flaggedIssues?: Map<string, any>;
 }
 
 export const ChecklistPrintView = forwardRef<HTMLDivElement, ChecklistPrintViewProps>(
-  ({ checklist, userName, employeeId }, ref) => {
+  ({ checklist, userName, employeeId, flaggedIssues }, ref) => {
     if (!checklist) return null;
 
     return (
@@ -86,25 +87,25 @@ export const ChecklistPrintView = forwardRef<HTMLDivElement, ChecklistPrintViewP
         {/* Module 1 */}
         <div className="mb-8 page-break-inside-avoid">
           <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">Module 1: Fire Protection</h2>
-          <Module1DataDisplay data={checklist.module1_data || {}} />
+          <Module1DataDisplay data={checklist.module1_data || {}} flaggedIssues={flaggedIssues} />
         </div>
 
         {/* Module 2 */}
         <div className="mb-8 page-break-before">
           <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">Module 2: Equipment Inspection</h2>
-          <Module2DataDisplay data={checklist.module2_data || {}} />
+          <Module2DataDisplay data={checklist.module2_data || {}} flaggedIssues={flaggedIssues} />
         </div>
 
         {/* Module 3 */}
         <div className="mb-8 page-break-before">
           <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">Module 3: Safety & Operations</h2>
-          <Module3DataDisplay data={checklist.module3_data || {}} />
+          <Module3DataDisplay data={checklist.module3_data || {}} flaggedIssues={flaggedIssues} />
         </div>
 
         {/* Module 4 */}
         <div className="mb-8 page-break-before">
           <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">Module 4: Electrical Systems</h2>
-          <Module4DataDisplay data={checklist.module4_data || {}} />
+          <Module4DataDisplay data={checklist.module4_data || {}} flaggedIssues={flaggedIssues} />
         </div>
 
         {/* Footer */}

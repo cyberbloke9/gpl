@@ -121,6 +121,10 @@ export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1P
           range={{ min: 65, max: 86, ideal: { min: 70, max: 80 } }}
           unit="bar"
           required
+          checklistId={checklistId}
+          module="Module 1"
+          section="Oil Pressure Unit (OPU)"
+          item="TOPU Pressure"
         />
 
         <NumericInput
@@ -129,6 +133,10 @@ export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1P
           onChange={(v) => updateUnit(unit, 'opu', 'oil_sump', v)}
           range={{ min: 0, max: 100 }}
           unit="%"
+          checklistId={checklistId}
+          module="Module 1"
+          section="Oil Pressure Unit (OPU)"
+          item="Oil sump level"
         />
 
         <NumericInput
@@ -137,6 +145,10 @@ export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1P
           onChange={(v) => updateUnit(unit, 'opu', 'temperature', v)}
           range={{ min: 25, max: 70, ideal: { min: 30, max: 60 } }}
           unit="°C"
+          checklistId={checklistId}
+          module="Module 1"
+          section="Oil Pressure Unit (OPU)"
+          item="Oil temperature"
         />
 
         <div>
@@ -280,6 +292,10 @@ export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1P
           onChange={(v) => updateUnit(unit, 'cooling', 'cw_pressure', v)}
           range={{ min: 0, max: 3 }}
           unit="Bar"
+          checklistId={checklistId}
+          module="Module 1"
+          section="Cooling System"
+          item="CW Pressure Unit"
         />
 
         <PhotoUpload

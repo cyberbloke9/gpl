@@ -17,13 +17,15 @@ interface IssueFlaggerProps {
   section: string;
   item: string;
   unit?: string;
+  defaultSeverity?: 'low' | 'medium' | 'high' | 'critical';
+  autoDescription?: string;
 }
 
-export const IssueFlagger = ({ checklistId, transformerLogId, module, section, item, unit }: IssueFlaggerProps) => {
+export const IssueFlagger = ({ checklistId, transformerLogId, module, section, item, unit, defaultSeverity, autoDescription }: IssueFlaggerProps) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
-  const [severity, setSeverity] = useState<string>('medium');
-  const [description, setDescription] = useState('');
+  const [severity, setSeverity] = useState<string>(defaultSeverity || 'medium');
+  const [description, setDescription] = useState(autoDescription || '');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {

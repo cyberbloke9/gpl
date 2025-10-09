@@ -56,6 +56,10 @@ export const ControlRoomSection = ({ data, onChange, checklistId }: ControlRoomS
               onChange={(v) => updateNested('battery_bank', 'daily', { ...data.battery_bank?.daily, dc_voltage: v })}
               range={{ min: 0, max: 120 }}
               unit="V"
+              checklistId={checklistId}
+              module="Module 4"
+              section="Battery Bank Panel"
+              item="DC Voltage"
             />
             <NumericInput
               label="DC Amperage"
@@ -63,6 +67,10 @@ export const ControlRoomSection = ({ data, onChange, checklistId }: ControlRoomS
               onChange={(v) => updateNested('battery_bank', 'daily', { ...data.battery_bank?.daily, dc_amperage: v })}
               range={{ min: 0, max: 50 }}
               unit="A"
+              checklistId={checklistId}
+              module="Module 4"
+              section="Battery Bank Panel"
+              item="DC Amperage"
             />
           </AccordionContent>
         </AccordionItem>
@@ -97,18 +105,30 @@ export const ControlRoomSection = ({ data, onChange, checklistId }: ControlRoomS
                     value={data.incomer?.eb_data?.phase1_voltage || 0}
                     onChange={(v) => updateNested('incomer', 'eb_data', { ...data.incomer?.eb_data, phase1_voltage: v })}
                     unit="V"
+                    checklistId={checklistId}
+                    module="Module 4"
+                    section="EB Incomer"
+                    item="Phase 1 Voltage"
                   />
                   <NumericInput
                     label="Phase 3 Voltage"
                     value={data.incomer?.eb_data?.phase3_voltage || 0}
                     onChange={(v) => updateNested('incomer', 'eb_data', { ...data.incomer?.eb_data, phase3_voltage: v })}
                     unit="V"
+                    checklistId={checklistId}
+                    module="Module 4"
+                    section="EB Incomer"
+                    item="Phase 3 Voltage"
                   />
                   <NumericInput
                     label="Current Load"
                     value={data.incomer?.eb_data?.current || 0}
                     onChange={(v) => updateNested('incomer', 'eb_data', { ...data.incomer?.eb_data, current: v })}
                     unit="A"
+                    checklistId={checklistId}
+                    module="Module 4"
+                    section="EB Incomer"
+                    item="Current Load"
                   />
                 </div>
               </ConditionalField>
@@ -123,18 +143,30 @@ export const ControlRoomSection = ({ data, onChange, checklistId }: ControlRoomS
                     value={data.incomer?.dg_data?.phase1_voltage || 0}
                     onChange={(v) => updateNested('incomer', 'dg_data', { ...data.incomer?.dg_data, phase1_voltage: v })}
                     unit="V"
+                    checklistId={checklistId}
+                    module="Module 4"
+                    section="DG Incomer"
+                    item="Phase 1 Voltage"
                   />
                   <NumericInput
                     label="Phase 3 Voltage"
                     value={data.incomer?.dg_data?.phase3_voltage || 0}
                     onChange={(v) => updateNested('incomer', 'dg_data', { ...data.incomer?.dg_data, phase3_voltage: v })}
                     unit="V"
+                    checklistId={checklistId}
+                    module="Module 4"
+                    section="DG Incomer"
+                    item="Phase 3 Voltage"
                   />
                   <NumericInput
                     label="Current Load"
                     value={data.incomer?.dg_data?.current || 0}
                     onChange={(v) => updateNested('incomer', 'dg_data', { ...data.incomer?.dg_data, current: v })}
                     unit="A"
+                    checklistId={checklistId}
+                    module="Module 4"
+                    section="DG Incomer"
+                    item="Current Load"
                   />
                 </div>
               </ConditionalField>
@@ -177,6 +209,10 @@ export const ControlRoomSection = ({ data, onChange, checklistId }: ControlRoomS
               onChange={(v) => updateNested('battery_charger', 'ac_input', v)}
               range={{ min: 0, max: 300 }}
               unit="V"
+              checklistId={checklistId}
+              module="Module 4"
+              section="Battery Charger"
+              item="AC Input Voltage"
             />
             <NumericInput
               label="AC Output Voltage"
@@ -184,6 +220,10 @@ export const ControlRoomSection = ({ data, onChange, checklistId }: ControlRoomS
               onChange={(v) => updateNested('battery_charger', 'ac_output', v)}
               range={{ min: 0, max: 300 }}
               unit="V"
+              checklistId={checklistId}
+              module="Module 4"
+              section="Battery Charger"
+              item="AC Output Voltage"
             />
           </AccordionContent>
         </AccordionItem>

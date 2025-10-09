@@ -285,6 +285,10 @@ export const TransformerLogForm = () => {
             unit="Hz"
             required
             disabled={isFormDisabled}
+            transformerLogId={currentLogId}
+            module="Transformer Logs"
+            section={`Transformer ${transformerNumber}`}
+            item={`Frequency - Hour ${selectedHour}`}
           />
 
           <NumericInput
@@ -294,6 +298,10 @@ export const TransformerLogForm = () => {
             range={{ min: 10000, max: 12000 }}
             unit="V"
             disabled={isFormDisabled}
+            transformerLogId={currentLogId}
+            module="Transformer Logs"
+            section={`Transformer ${transformerNumber}`}
+            item={`Voltage R - Hour ${selectedHour}`}
           />
 
           <NumericInput
@@ -303,6 +311,10 @@ export const TransformerLogForm = () => {
             range={{ min: 10000, max: 12000 }}
             unit="V"
             disabled={isFormDisabled}
+            transformerLogId={currentLogId}
+            module="Transformer Logs"
+            section={`Transformer ${transformerNumber}`}
+            item={`Voltage Y - Hour ${selectedHour}`}
           />
 
           <NumericInput
@@ -312,6 +324,10 @@ export const TransformerLogForm = () => {
             range={{ min: 10000, max: 12000 }}
             unit="V"
             disabled={isFormDisabled}
+            transformerLogId={currentLogId}
+            module="Transformer Logs"
+            section={`Transformer ${transformerNumber}`}
+            item={`Voltage B - Hour ${selectedHour}`}
           />
 
           <NumericInput
@@ -321,6 +337,10 @@ export const TransformerLogForm = () => {
             range={{ min: 0, max: 500 }}
             unit="A"
             disabled={isFormDisabled}
+            transformerLogId={currentLogId}
+            module="Transformer Logs"
+            section={`Transformer ${transformerNumber}`}
+            item={`Current R - Hour ${selectedHour}`}
           />
 
           <NumericInput
@@ -330,6 +350,10 @@ export const TransformerLogForm = () => {
             range={{ min: 0, max: 500 }}
             unit="A"
             disabled={isFormDisabled}
+            transformerLogId={currentLogId}
+            module="Transformer Logs"
+            section={`Transformer ${transformerNumber}`}
+            item={`Current Y - Hour ${selectedHour}`}
           />
 
           <NumericInput
@@ -339,6 +363,10 @@ export const TransformerLogForm = () => {
             range={{ min: 0, max: 500 }}
             unit="A"
             disabled={isFormDisabled}
+            transformerLogId={currentLogId}
+            module="Transformer Logs"
+            section={`Transformer ${transformerNumber}`}
+            item={`Current B - Hour ${selectedHour}`}
           />
 
           <NumericInput
@@ -348,6 +376,10 @@ export const TransformerLogForm = () => {
             range={{ min: 0, max: 5000 }}
             unit="kW"
             disabled={isFormDisabled}
+            transformerLogId={currentLogId}
+            module="Transformer Logs"
+            section={`Transformer ${transformerNumber}`}
+            item={`Active Power - Hour ${selectedHour}`}
           />
 
           <NumericInput
@@ -357,6 +389,10 @@ export const TransformerLogForm = () => {
             range={{ min: -2000, max: 2000 }}
             unit="kVAR"
             disabled={isFormDisabled}
+            transformerLogId={currentLogId}
+            module="Transformer Logs"
+            section={`Transformer ${transformerNumber}`}
+            item={`Reactive Power - Hour ${selectedHour}`}
           />
 
           <NumericInput
@@ -366,6 +402,10 @@ export const TransformerLogForm = () => {
             range={{ min: 0, max: 100 }}
             unit="°C"
             disabled={isFormDisabled}
+            transformerLogId={currentLogId}
+            module="Transformer Logs"
+            section={`Transformer ${transformerNumber}`}
+            item={`Winding Temperature - Hour ${selectedHour}`}
           />
 
           <NumericInput
@@ -375,6 +415,10 @@ export const TransformerLogForm = () => {
             range={{ min: 0, max: 100 }}
             unit="°C"
             disabled={isFormDisabled}
+            transformerLogId={currentLogId}
+            module="Transformer Logs"
+            section={`Transformer ${transformerNumber}`}
+            item={`Oil Temperature - Hour ${selectedHour}`}
           />
         </div>
 

@@ -99,6 +99,10 @@ export const ChecklistModule3 = ({ checklistId, userId, data, onSave }: Module3P
             value={formData.gv_sump_unit1_level || 0}
             onChange={(v) => updateField('gv_sump_unit1_level', v)}
             unit="cm"
+            checklistId={checklistId}
+            module="Module 3"
+            section="Guide Vane Sump - Unit 1"
+            item="Water Level"
           />
           <PhotoUpload
             label="Unit 1 Sump Photo"
@@ -118,6 +122,10 @@ export const ChecklistModule3 = ({ checklistId, userId, data, onSave }: Module3P
             value={formData.gv_sump_unit2_level || 0}
             onChange={(v) => updateField('gv_sump_unit2_level', v)}
             unit="cm"
+            checklistId={checklistId}
+            module="Module 3"
+            section="Guide Vane Sump - Unit 2"
+            item="Water Level"
           />
           <PhotoUpload
             label="Unit 2 Sump Photo"

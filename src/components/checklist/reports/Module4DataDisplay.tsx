@@ -3,12 +3,28 @@ import { Badge } from '@/components/ui/badge';
 
 interface Module4DataDisplayProps {
   data: any;
+  flaggedIssues?: Map<string, any>;
 }
 
-export const Module4DataDisplay = ({ data }: Module4DataDisplayProps) => {
+export const Module4DataDisplay = ({ data, flaggedIssues }: Module4DataDisplayProps) => {
   if (!data || Object.keys(data).length === 0) {
     return <p className="text-muted-foreground">No data recorded</p>;
   }
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'bg-red-100 border-2 border-red-500 text-red-900';
+      case 'high': return 'bg-orange-100 border-2 border-orange-500 text-orange-900';
+      case 'medium': return 'bg-yellow-100 border-2 border-yellow-500 text-yellow-900';
+      case 'low': return 'bg-yellow-50 border-2 border-yellow-300 text-yellow-800';
+      default: return '';
+    }
+  };
+
+  const getIssue = (module: string, section: string, item: string) => {
+    const key = `${module}-${section}-${item}`;
+    return flaggedIssues?.get(key);
+  };
 
   const renderSection = (sectionData: any, sectionName: string) => {
     if (!sectionData || Object.keys(sectionData).length === 0) return null;
@@ -27,10 +43,14 @@ export const Module4DataDisplay = ({ data }: Module4DataDisplayProps) => {
               .replace(/_/g, ' ')
               .replace(/\b\w/g, (l) => l.toUpperCase());
 
+            // Check if flagged
+            const issue = getIssue('Module 4', sectionName, formattedKey);
+            const containerClass = issue ? `p-2 rounded ${getSeverityColor(issue.severity)}` : '';
+
             // Handle photo URLs
             if (key.includes('photo') && typeof value === 'string') {
               return (
-                <div key={key} className="col-span-1">
+                <div key={key} className={`col-span-1 ${containerClass}`}>
                   <span className="text-muted-foreground">{formattedKey}:</span>
                   <a href={value} target="_blank" rel="noopener noreferrer" className="text-primary ml-2 underline text-xs">
                     View Image
@@ -42,11 +62,12 @@ export const Module4DataDisplay = ({ data }: Module4DataDisplayProps) => {
             // Handle boolean values
             if (typeof value === 'boolean') {
               return (
-                <div key={key}>
+                <div key={key} className={containerClass}>
                   <span className="text-muted-foreground">{formattedKey}:</span>
                   <Badge variant={value ? 'outline' : 'destructive'} className="ml-2">
                     {value ? 'Yes' : 'No'}
                   </Badge>
+                  {issue && <span className="ml-2 text-xs font-bold">⚠️ FLAGGED</span>}
                 </div>
               );
             }
@@ -54,9 +75,12 @@ export const Module4DataDisplay = ({ data }: Module4DataDisplayProps) => {
             // Handle numeric values
             if (typeof value === 'number') {
               return (
-                <div key={key}>
+                <div key={key} className={containerClass}>
                   <span className="text-muted-foreground">{formattedKey}:</span>
-                  <span className="ml-2 font-medium">{value}</span>
+                  <span className={`ml-2 ${issue ? 'font-bold' : 'font-medium'}`}>
+                    {value}
+                    {issue && <span className="ml-2 text-xs">⚠️ FLAGGED</span>}
+                  </span>
                 </div>
               );
             }

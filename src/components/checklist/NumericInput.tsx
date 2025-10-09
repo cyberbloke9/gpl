@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { validateRange, getRangeColor, RangeValidation } from '@/lib/validation';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { AlertCircle } from 'lucide-react';
+import { IssueFlagger } from './IssueFlagger';
 
 interface NumericInputProps {
   label: string;
@@ -15,6 +16,11 @@ interface NumericInputProps {
   onProblemDetected?: (isProblem: boolean, details?: any) => void;
   fieldKey?: string;
   disabled?: boolean;
+  checklistId?: string | null;
+  transformerLogId?: string | null;
+  module?: string;
+  section?: string;
+  item?: string;
 }
 
 export const NumericInput = ({ 
@@ -26,7 +32,12 @@ export const NumericInput = ({
   required,
   onProblemDetected,
   fieldKey,
-  disabled = false
+  disabled = false,
+  checklistId,
+  transformerLogId,
+  module,
+  section,
+  item
 }: NumericInputProps) => {
   const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
   const validation = range ? validateRange(numValue, range) : { valid: true, status: 'normal' as const };
@@ -105,6 +116,32 @@ export const NumericInput = ({
         <p className="text-xs text-red-600 font-semibold flex items-center gap-1">
           <AlertCircle className="h-3 w-3" /> Value out of acceptable range - flagged as PROBLEM
         </p>
+      )}
+      
+      {/* Flag Issue Button - Always visible like dropdowns */}
+      {(checklistId || transformerLogId) && module && section && item && (
+        <div className="mt-2">
+          <IssueFlagger
+            checklistId={checklistId}
+            transformerLogId={transformerLogId}
+            module={module}
+            section={section}
+            item={item}
+            unit={unit}
+            defaultSeverity={
+              validation.status === 'danger' ? 'critical' : 
+              validation.status === 'warning' ? 'high' : 
+              'medium'
+            }
+            autoDescription={
+              validation.status === 'danger' 
+                ? `Value ${numValue}${unit || ''} is outside acceptable range (${range?.min}-${range?.max}${unit || ''})`
+                : validation.status === 'warning'
+                ? `Value ${numValue}${unit || ''} is outside ideal range`
+                : undefined
+            }
+          />
+        </div>
       )}
     </div>
   );

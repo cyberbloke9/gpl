@@ -4,12 +4,30 @@ import { StatusBadge } from '@/components/ui/status-badge';
 
 interface Module1DataDisplayProps {
   data: any;
+  flaggedIssues?: Map<string, any>;
 }
 
-export const Module1DataDisplay = ({ data }: Module1DataDisplayProps) => {
+export const Module1DataDisplay = ({ data, flaggedIssues }: Module1DataDisplayProps) => {
   if (!data || Object.keys(data).length === 0) {
     return <p className="text-muted-foreground">No data recorded</p>;
   }
+
+  // Helper function to get severity color classes
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'bg-red-100 border-2 border-red-500 text-red-900';
+      case 'high': return 'bg-orange-100 border-2 border-orange-500 text-orange-900';
+      case 'medium': return 'bg-yellow-100 border-2 border-yellow-500 text-yellow-900';
+      case 'low': return 'bg-yellow-50 border-2 border-yellow-300 text-yellow-800';
+      default: return '';
+    }
+  };
+
+  // Check if a field is flagged
+  const getIssue = (module: string, section: string, item: string, unit?: string) => {
+    const key = `${module}-${section}-${item}${unit ? `-${unit}` : ''}`;
+    return flaggedIssues?.get(key);
+  };
 
   const renderUnitData = (unitData: any, unitName: string) => {
     if (!unitData) return null;
@@ -48,17 +66,26 @@ export const Module1DataDisplay = ({ data }: Module1DataDisplayProps) => {
           <div className="space-y-2">
             <h5 className="font-medium text-sm text-muted-foreground">B. Oil Pressure Unit (OPU)</h5>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <div>
+              <div className={getIssue('Module 1', 'Oil Pressure Unit (OPU)', 'TOPU Pressure') ? `p-2 rounded ${getSeverityColor(getIssue('Module 1', 'Oil Pressure Unit (OPU)', 'TOPU Pressure')?.severity)}` : ''}>
                 <span className="text-muted-foreground">TOPU Pressure:</span>
-                <span className="ml-2 font-medium">{unitData.opu.pressure} bar</span>
+                <span className={`ml-2 font-medium ${getIssue('Module 1', 'Oil Pressure Unit (OPU)', 'TOPU Pressure') ? 'font-bold' : ''}`}>
+                  {unitData.opu.pressure} bar
+                  {getIssue('Module 1', 'Oil Pressure Unit (OPU)', 'TOPU Pressure') && <span className="ml-2 text-xs">⚠️ FLAGGED</span>}
+                </span>
               </div>
-              <div>
+              <div className={getIssue('Module 1', 'Oil Pressure Unit (OPU)', 'Oil sump level') ? `p-2 rounded ${getSeverityColor(getIssue('Module 1', 'Oil Pressure Unit (OPU)', 'Oil sump level')?.severity)}` : ''}>
                 <span className="text-muted-foreground">Oil sump level:</span>
-                <span className="ml-2 font-medium">{unitData.opu.oil_sump}%</span>
+                <span className={`ml-2 font-medium ${getIssue('Module 1', 'Oil Pressure Unit (OPU)', 'Oil sump level') ? 'font-bold' : ''}`}>
+                  {unitData.opu.oil_sump}%
+                  {getIssue('Module 1', 'Oil Pressure Unit (OPU)', 'Oil sump level') && <span className="ml-2 text-xs">⚠️ FLAGGED</span>}
+                </span>
               </div>
-              <div>
+              <div className={getIssue('Module 1', 'Oil Pressure Unit (OPU)', 'Oil temperature') ? `p-2 rounded ${getSeverityColor(getIssue('Module 1', 'Oil Pressure Unit (OPU)', 'Oil temperature')?.severity)}` : ''}>
                 <span className="text-muted-foreground">Temperature:</span>
-                <span className="ml-2 font-medium">{unitData.opu.temperature}°C</span>
+                <span className={`ml-2 font-medium ${getIssue('Module 1', 'Oil Pressure Unit (OPU)', 'Oil temperature') ? 'font-bold' : ''}`}>
+                  {unitData.opu.temperature}°C
+                  {getIssue('Module 1', 'Oil Pressure Unit (OPU)', 'Oil temperature') && <span className="ml-2 text-xs">⚠️ FLAGGED</span>}
+                </span>
               </div>
               <div>
                 <span className="text-muted-foreground">Pump sound:</span>
@@ -112,9 +139,12 @@ export const Module1DataDisplay = ({ data }: Module1DataDisplayProps) => {
           <div className="space-y-2">
             <h5 className="font-medium text-sm text-muted-foreground">D. Cooling System</h5>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <div>
+              <div className={getIssue('Module 1', 'Cooling System', 'CW Pressure Unit') ? `p-2 rounded ${getSeverityColor(getIssue('Module 1', 'Cooling System', 'CW Pressure Unit')?.severity)}` : ''}>
                 <span className="text-muted-foreground">CW Pressure:</span>
-                <span className="ml-2 font-medium">{unitData.cooling.cw_pressure} Bar</span>
+                <span className={`ml-2 font-medium ${getIssue('Module 1', 'Cooling System', 'CW Pressure Unit') ? 'font-bold' : ''}`}>
+                  {unitData.cooling.cw_pressure} Bar
+                  {getIssue('Module 1', 'Cooling System', 'CW Pressure Unit') && <span className="ml-2 text-xs">⚠️ FLAGGED</span>}
+                </span>
               </div>
               <div>
                 <span className="text-muted-foreground">Filter condition:</span>

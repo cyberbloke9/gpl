@@ -31,6 +31,10 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
               onChange={(v) => updateNested('ptr', 'winding_temp1', v)}
               unit="°C"
               required
+              checklistId={checklistId}
+              module="Module 4"
+              section="Power Transformers (PTR)"
+              item="Winding Temperature 1"
             />
             <NumericInput
               label="Winding Temperature 2"
@@ -38,12 +42,20 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
               onChange={(v) => updateNested('ptr', 'winding_temp2', v)}
               unit="°C"
               required
+              checklistId={checklistId}
+              module="Module 4"
+              section="Power Transformers (PTR)"
+              item="Winding Temperature 2"
             />
             <NumericInput
               label="Oil Level (PTR)"
               value={data.ptr?.oil_level || 0}
               onChange={(v) => updateNested('ptr', 'oil_level', v)}
               unit="%"
+              checklistId={checklistId}
+              module="Module 4"
+              section="Power Transformers (PTR)"
+              item="Oil Level (PTR)"
             />
             <div>
               <Label>Breather Silica gel</Label>
@@ -78,6 +90,10 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
                 value={data.ptr?.tap_position || 0}
                 onChange={(v) => updateNested('ptr', 'tap_position', v)}
                 range={{ min: 0, max: 9 }}
+                checklistId={checklistId}
+                module="Module 4"
+                section="Power Transformers (PTR)"
+                item="Tap Position"
               />
             </div>
             <PhotoUpload
@@ -102,12 +118,20 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
               onChange={(v) => updateNested('diesel_gen', 'diesel_level', v)}
               range={{ min: 0, max: 100 }}
               unit="%"
+              checklistId={checklistId}
+              module="Module 4"
+              section="Diesel Generator"
+              item="Diesel Level"
             />
             <NumericInput
               label="Battery Charge Level"
               value={data.diesel_gen?.battery_charge || 0}
               onChange={(v) => updateNested('diesel_gen', 'battery_charge', v)}
               unit="V"
+              checklistId={checklistId}
+              module="Module 4"
+              section="Diesel Generator"
+              item="Battery Charge Level"
             />
             <div>
               <Label>Battery Charging Status</Label>

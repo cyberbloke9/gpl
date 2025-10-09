@@ -49,6 +49,10 @@ export const ChecklistModule2 = ({ checklistId, userId, data, onSave }: Module2P
           range={{ min: 0, max: 80 }}
           unit="°C"
           required
+          checklistId={checklistId}
+          module="Module 2"
+          section="Generator Daily Checks"
+          item="Winding Temperature"
         />
 
         <NumericInput
@@ -58,6 +62,10 @@ export const ChecklistModule2 = ({ checklistId, userId, data, onSave }: Module2P
           range={{ min: 0, max: 80 }}
           unit="°C"
           required
+          checklistId={checklistId}
+          module="Module 2"
+          section="Generator Daily Checks"
+          item="D/NDE Temperatures"
         />
 
         <div>

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { ChecklistPrintView } from '@/components/reports/ChecklistPrintView';
 import { AlertCircle, Download } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ChecklistReportViewerProps {
   checklist: any;
@@ -25,6 +26,33 @@ interface ChecklistReportViewerProps {
 
 export const ChecklistReportViewer = ({ checklist, isOpen, onClose, userName, employeeId, isAdminView = false }: ChecklistReportViewerProps) => {
   const printRef = useRef<HTMLDivElement>(null);
+  const [flaggedIssues, setFlaggedIssues] = useState<any[]>([]);
+
+  // Fetch flagged issues for this checklist
+  useEffect(() => {
+    const fetchFlaggedIssues = async () => {
+      if (!checklist?.id) return;
+      
+      const { data } = await supabase
+        .from('flagged_issues')
+        .select('*')
+        .eq('checklist_id', checklist.id);
+      
+      setFlaggedIssues(data || []);
+    };
+    
+    if (isOpen && checklist?.id) {
+      fetchFlaggedIssues();
+    }
+  }, [checklist?.id, isOpen]);
+
+  // Create a lookup map for quick access: "Module-Section-Item" -> issue
+  const issueMap = new Map(
+    flaggedIssues.map(issue => [
+      `${issue.module}-${issue.section}-${issue.item}${issue.unit ? `-${issue.unit}` : ''}`,
+      issue
+    ])
+  );
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -62,7 +90,7 @@ export const ChecklistReportViewer = ({ checklist, isOpen, onClose, userName, em
     <>
       {/* Hidden print view */}
       <div className="hidden">
-        <ChecklistPrintView ref={printRef} checklist={checklist} userName={userName} employeeId={employeeId} />
+        <ChecklistPrintView ref={printRef} checklist={checklist} userName={userName} employeeId={employeeId} flaggedIssues={issueMap} />
       </div>
 
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -148,7 +176,7 @@ export const ChecklistReportViewer = ({ checklist, isOpen, onClose, userName, em
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold">Module 1: Turbine, OPU & Cooling System</h3>
                 {checklist.module1_data && Object.keys(checklist.module1_data).length > 0 ? (
-                  <Module1DataDisplay data={checklist.module1_data} />
+                  <Module1DataDisplay data={checklist.module1_data} flaggedIssues={issueMap} />
                 ) : (
                   <p className="text-muted-foreground text-center py-8">No data available for Module 1</p>
                 )}
@@ -159,7 +187,7 @@ export const ChecklistReportViewer = ({ checklist, isOpen, onClose, userName, em
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold">Module 2: Generator</h3>
                 {checklist.module2_data && Object.keys(checklist.module2_data).length > 0 ? (
-                  <Module2DataDisplay data={checklist.module2_data} />
+                  <Module2DataDisplay data={checklist.module2_data} flaggedIssues={issueMap} />
                 ) : (
                   <p className="text-muted-foreground text-center py-8">No data available for Module 2</p>
                 )}
@@ -170,7 +198,7 @@ export const ChecklistReportViewer = ({ checklist, isOpen, onClose, userName, em
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold">Module 3: De-watering Sump</h3>
                 {checklist.module3_data && Object.keys(checklist.module3_data).length > 0 ? (
-                  <Module3DataDisplay data={checklist.module3_data} />
+                  <Module3DataDisplay data={checklist.module3_data} flaggedIssues={issueMap} />
                 ) : (
                   <p className="text-muted-foreground text-center py-8">No data available for Module 3</p>
                 )}
@@ -181,7 +209,7 @@ export const ChecklistReportViewer = ({ checklist, isOpen, onClose, userName, em
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold">Module 4: Electrical Systems</h3>
                 {checklist.module4_data && Object.keys(checklist.module4_data).length > 0 ? (
-                  <Module4DataDisplay data={checklist.module4_data} />
+                  <Module4DataDisplay data={checklist.module4_data} flaggedIssues={issueMap} />
                 ) : (
                   <p className="text-muted-foreground text-center py-8">No data available for Module 4</p>
                 )}
