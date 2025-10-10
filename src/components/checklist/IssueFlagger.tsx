@@ -84,27 +84,18 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
       return;
     }
 
-    // Validate that we have a valid reference ID for immediate save
-    const validChecklistId = checklistId && checklistId !== 'pending';
-    const validTransformerLogId = transformerLogId && transformerLogId !== 'pending';
-
-    if (!validChecklistId && !validTransformerLogId) {
-      toast({
-        title: 'Cannot flag issue',
-        description: 'Unable to save issue. Please try again.',
-        variant: 'destructive',
-      });
-      return;
-    }
+    // For immediate save - allow if either ID is present (let database handle validation)
+    const hasChecklistId = checklistId && checklistId !== 'pending';
+    const hasTransformerLogId = transformerLogId && transformerLogId !== 'pending';
 
     setLoading(true);
     try {
-      const prefix = validTransformerLogId ? 'TRF' : 'CHK';
+      const prefix = hasTransformerLogId ? 'TRF' : 'CHK';
       const issueCode = `${prefix}-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Date.now().toString().slice(-4)}`;
       
       const { error } = await supabase.from('flagged_issues').insert({
-        checklist_id: validChecklistId ? checklistId : null,
-        transformer_log_id: validTransformerLogId ? transformerLogId : null,
+        checklist_id: hasChecklistId ? checklistId : null,
+        transformer_log_id: hasTransformerLogId ? transformerLogId : null,
         user_id: user.id,
         module,
         section,
@@ -116,7 +107,10 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
         status: 'reported'
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Issue flagging error:', error);
+        throw error;
+      }
 
       toast({ 
         title: 'Issue flagged successfully', 
@@ -125,7 +119,12 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
       setOpen(false);
       setDescription('');
     } catch (error) {
-      toast({ title: 'Error flagging issue', description: 'Please try again or contact support.', variant: 'destructive' });
+      console.error('Full error:', error);
+      toast({ 
+        title: 'Error flagging issue', 
+        description: error instanceof Error ? error.message : 'Please try again or contact support.',
+        variant: 'destructive' 
+      });
     } finally {
       setLoading(false);
     }
