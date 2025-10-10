@@ -317,7 +317,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             unit="Hz"
             required
             disabled={isFormDisabled}
-            transformerLogId={currentLogId}
+            transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Frequency - Hour ${selectedHour}`}
@@ -330,7 +330,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 10000, max: 12000 }}
             unit="V"
             disabled={isFormDisabled}
-            transformerLogId={currentLogId}
+            transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Voltage R - Hour ${selectedHour}`}
@@ -343,7 +343,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 10000, max: 12000 }}
             unit="V"
             disabled={isFormDisabled}
-            transformerLogId={currentLogId}
+            transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Voltage Y - Hour ${selectedHour}`}
@@ -356,7 +356,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 10000, max: 12000 }}
             unit="V"
             disabled={isFormDisabled}
-            transformerLogId={currentLogId}
+            transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Voltage B - Hour ${selectedHour}`}
@@ -369,7 +369,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 0, max: 500 }}
             unit="A"
             disabled={isFormDisabled}
-            transformerLogId={currentLogId}
+            transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Current R - Hour ${selectedHour}`}
@@ -382,7 +382,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 0, max: 500 }}
             unit="A"
             disabled={isFormDisabled}
-            transformerLogId={currentLogId}
+            transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Current Y - Hour ${selectedHour}`}
@@ -395,7 +395,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 0, max: 500 }}
             unit="A"
             disabled={isFormDisabled}
-            transformerLogId={currentLogId}
+            transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Current B - Hour ${selectedHour}`}
@@ -408,7 +408,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 0, max: 5000 }}
             unit="kW"
             disabled={isFormDisabled}
-            transformerLogId={currentLogId}
+            transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Active Power - Hour ${selectedHour}`}
@@ -421,7 +421,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: -2000, max: 2000 }}
             unit="kVAR"
             disabled={isFormDisabled}
-            transformerLogId={currentLogId}
+            transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Reactive Power - Hour ${selectedHour}`}
@@ -434,7 +434,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 0, max: 100 }}
             unit="°C"
             disabled={isFormDisabled}
-            transformerLogId={currentLogId}
+            transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Winding Temperature - Hour ${selectedHour}`}
@@ -447,23 +447,32 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 0, max: 100 }}
             unit="°C"
             disabled={isFormDisabled}
-            transformerLogId={currentLogId}
+            transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Oil Temperature - Hour ${selectedHour}`}
           />
         </div>
 
-        <div>
-          <Label>Remarks (Optional)</Label>
-          <Textarea
-            value={formData.remarks}
-            onChange={(e) => updateField('remarks', e.target.value)}
-            placeholder="Any observations or notes..."
-            rows={3}
-            disabled={isFormDisabled}
-          />
-        </div>
+            <div>
+              <Label>Remarks (Optional)</Label>
+              <Textarea
+                value={formData.remarks}
+                onChange={(e) => updateField('remarks', e.target.value)}
+                placeholder="Any observations or notes..."
+                rows={3}
+                disabled={isFormDisabled}
+              />
+              <div className="mt-2">
+                <IssueFlagger
+                  transformerLogId={currentLogId || 'pending'}
+                  module="Transformer Logs"
+                  section={`Transformer ${transformerNumber}`}
+                  item={`Remarks - Hour ${selectedHour}`}
+                  disabled={isFormDisabled}
+                />
+              </div>
+            </div>
 
         <div className="flex gap-3 pt-4 border-t">
           <Button

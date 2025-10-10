@@ -17,11 +17,12 @@ interface IssueFlaggerProps {
   section: string;
   item: string;
   unit?: string;
+  disabled?: boolean;
   defaultSeverity?: 'low' | 'medium' | 'high' | 'critical';
   autoDescription?: string;
 }
 
-export const IssueFlagger = ({ checklistId, transformerLogId, module, section, item, unit, defaultSeverity, autoDescription }: IssueFlaggerProps) => {
+export const IssueFlagger = ({ checklistId, transformerLogId, module, section, item, unit, disabled = false, defaultSeverity, autoDescription }: IssueFlaggerProps) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [severity, setSeverity] = useState<string>(defaultSeverity || 'medium');
@@ -53,12 +54,12 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
 
     setLoading(true);
     try {
-      const prefix = transformerLogId ? 'TRF' : 'CHK';
+      const prefix = (transformerLogId && transformerLogId !== 'pending') ? 'TRF' : 'CHK';
       const issueCode = `${prefix}-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Date.now().toString().slice(-4)}`;
       
       const { error } = await supabase.from('flagged_issues').insert({
         checklist_id: checklistId || null,
-        transformer_log_id: transformerLogId || null,
+        transformer_log_id: (transformerLogId && transformerLogId !== 'pending') ? transformerLogId : null,
         user_id: user.id,
         module,
         section,
@@ -72,7 +73,12 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
 
       if (error) throw error;
 
-      toast({ title: 'Issue flagged successfully', description: `Issue code: ${issueCode}` });
+      toast({ 
+        title: 'Issue flagged successfully', 
+        description: transformerLogId === 'pending' 
+          ? `Issue code: ${issueCode}. Will be linked when log entry is saved.`
+          : `Issue code: ${issueCode}`
+      });
       setOpen(false);
       setDescription('');
     } catch (error) {
@@ -84,7 +90,7 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
 
   return (
     <>
-      <Button size="sm" variant="destructive" onClick={() => setOpen(true)}>
+      <Button size="sm" variant="destructive" onClick={() => setOpen(true)} disabled={disabled}>
         <AlertCircle className="mr-2 h-4 w-4" />
         Flag Issue
       </Button>

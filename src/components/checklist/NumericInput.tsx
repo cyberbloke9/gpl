@@ -103,16 +103,17 @@ export const NumericInput = ({
         )}
       </div>
       
-      {/* Flag Issue Button - Always visible like dropdowns */}
-      {(checklistId || transformerLogId) && module && section && item && (
+      {/* Flag Issue Button - Always visible when context is provided */}
+      {module && section && item && (
         <div className="mt-2">
           <IssueFlagger
-            checklistId={checklistId}
-            transformerLogId={transformerLogId}
+            checklistId={checklistId || undefined}
+            transformerLogId={transformerLogId || 'pending'}
             module={module}
             section={section}
             item={item}
             unit={unit}
+            disabled={disabled}
             defaultSeverity={
               validation.status === 'danger' ? 'critical' : 
               validation.status === 'warning' ? 'high' : 
