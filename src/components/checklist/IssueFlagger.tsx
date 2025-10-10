@@ -64,6 +64,17 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
       return;
     }
 
+    // Security: Block potential XSS patterns
+    const dangerousPatterns = /<script|javascript:|onerror=|onload=|<iframe|eval\(|onclick=/i;
+    if (dangerousPatterns.test(trimmedDesc)) {
+      toast({
+        title: 'Invalid content',
+        description: 'Description contains disallowed content',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     // Handle pending transformer log issues (store locally, don't save to DB yet)
     if (transformerLogId === 'pending' && onPendingIssue) {
       onPendingIssue({
@@ -108,7 +119,6 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
       });
 
       if (error) {
-        console.error('Issue flagging error:', error);
         throw error;
       }
 
@@ -119,7 +129,6 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
       setOpen(false);
       setDescription('');
     } catch (error) {
-      console.error('Full error:', error);
       toast({ 
         title: 'Error flagging issue', 
         description: error instanceof Error ? error.message : 'Please try again or contact support.',

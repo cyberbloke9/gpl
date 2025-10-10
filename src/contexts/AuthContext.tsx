@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  roleLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string, employeeId?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -19,6 +20,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [roleLoading, setRoleLoading] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,6 +50,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const fetchUserRole = async (userId: string) => {
+    setRoleLoading(true);
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
@@ -57,6 +60,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!error && data) {
       setUserRole(data.role);
     }
+    setRoleLoading(false);
   };
 
   const signIn = async (email: string, password: string) => {
@@ -75,9 +79,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error };
       }
 
-      if (import.meta.env.DEV) {
-        console.log('Attempting signup for:', email);
-      }
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -91,9 +92,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) {
-        if (import.meta.env.DEV) {
-          console.error('Signup error:', error);
-        }
         if (error.message.includes('timeout')) {
           toast.error('Server is taking too long to respond. Please try again.');
         } else if (error.message.includes('already registered')) {
@@ -104,15 +102,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error };
       }
 
-    if (import.meta.env.DEV) {
-      console.log('Signup successful');
-    }
       toast.success('Account created successfully!');
       return { error: null };
     } catch (err: any) {
-      if (import.meta.env.DEV) {
-        console.error('Unexpected signup error:', err);
-      }
       toast.error('An unexpected error occurred. Please try again.');
       return { error: err };
     }
@@ -125,7 +117,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut, userRole }}>
+    <AuthContext.Provider value={{ user, session, loading, roleLoading, signIn, signUp, signOut, userRole }}>
       {children}
     </AuthContext.Provider>
   );

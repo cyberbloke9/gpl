@@ -161,6 +161,17 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
         return null;
       }
 
+      // Security: Validate remarks field for XSS patterns
+      const dangerousPatterns = /<script|javascript:|onerror=|onload=|<iframe|eval\(|onclick=/i;
+      if (formData.remarks && dangerousPatterns.test(formData.remarks)) {
+        toast({
+          title: 'Invalid content',
+          description: 'Remarks contain disallowed content',
+          variant: 'destructive'
+        });
+        return null;
+      }
+
       const { data, error } = await supabase
         .from('transformer_logs')
         .upsert({
