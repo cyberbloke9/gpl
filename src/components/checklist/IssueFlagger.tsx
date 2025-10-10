@@ -29,7 +29,27 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!user || !description) return;
+    if (!user) return;
+
+    const trimmedDesc = description.trim();
+    
+    if (trimmedDesc.length < 10) {
+      toast({ 
+        title: 'Description too short', 
+        description: 'Please provide at least 10 characters',
+        variant: 'destructive' 
+      });
+      return;
+    }
+    
+    if (trimmedDesc.length > 1000) {
+      toast({ 
+        title: 'Description too long', 
+        description: 'Maximum 1000 characters allowed',
+        variant: 'destructive' 
+      });
+      return;
+    }
 
     setLoading(true);
     try {
@@ -45,7 +65,7 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
         item,
         unit,
         severity,
-        description,
+        description: trimmedDesc,
         issue_code: issueCode,
         status: 'reported'
       });
@@ -99,9 +119,14 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe the issue..."
+                maxLength={1000}
+                className="min-h-[100px]"
               />
+              <div className="text-sm text-muted-foreground text-right mt-1">
+                {description.length}/1000 characters
+              </div>
             </div>
-            <Button onClick={handleSubmit} disabled={loading || !description}>
+            <Button onClick={handleSubmit} disabled={loading || description.trim().length < 10}>
               Submit Issue
             </Button>
           </div>

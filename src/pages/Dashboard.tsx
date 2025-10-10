@@ -33,7 +33,7 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           <Link to="/checklist">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
@@ -60,21 +60,6 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <Button className="w-full">Log Readings</Button>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link to="/reminders">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardHeader>
-                <Calendar className="h-10 w-10 text-primary mb-2" />
-                <CardTitle>Interval Reminders</CardTitle>
-                <CardDescription>
-                  Track and manage interval-based maintenance tasks
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full">View Reminders</Button>
               </CardContent>
             </Card>
           </Link>

@@ -40,7 +40,8 @@ export const NumericInput = ({
   item
 }: NumericInputProps) => {
   const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
-  const validation = range ? validateRange(numValue, range) : { valid: true, status: 'normal' as const };
+  // Only validate if value is not 0 (default/empty state)
+  const validation = range && numValue !== 0 ? validateRange(numValue, range) : { valid: true, status: 'normal' as const };
 
   // Notify parent component about problem status
   useEffect(() => {

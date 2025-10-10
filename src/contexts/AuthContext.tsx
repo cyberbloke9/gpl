@@ -103,7 +103,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error };
       }
 
-      console.log('Signup successful:', data);
+    if (import.meta.env.DEV) {
+      console.log('Signup successful');
+    }
       toast.success('Account created successfully!');
       navigate('/');
       return { error: null };
