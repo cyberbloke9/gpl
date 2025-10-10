@@ -74,13 +74,24 @@ export const ChecklistPrintView = forwardRef<HTMLDivElement, ChecklistPrintViewP
           </div>
         </div>
 
-        {/* Flagged Issues Section */}
-        {checklist.problem_count > 0 && (
-          <div className="mb-6 p-4 bg-red-50 border-2 border-red-500 rounded">
-            <h2 className="text-xl font-bold text-red-800 mb-2">⚠️ Flagged Issues</h2>
-            <p className="text-red-700">
-              {checklist.problem_count} issue(s) detected during inspection. Review module details below.
-            </p>
+        {/* Severity Legend */}
+        {checklist.flagged_issues_count > 0 && (
+          <div className="mb-6 p-4 bg-orange-50 border-2 border-orange-500 rounded">
+            <h2 className="text-xl font-bold text-orange-800 mb-3">⚠️ Flagged Issues Severity Legend</h2>
+            <div className="flex gap-4 text-sm">
+              <span className="px-3 py-1.5 bg-red-100 text-red-900 border-2 border-red-500 rounded font-medium">
+                🔴 Critical
+              </span>
+              <span className="px-3 py-1.5 bg-orange-100 text-orange-900 border-2 border-orange-500 rounded font-medium">
+                🟠 High
+              </span>
+              <span className="px-3 py-1.5 bg-yellow-100 text-yellow-900 border-2 border-yellow-500 rounded font-medium">
+                🟡 Medium
+              </span>
+              <span className="px-3 py-1.5 bg-yellow-50 text-yellow-800 border-2 border-yellow-300 rounded font-medium">
+                ⚪ Low
+              </span>
+            </div>
           </div>
         )}
 

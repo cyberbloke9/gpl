@@ -2,7 +2,6 @@ import { useRef, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ProblemBadge } from '@/components/ui/status-badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { Module1DataDisplay } from './reports/Module1DataDisplay';
@@ -133,32 +132,35 @@ export const ChecklistReportViewer = ({ checklist, isOpen, onClose, userName, em
                 <Badge className="bg-green-100 text-green-800 border-green-200">
                   Submitted
                 </Badge>
-                {checklist.problem_count > 0 && (
-                  <ProblemBadge count={checklist.problem_count} />
+                {checklist.flagged_issues_count > 0 && (
+                  <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
+                    ⚠️ {checklist.flagged_issues_count} Flagged
+                  </Badge>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Problem Fields Alert */}
-          {checklist.problem_fields && checklist.problem_fields.length > 0 && (
-            <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-lg">
-              <h4 className="font-semibold text-red-800 dark:text-red-200 mb-3 flex items-center gap-2">
+          {/* Severity Legend */}
+          {flaggedIssues.length > 0 && (
+            <div className="p-4 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg">
+              <h4 className="font-semibold text-orange-800 mb-3 flex items-center gap-2">
                 <AlertCircle className="h-5 w-5" />
-                Flagged Issues ({checklist.problem_fields.length})
+                Flagged Issues Severity Legend
               </h4>
-              <div className="space-y-2">
-                {checklist.problem_fields.map((problem: any, idx: number) => (
-                  <div key={idx} className="p-3 bg-white dark:bg-gray-900 rounded border border-red-200">
-                    <p className="font-semibold text-sm">{problem.field}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Value: {problem.value} {problem.unit} (Expected: {problem.range})
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(problem.timestamp), 'PPpp')}
-                    </p>
-                  </div>
-                ))}
+              <div className="flex flex-wrap gap-3 text-sm">
+                <span className="px-3 py-1.5 bg-red-100 text-red-900 border-2 border-red-500 rounded font-medium">
+                  🔴 Critical
+                </span>
+                <span className="px-3 py-1.5 bg-orange-100 text-orange-900 border-2 border-orange-500 rounded font-medium">
+                  🟠 High
+                </span>
+                <span className="px-3 py-1.5 bg-yellow-100 text-yellow-900 border-2 border-yellow-500 rounded font-medium">
+                  🟡 Medium
+                </span>
+                <span className="px-3 py-1.5 bg-yellow-50 text-yellow-800 border-2 border-yellow-300 rounded font-medium">
+                  ⚪ Low
+                </span>
               </div>
             </div>
           )}

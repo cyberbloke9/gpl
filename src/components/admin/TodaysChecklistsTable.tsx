@@ -2,7 +2,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ProblemBadge } from '@/components/ui/status-badge';
 import { Eye } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -50,15 +49,14 @@ export const TodaysChecklistsTable = ({ checklists, onViewReport }: TodaysCheckl
               <TableHead className="whitespace-nowrap">Start</TableHead>
               <TableHead className="whitespace-nowrap">Status</TableHead>
               <TableHead className="whitespace-nowrap">Progress</TableHead>
-              <TableHead className="whitespace-nowrap">Problems</TableHead>
-              <TableHead className="hidden md:table-cell whitespace-nowrap">Issues</TableHead>
+              <TableHead className="whitespace-nowrap">Flagged</TableHead>
               <TableHead className="whitespace-nowrap">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {checklists.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground py-8 text-sm">
+                <TableCell colSpan={7} className="text-center text-muted-foreground py-8 text-sm">
                   No checklists for today yet
                 </TableCell>
               </TableRow>
@@ -78,15 +76,8 @@ export const TodaysChecklistsTable = ({ checklists, onViewReport }: TodaysCheckl
                     </div>
                   </TableCell>
                   <TableCell>
-                    {checklist.problem_count > 0 ? (
-                      <ProblemBadge count={checklist.problem_count} />
-                    ) : (
-                      <span className="text-xs sm:text-sm text-muted-foreground">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
                     {checklist.flagged_issues_count > 0 ? (
-                      <Badge variant="outline" className="bg-orange-50 text-orange-700 text-xs">
+                      <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300 text-xs">
                         ⚠️ {checklist.flagged_issues_count}
                       </Badge>
                     ) : (

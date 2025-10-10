@@ -258,6 +258,9 @@ export type Database = {
           current_r: number | null
           current_y: number | null
           date: string
+          finalized: boolean | null
+          finalized_at: string | null
+          finalized_by: string | null
           frequency: number | null
           hour: number
           id: string
@@ -280,6 +283,9 @@ export type Database = {
           current_r?: number | null
           current_y?: number | null
           date?: string
+          finalized?: boolean | null
+          finalized_at?: string | null
+          finalized_by?: string | null
           frequency?: number | null
           hour: number
           id?: string
@@ -302,6 +308,9 @@ export type Database = {
           current_r?: number | null
           current_y?: number | null
           date?: string
+          finalized?: boolean | null
+          finalized_at?: string | null
+          finalized_by?: string | null
           frequency?: number | null
           hour?: number
           id?: string

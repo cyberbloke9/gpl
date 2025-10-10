@@ -158,6 +158,17 @@ export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1P
             onChange={(e) => updateUnit(unit, 'opu', 'leakage_remarks', e.target.value)}
             placeholder="Visual inspection remarks..."
           />
+          {checklistId && (
+            <div className="mt-2">
+              <IssueFlagger
+                checklistId={checklistId}
+                module="Module 1"
+                section="Oil Pressure Unit (OPU)"
+                item="Oil piping leakage remarks"
+                unit={unit}
+              />
+            </div>
+          )}
         </div>
 
         <div>

@@ -126,6 +126,27 @@ export const TransformerReportViewer = ({ isOpen, onClose, report, userName, emp
           </DialogHeader>
 
         <div className="space-y-4">
+          {/* Severity Legend */}
+          {flaggedIssues.length > 0 && (
+            <div className="p-4 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg">
+              <h4 className="font-semibold text-orange-800 mb-3">Flagged Issues Severity Legend</h4>
+              <div className="flex flex-wrap gap-3 text-sm">
+                <span className="px-3 py-1.5 bg-red-100 text-red-900 border-2 border-red-500 rounded font-medium">
+                  🔴 Critical
+                </span>
+                <span className="px-3 py-1.5 bg-orange-100 text-orange-900 border-2 border-orange-500 rounded font-medium">
+                  🟠 High
+                </span>
+                <span className="px-3 py-1.5 bg-yellow-100 text-yellow-900 border-2 border-yellow-500 rounded font-medium">
+                  🟡 Medium
+                </span>
+                <span className="px-3 py-1.5 bg-yellow-50 text-yellow-800 border-2 border-yellow-300 rounded font-medium">
+                  ⚪ Low
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-4">
             <Badge variant="outline">
               {logs.length}/24 Hours Logged ({Math.round((logs.length / 24) * 100)}%)

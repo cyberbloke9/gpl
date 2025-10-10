@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ProblemBadge } from '@/components/ui/status-badge';
 import { CheckCircle, Send } from 'lucide-react';
 
 interface SubmitBarProps {
@@ -28,7 +27,6 @@ export const SubmitBar = ({
                 Progress: {overallProgress}%
               </span>
               <div className="flex items-center gap-2 flex-shrink-0">
-                {problemCount > 0 && <ProblemBadge count={problemCount} />}
                 {isSaving && <span className="text-xs text-muted-foreground hidden sm:inline">Saving...</span>}
               </div>
             </div>

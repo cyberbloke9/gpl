@@ -79,12 +79,6 @@ export const NumericInput = ({
             </span>
           )}
         </Label>
-        {validation.status === 'danger' && (
-          <div className="flex items-center gap-1 text-red-600 text-xs font-semibold">
-            <AlertCircle className="h-3 w-3" />
-            PROBLEM
-          </div>
-        )}
       </div>
       <div className="relative">
         <Input

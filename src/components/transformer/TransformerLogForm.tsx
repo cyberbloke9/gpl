@@ -29,7 +29,13 @@ interface TransformerData {
   remarks: string;
 }
 
-export const TransformerLogForm = () => {
+interface TransformerLogFormProps {
+  isFinalized?: boolean;
+  onDateChange?: (date: string) => void;
+  onFinalizeDay?: (transformerNumber: number) => Promise<void>;
+}
+
+export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinalizeDay }: TransformerLogFormProps) => {
   const { toast } = useToast();
   const [transformerNumber, setTransformerNumber] = useState<number>(1);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -98,12 +104,15 @@ export const TransformerLogForm = () => {
   // Load logged hours when date or transformer changes
   useEffect(() => {
     loadLoggedHours();
+    if (onDateChange) {
+      onDateChange(format(selectedDate, 'yyyy-MM-dd'));
+    }
   }, [selectedDate, transformerNumber, selectedHour]);
 
   // Check if current selection is already logged
   const currentTransformerKey = `transformer${transformerNumber}` as keyof typeof loggedHours;
   const isCurrentHourLogged = loggedHours[currentTransformerKey].includes(selectedHour);
-  const isFormDisabled = isCurrentHourLogged;
+  const isFormDisabled = isCurrentHourLogged || isFinalized;
 
   const updateField = (field: keyof TransformerData, value: number | string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -456,15 +465,43 @@ export const TransformerLogForm = () => {
           />
         </div>
 
-
-        <Button
-          onClick={handleLogEntry}
-          disabled={saving || isFormDisabled || !isFormComplete()}
-          size="lg"
-          className="w-full"
-        >
-          {saving ? 'Logging Entry...' : isFormDisabled ? 'Already Logged' : 'Log Entry'}
-        </Button>
+        <div className="flex gap-3 pt-4 border-t">
+          <Button
+            onClick={handleLogEntry}
+            disabled={saving || isFormDisabled || !isFormComplete()}
+            className="flex-1"
+            size="lg"
+          >
+            {saving ? (
+              <>
+                <Clock className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : isCurrentHourLogged ? (
+              <>
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Hour {selectedHour} Already Logged
+              </>
+            ) : (
+              <>
+                <Zap className="mr-2 h-4 w-4" />
+                Log Entry for Hour {selectedHour}
+              </>
+            )}
+          </Button>
+          
+          {onFinalizeDay && !isFinalized && loggedHours[currentTransformerKey].length === 24 && (
+            <Button
+              onClick={() => onFinalizeDay(transformerNumber)}
+              variant="outline"
+              className="border-orange-500 text-orange-700 hover:bg-orange-50"
+              size="lg"
+            >
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              Finalize Day
+            </Button>
+          )}
+        </div>
       </div>
     </Card>
   );

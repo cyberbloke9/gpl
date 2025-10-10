@@ -143,6 +143,17 @@ export const ChecklistModule2 = ({ checklistId, userId, data, onSave }: Module2P
             onChange={(e) => updateUnit(unit, 'interval', 'greasing_remarks', e.target.value)}
             placeholder="Sound and temperature remarks after greasing..."
           />
+          {checklistId && (
+            <div className="mt-2">
+              <IssueFlagger
+                checklistId={checklistId}
+                module="Module 2"
+                section="Generator Interval Checks"
+                item="Greasing for D/NDE remarks"
+                unit={unit}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

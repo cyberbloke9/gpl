@@ -111,6 +111,27 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
           </div>
         </div>
 
+        {/* Severity Legend */}
+        {flaggedIssues.length > 0 && (
+          <div className="mb-6 p-4 bg-orange-50 border-2 border-orange-500 rounded">
+            <h2 className="text-xl font-bold text-orange-800 mb-3">⚠️ Flagged Issues Severity Legend</h2>
+            <div className="flex gap-4 text-sm">
+              <span className="px-3 py-1.5 bg-red-100 text-red-900 border-2 border-red-500 rounded font-medium">
+                🔴 Critical
+              </span>
+              <span className="px-3 py-1.5 bg-orange-100 text-orange-900 border-2 border-orange-500 rounded font-medium">
+                🟠 High
+              </span>
+              <span className="px-3 py-1.5 bg-yellow-100 text-yellow-900 border-2 border-yellow-500 rounded font-medium">
+                🟡 Medium
+              </span>
+              <span className="px-3 py-1.5 bg-yellow-50 text-yellow-800 border-2 border-yellow-300 rounded font-medium">
+                ⚪ Low
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Statistics Summary */}
         <div className="mb-6 p-4 bg-blue-50 border border-blue-300 rounded">
           <h2 className="text-xl font-bold text-blue-800 mb-3">Summary Statistics</h2>
