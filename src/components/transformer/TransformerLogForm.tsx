@@ -105,8 +105,37 @@ export const TransformerLogForm = () => {
   const isCurrentHourLogged = loggedHours[currentTransformerKey].includes(selectedHour);
   const isFormDisabled = isCurrentHourLogged;
 
+  const autoSaveLog = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('transformer_logs')
+        .upsert({
+          transformer_number: transformerNumber,
+          date: format(selectedDate, 'yyyy-MM-dd'),
+          hour: selectedHour,
+          user_id: user.id,
+          ...formData,
+        }, {
+          onConflict: 'transformer_number,date,hour',
+        })
+        .select('id')
+        .single();
+
+      if (!error && data) {
+        setCurrentLogId(data.id);
+      }
+    } catch (error) {
+      // Silent fail for auto-save
+    }
+  };
+
   const updateField = (field: keyof TransformerData, value: number | string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Auto-save to get an ID for flag buttons
+    setTimeout(autoSaveLog, 500);
   };
 
   const handleLogEntry = async () => {
@@ -423,7 +452,17 @@ export const TransformerLogForm = () => {
         </div>
 
         <div>
-          <Label>Remarks (Optional)</Label>
+          <div className="flex items-center justify-between mb-2">
+            <Label>Remarks (Optional)</Label>
+            {currentLogId && (
+              <IssueFlagger
+                transformerLogId={currentLogId}
+                module="Transformer Logs"
+                section={`Transformer ${transformerNumber}`}
+                item={`Remarks - Hour ${selectedHour}`}
+              />
+            )}
+          </div>
           <Textarea
             value={formData.remarks}
             onChange={(e) => updateField('remarks', e.target.value)}
@@ -433,16 +472,6 @@ export const TransformerLogForm = () => {
           />
         </div>
 
-        {currentLogId && (
-          <div className="pt-2 border-t">
-            <IssueFlagger
-              transformerLogId={currentLogId}
-              module="Transformer Logs"
-              section={`Transformer ${transformerNumber}`}
-              item={`Hour ${selectedHour}:00`}
-            />
-          </div>
-        )}
 
         <Button
           onClick={handleLogEntry}
