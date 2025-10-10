@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,8 +38,16 @@ const signInSchema = z.object({
 });
 
 export default function Auth() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   // Sign In form state
   const [signInEmail, setSignInEmail] = useState('');
@@ -63,6 +72,8 @@ export default function Auth() {
       const { error } = await signIn(validatedData.email, validatedData.password);
       if (error) {
         toast.error(error.message || 'Failed to sign in');
+      } else {
+        navigate('/');
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -94,6 +105,8 @@ export default function Auth() {
       
       if (error) {
         toast.error(error.message || 'Failed to create account');
+      } else {
+        navigate('/');
       }
     } catch (error) {
       if (error instanceof z.ZodError) {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { 
@@ -25,7 +25,13 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 export const Navigation = () => {
   const { user, signOut, userRole } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -125,7 +131,7 @@ export const Navigation = () => {
                     Role: {userRole}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={signOut}>
+                  <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
                   </DropdownMenuItem>
@@ -151,7 +157,7 @@ export const Navigation = () => {
                   
                   <Button 
                     onClick={() => {
-                      signOut();
+                      handleSignOut();
                       setIsOpen(false);
                     }} 
                     variant="outline" 

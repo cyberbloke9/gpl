@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 interface AuthContextType {
@@ -21,7 +20,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -65,7 +63,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (!error) {
       toast.success('Signed in successfully!');
-      navigate('/');
     }
     return { error };
   };
@@ -111,7 +108,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log('Signup successful');
     }
       toast.success('Account created successfully!');
-      navigate('/');
       return { error: null };
     } catch (err: any) {
       if (import.meta.env.DEV) {
@@ -126,7 +122,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await supabase.auth.signOut();
     setUserRole(null);
     toast.success('Signed out successfully!');
-    navigate('/auth');
   };
 
   return (
