@@ -173,56 +173,6 @@ export type Database = {
           },
         ]
       }
-      interval_reminders: {
-        Row: {
-          created_at: string | null
-          description: string
-          id: string
-          last_completed: string | null
-          next_due: string
-          notification_sent: boolean | null
-          reminder_key: string
-          reminder_type: string
-          status: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          description: string
-          id?: string
-          last_completed?: string | null
-          next_due: string
-          notification_sent?: boolean | null
-          reminder_key: string
-          reminder_type: string
-          status?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          description?: string
-          id?: string
-          last_completed?: string | null
-          next_due?: string
-          notification_sent?: boolean | null
-          reminder_key?: string
-          reminder_type?: string
-          status?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "interval_reminders_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           created_at: string | null

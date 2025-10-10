@@ -114,7 +114,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       navigate('/');
       return { error: null };
     } catch (err: any) {
-      console.error('Unexpected signup error:', err);
+      if (import.meta.env.DEV) {
+        console.error('Unexpected signup error:', err);
+      }
       toast.error('An unexpected error occurred. Please try again.');
       return { error: err };
     }
