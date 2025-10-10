@@ -20,31 +20,16 @@ interface IssueFlaggerProps {
   disabled?: boolean;
   defaultSeverity?: 'low' | 'medium' | 'high' | 'critical';
   autoDescription?: string;
-  onBeforeOpen?: () => Promise<string | null>; // Returns the actual ID to use
 }
 
-export const IssueFlagger = ({ checklistId, transformerLogId, module, section, item, unit, disabled = false, defaultSeverity, autoDescription, onBeforeOpen }: IssueFlaggerProps) => {
+export const IssueFlagger = ({ checklistId, transformerLogId, module, section, item, unit, disabled = false, defaultSeverity, autoDescription }: IssueFlaggerProps) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [severity, setSeverity] = useState<string>(defaultSeverity || 'medium');
   const [description, setDescription] = useState(autoDescription || '');
   const [loading, setLoading] = useState(false);
-  const [actualTransformerLogId, setActualTransformerLogId] = useState<string | undefined>(transformerLogId);
 
-  const handleOpenDialog = async () => {
-    if (onBeforeOpen) {
-      const savedId = await onBeforeOpen();
-      if (!savedId) {
-        toast({ 
-          title: 'Cannot flag issue', 
-          description: 'Unable to save entry. Please try again.',
-          variant: 'destructive' 
-        });
-        return;
-      }
-      // Use the freshly saved ID
-      setActualTransformerLogId(savedId);
-    }
+  const handleOpenDialog = () => {
     setOpen(true);
   };
 
@@ -73,8 +58,7 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
 
     // Validate that we have a valid reference ID
     const validChecklistId = checklistId && checklistId !== 'pending';
-    const validTransformerLogId = (actualTransformerLogId || transformerLogId) && 
-                                   (actualTransformerLogId || transformerLogId) !== 'pending';
+    const validTransformerLogId = transformerLogId && transformerLogId !== 'pending';
 
     if (!validChecklistId && !validTransformerLogId) {
       toast({
@@ -90,11 +74,9 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
       const prefix = validTransformerLogId ? 'TRF' : 'CHK';
       const issueCode = `${prefix}-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Date.now().toString().slice(-4)}`;
       
-      const finalTransformerLogId = actualTransformerLogId || transformerLogId;
-      
       const { error } = await supabase.from('flagged_issues').insert({
         checklist_id: validChecklistId ? checklistId : null,
-        transformer_log_id: validTransformerLogId ? finalTransformerLogId : null,
+        transformer_log_id: validTransformerLogId ? transformerLogId : null,
         user_id: user.id,
         module,
         section,

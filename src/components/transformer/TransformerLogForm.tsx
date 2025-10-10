@@ -225,22 +225,6 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
     setSaving(false);
   };
 
-  // Auto-save before flagging issue
-  const handleBeforeFlagIssue = async (): Promise<string | null> => {
-    if (currentLogId) return currentLogId; // Already saved, return existing ID
-    
-    const logId = await saveLogEntry(true); // Skip validation for partial saves
-    if (logId) {
-      setCurrentLogId(logId);
-      toast({
-        title: 'Entry Auto-saved',
-        description: 'Log entry saved to flag this issue',
-      });
-      return logId; // Return the new ID
-    }
-    return null; // Failed to save
-  };
-
   return (
     <Card className="p-6">
       <div className="space-y-6">
@@ -498,15 +482,19 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
                 rows={3}
                 disabled={isFormDisabled}
               />
-              <div className="mt-2">
+              <div className="mt-2 space-y-2">
                 <IssueFlagger
                   transformerLogId={currentLogId || 'pending'}
                   module="Transformer Logs"
                   section={`Transformer ${transformerNumber}`}
                   item={`Remarks - Hour ${selectedHour}`}
-                  disabled={isFormDisabled}
-                  onBeforeOpen={handleBeforeFlagIssue}
+                  disabled={!currentLogId || isFormDisabled}
                 />
+                {!currentLogId && !isFormDisabled && (
+                  <p className="text-xs text-muted-foreground">
+                    Save this log entry first to flag issues
+                  </p>
+                )}
               </div>
             </div>
 
