@@ -138,22 +138,22 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
            formData.winding_temperature > 0;
   };
 
-  const handleLogEntry = async () => {
-    if (!isFormComplete()) {
-      toast({
-        title: 'Incomplete Form',
-        description: 'Please fill in all required fields before logging',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    setSaving(true);
+  // Save log entry (supports both complete and partial saves)
+  const saveLogEntry = async (skipValidation: boolean = false): Promise<string | null> => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { error } = await supabase
+      if (!skipValidation && !isFormComplete()) {
+        toast({
+          title: 'Incomplete Form',
+          description: 'Please fill in all required fields before logging',
+          variant: 'destructive'
+        });
+        return null;
+      }
+
+      const { data, error } = await supabase
         .from('transformer_logs')
         .upsert({
           transformer_number: transformerNumber,
@@ -163,53 +163,82 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
           ...formData,
         }, {
           onConflict: 'transformer_number,date,hour',
-        });
+        })
+        .select('id')
+        .single();
 
       if (error) throw error;
 
-      toast({
-        title: 'Entry Logged',
-        description: `Transformer ${transformerNumber} - Hour ${selectedHour}:00 saved successfully`,
-      });
+      if (!skipValidation) {
+        toast({
+          title: 'Entry Logged',
+          description: `Transformer ${transformerNumber} - Hour ${selectedHour}:00 saved successfully`,
+        });
 
-      // Reload logged hours
-      await loadLoggedHours();
-      
-      // Calculate and show daily progress
-      const updatedHours = transformerNumber === 1 
-        ? [...loggedHours.transformer1, selectedHour]
-        : [...loggedHours.transformer2, selectedHour];
-      const progress = Math.round((updatedHours.length / 24) * 100);
-      
-      toast({
-        title: `Daily Progress: ${progress}%`,
-        description: `${updatedHours.length}/24 hours logged for Transformer ${transformerNumber}`,
-      });
+        // Reload logged hours
+        await loadLoggedHours();
+        
+        // Calculate and show daily progress
+        const updatedHours = transformerNumber === 1 
+          ? [...loggedHours.transformer1, selectedHour]
+          : [...loggedHours.transformer2, selectedHour];
+        const progress = Math.round((updatedHours.length / 24) * 100);
+        
+        toast({
+          title: `Daily Progress: ${progress}%`,
+          description: `${updatedHours.length}/24 hours logged for Transformer ${transformerNumber}`,
+        });
 
-      // Reset form
-      setFormData({
-        frequency: 0,
-        voltage_r: 0,
-        voltage_y: 0,
-        voltage_b: 0,
-        current_r: 0,
-        current_y: 0,
-        current_b: 0,
-        active_power: 0,
-        reactive_power: 0,
-        winding_temperature: 0,
-        oil_temperature: 0,
-        remarks: '',
-      });
+        // Reset form
+        setFormData({
+          frequency: 0,
+          voltage_r: 0,
+          voltage_y: 0,
+          voltage_b: 0,
+          current_r: 0,
+          current_y: 0,
+          current_b: 0,
+          active_power: 0,
+          reactive_power: 0,
+          winding_temperature: 0,
+          oil_temperature: 0,
+          remarks: '',
+        });
+      }
+
+      return data?.id || null;
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setSaving(false);
+      if (!skipValidation) {
+        toast({
+          title: 'Error',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
+      return null;
     }
+  };
+
+  const handleLogEntry = async () => {
+    setSaving(true);
+    await saveLogEntry(false);
+    setSaving(false);
+  };
+
+  // Auto-save before flagging issue
+  const handleBeforeFlagIssue = async (): Promise<boolean> => {
+    if (currentLogId) return true; // Already saved
+    
+    const logId = await saveLogEntry(true); // Skip validation for partial saves
+    if (logId) {
+      setCurrentLogId(logId);
+      toast({
+        title: 'Entry Auto-saved',
+        description: 'Log entry saved to flag this issue',
+      });
+      return true;
+    }
+    return false;
   };
 
   return (
@@ -476,6 +505,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
                   section={`Transformer ${transformerNumber}`}
                   item={`Remarks - Hour ${selectedHour}`}
                   disabled={isFormDisabled}
+                  onBeforeOpen={handleBeforeFlagIssue}
                 />
               </div>
             </div>

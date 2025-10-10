@@ -20,14 +20,23 @@ interface IssueFlaggerProps {
   disabled?: boolean;
   defaultSeverity?: 'low' | 'medium' | 'high' | 'critical';
   autoDescription?: string;
+  onBeforeOpen?: () => Promise<boolean>; // Returns true if ready to proceed
 }
 
-export const IssueFlagger = ({ checklistId, transformerLogId, module, section, item, unit, disabled = false, defaultSeverity, autoDescription }: IssueFlaggerProps) => {
+export const IssueFlagger = ({ checklistId, transformerLogId, module, section, item, unit, disabled = false, defaultSeverity, autoDescription, onBeforeOpen }: IssueFlaggerProps) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [severity, setSeverity] = useState<string>(defaultSeverity || 'medium');
   const [description, setDescription] = useState(autoDescription || '');
   const [loading, setLoading] = useState(false);
+
+  const handleOpenDialog = async () => {
+    if (onBeforeOpen) {
+      const canProceed = await onBeforeOpen();
+      if (!canProceed) return;
+    }
+    setOpen(true);
+  };
 
   const handleSubmit = async () => {
     if (!user) return;
@@ -52,14 +61,27 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
       return;
     }
 
+    // Validate that we have a valid reference ID
+    const validChecklistId = checklistId && checklistId !== 'pending';
+    const validTransformerLogId = transformerLogId && transformerLogId !== 'pending';
+
+    if (!validChecklistId && !validTransformerLogId) {
+      toast({
+        title: 'Cannot flag issue',
+        description: 'Unable to save issue. Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      const prefix = (transformerLogId && transformerLogId !== 'pending') ? 'TRF' : 'CHK';
+      const prefix = validTransformerLogId ? 'TRF' : 'CHK';
       const issueCode = `${prefix}-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Date.now().toString().slice(-4)}`;
       
       const { error } = await supabase.from('flagged_issues').insert({
-        checklist_id: checklistId || null,
-        transformer_log_id: (transformerLogId && transformerLogId !== 'pending') ? transformerLogId : null,
+        checklist_id: validChecklistId ? checklistId : null,
+        transformer_log_id: validTransformerLogId ? transformerLogId : null,
         user_id: user.id,
         module,
         section,
@@ -75,14 +97,12 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
 
       toast({ 
         title: 'Issue flagged successfully', 
-        description: transformerLogId === 'pending' 
-          ? `Issue code: ${issueCode}. Will be linked when log entry is saved.`
-          : `Issue code: ${issueCode}`
+        description: `Issue code: ${issueCode}`
       });
       setOpen(false);
       setDescription('');
     } catch (error) {
-      toast({ title: 'Error flagging issue', variant: 'destructive' });
+      toast({ title: 'Error flagging issue', description: 'Please try again or contact support.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -90,7 +110,7 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
 
   return (
     <>
-      <Button size="sm" variant="destructive" onClick={() => setOpen(true)} disabled={disabled}>
+      <Button size="sm" variant="destructive" onClick={handleOpenDialog} disabled={disabled}>
         <AlertCircle className="mr-2 h-4 w-4" />
         Flag Issue
       </Button>
