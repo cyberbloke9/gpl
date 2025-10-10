@@ -51,6 +51,7 @@ export const ChecklistModule4 = ({ checklistId, userId, data, onSave }: Module4P
           <ControlRoomSection
             data={formData.section2_control_room || {}}
             onChange={(field, value) => updateSection('section2_control_room', field, value)}
+            checklistId={checklistId}
           />
         </TabsContent>
       </Tabs>

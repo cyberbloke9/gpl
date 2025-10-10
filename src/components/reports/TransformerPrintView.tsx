@@ -23,12 +23,33 @@ interface TransformerPrintViewProps {
   logs: TransformerLog[];
   userName?: string;
   employeeId?: string;
+  flaggedIssues?: any[];
 }
 
 export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintViewProps>(
-  ({ date, transformerNumber, logs, userName, employeeId }, ref) => {
+  ({ date, transformerNumber, logs, userName, employeeId, flaggedIssues = [] }, ref) => {
     const allHours = Array.from({ length: 24 }, (_, i) => i);
     const logsByHour = new Map(logs.map(log => [log.hour, log]));
+
+    // Helper to check if a field is flagged
+    const getIssue = (hour: number, field: string) => {
+      return flaggedIssues.find(issue => 
+        issue.section === `Transformer ${transformerNumber}` &&
+        issue.item?.includes(`Hour ${hour}`) &&
+        issue.item?.includes(field)
+      );
+    };
+
+    // Helper to get severity color for print
+    const getSeverityColor = (severity: string) => {
+      switch (severity) {
+        case 'critical': return 'bg-red-200 border-red-500';
+        case 'high': return 'bg-orange-200 border-orange-500';
+        case 'medium': return 'bg-yellow-200 border-yellow-500';
+        case 'low': return 'bg-yellow-100 border-yellow-300';
+        default: return '';
+      }
+    };
 
     // Calculate summary statistics
     const avgFrequency = logs.length > 0 
@@ -150,17 +171,50 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                     </td>
                     {isLogged ? (
                       <>
-                        <td className="border border-gray-400 p-2 text-right">{log.frequency.toFixed(2)}</td>
-                        <td className="border border-gray-400 p-2 text-right">{log.voltage_r.toFixed(0)}</td>
-                        <td className="border border-gray-400 p-2 text-right">{log.voltage_y.toFixed(0)}</td>
-                        <td className="border border-gray-400 p-2 text-right">{log.voltage_b.toFixed(0)}</td>
-                        <td className="border border-gray-400 p-2 text-right">{log.current_r.toFixed(1)}</td>
-                        <td className="border border-gray-400 p-2 text-right">{log.current_y.toFixed(1)}</td>
-                        <td className="border border-gray-400 p-2 text-right">{log.current_b.toFixed(1)}</td>
-                        <td className="border border-gray-400 p-2 text-right">{log.active_power.toFixed(1)}</td>
-                        <td className="border border-gray-400 p-2 text-right">{log.reactive_power.toFixed(1)}</td>
-                        <td className="border border-gray-400 p-2 text-right">{log.winding_temperature.toFixed(1)}</td>
-                        <td className="border border-gray-400 p-2 text-right">{log.oil_temperature.toFixed(1)}</td>
+                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Frequency') ? getSeverityColor(getIssue(hour, 'Frequency')?.severity) : ''}`}>
+                          {log.frequency.toFixed(2)}
+                          {getIssue(hour, 'Frequency') && <span className="ml-1">⚠️</span>}
+                        </td>
+                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Voltage R') ? getSeverityColor(getIssue(hour, 'Voltage R')?.severity) : ''}`}>
+                          {log.voltage_r.toFixed(0)}
+                          {getIssue(hour, 'Voltage R') && <span className="ml-1">⚠️</span>}
+                        </td>
+                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Voltage Y') ? getSeverityColor(getIssue(hour, 'Voltage Y')?.severity) : ''}`}>
+                          {log.voltage_y.toFixed(0)}
+                          {getIssue(hour, 'Voltage Y') && <span className="ml-1">⚠️</span>}
+                        </td>
+                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Voltage B') ? getSeverityColor(getIssue(hour, 'Voltage B')?.severity) : ''}`}>
+                          {log.voltage_b.toFixed(0)}
+                          {getIssue(hour, 'Voltage B') && <span className="ml-1">⚠️</span>}
+                        </td>
+                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Current R') ? getSeverityColor(getIssue(hour, 'Current R')?.severity) : ''}`}>
+                          {log.current_r.toFixed(1)}
+                          {getIssue(hour, 'Current R') && <span className="ml-1">⚠️</span>}
+                        </td>
+                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Current Y') ? getSeverityColor(getIssue(hour, 'Current Y')?.severity) : ''}`}>
+                          {log.current_y.toFixed(1)}
+                          {getIssue(hour, 'Current Y') && <span className="ml-1">⚠️</span>}
+                        </td>
+                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Current B') ? getSeverityColor(getIssue(hour, 'Current B')?.severity) : ''}`}>
+                          {log.current_b.toFixed(1)}
+                          {getIssue(hour, 'Current B') && <span className="ml-1">⚠️</span>}
+                        </td>
+                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Active Power') ? getSeverityColor(getIssue(hour, 'Active Power')?.severity) : ''}`}>
+                          {log.active_power.toFixed(1)}
+                          {getIssue(hour, 'Active Power') && <span className="ml-1">⚠️</span>}
+                        </td>
+                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Reactive Power') ? getSeverityColor(getIssue(hour, 'Reactive Power')?.severity) : ''}`}>
+                          {log.reactive_power.toFixed(1)}
+                          {getIssue(hour, 'Reactive Power') && <span className="ml-1">⚠️</span>}
+                        </td>
+                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Winding Temperature') ? getSeverityColor(getIssue(hour, 'Winding Temperature')?.severity) : ''}`}>
+                          {log.winding_temperature.toFixed(1)}
+                          {getIssue(hour, 'Winding Temperature') && <span className="ml-1">⚠️</span>}
+                        </td>
+                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Oil Temperature') ? getSeverityColor(getIssue(hour, 'Oil Temperature')?.severity) : ''}`}>
+                          {log.oil_temperature.toFixed(1)}
+                          {getIssue(hour, 'Oil Temperature') && <span className="ml-1">⚠️</span>}
+                        </td>
                         <td className="border border-gray-400 p-2 text-xs">{log.remarks || '-'}</td>
                       </>
                     ) : (

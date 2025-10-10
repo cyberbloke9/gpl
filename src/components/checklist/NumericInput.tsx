@@ -107,16 +107,6 @@ export const NumericInput = ({
           <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">{unit}</span>
         )}
       </div>
-      {validation.status === 'warning' && (
-        <p className="text-xs text-yellow-600 flex items-center gap-1">
-          <AlertCircle className="h-3 w-3" /> Value outside ideal range
-        </p>
-      )}
-      {validation.status === 'danger' && (
-        <p className="text-xs text-red-600 font-semibold flex items-center gap-1">
-          <AlertCircle className="h-3 w-3" /> Value out of acceptable range - flagged as PROBLEM
-        </p>
-      )}
       
       {/* Flag Issue Button - Always visible like dropdowns */}
       {(checklistId || transformerLogId) && module && section && item && (
