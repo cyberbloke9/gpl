@@ -47,6 +47,14 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
     transformer1: number[];
     transformer2: number[];
   }>({ transformer1: [], transformer2: [] });
+  const [pendingIssues, setPendingIssues] = useState<Array<{
+    module: string;
+    section: string;
+    item: string;
+    unit?: string;
+    severity: string;
+    description: string;
+  }>>([]);
 
   const [formData, setFormData] = useState<TransformerData>({
     frequency: 0,
@@ -219,9 +227,37 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
     }
   };
 
+  const savePendingIssues = async (transformerLogId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const issues = pendingIssues.map(issue => ({
+      ...issue,
+      transformer_log_id: transformerLogId,
+      user_id: user.id,
+      issue_code: `TRF-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Date.now().toString().slice(-4)}`,
+      status: 'reported' as const
+    }));
+
+    const { error } = await supabase.from('flagged_issues').insert(issues);
+    if (!error) {
+      toast({
+        title: 'Issues Saved',
+        description: `${issues.length} flagged issue(s) saved successfully`
+      });
+    }
+  };
+
   const handleLogEntry = async () => {
     setSaving(true);
-    await saveLogEntry(false);
+    const logId = await saveLogEntry(false);
+    
+    // Save pending issues if we have any and got a valid log ID
+    if (logId && pendingIssues.length > 0) {
+      await savePendingIssues(logId);
+      setPendingIssues([]); // Clear pending issues
+    }
+    
     setSaving(false);
   };
 
@@ -488,11 +524,12 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
                   module="Transformer Logs"
                   section={`Transformer ${transformerNumber}`}
                   item={`Remarks - Hour ${selectedHour}`}
-                  disabled={!currentLogId || isFormDisabled}
+                  disabled={isFormDisabled}
+                  onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
                 />
-                {!currentLogId && !isFormDisabled && (
-                  <p className="text-xs text-muted-foreground">
-                    Save this log entry first to flag issues
+                {pendingIssues.length > 0 && (
+                  <p className="text-xs text-amber-600">
+                    {pendingIssues.length} pending issue(s) will be saved with the log entry
                   </p>
                 )}
               </div>

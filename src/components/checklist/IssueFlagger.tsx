@@ -20,9 +20,17 @@ interface IssueFlaggerProps {
   disabled?: boolean;
   defaultSeverity?: 'low' | 'medium' | 'high' | 'critical';
   autoDescription?: string;
+  onPendingIssue?: (issue: {
+    module: string;
+    section: string;
+    item: string;
+    unit?: string;
+    severity: string;
+    description: string;
+  }) => void;
 }
 
-export const IssueFlagger = ({ checklistId, transformerLogId, module, section, item, unit, disabled = false, defaultSeverity, autoDescription }: IssueFlaggerProps) => {
+export const IssueFlagger = ({ checklistId, transformerLogId, module, section, item, unit, disabled = false, defaultSeverity, autoDescription, onPendingIssue }: IssueFlaggerProps) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [severity, setSeverity] = useState<string>(defaultSeverity || 'medium');
@@ -56,7 +64,27 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
       return;
     }
 
-    // Validate that we have a valid reference ID
+    // Handle pending transformer log issues (store locally, don't save to DB yet)
+    if (transformerLogId === 'pending' && onPendingIssue) {
+      onPendingIssue({
+        module,
+        section,
+        item,
+        unit,
+        severity,
+        description: trimmedDesc,
+      });
+      
+      toast({ 
+        title: 'Issue flagged', 
+        description: 'Issue will be saved when you log the entry'
+      });
+      setOpen(false);
+      setDescription('');
+      return;
+    }
+
+    // Validate that we have a valid reference ID for immediate save
     const validChecklistId = checklistId && checklistId !== 'pending';
     const validTransformerLogId = transformerLogId && transformerLogId !== 'pending';
 
