@@ -226,8 +226,8 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
   };
 
   // Auto-save before flagging issue
-  const handleBeforeFlagIssue = async (): Promise<boolean> => {
-    if (currentLogId) return true; // Already saved
+  const handleBeforeFlagIssue = async (): Promise<string | null> => {
+    if (currentLogId) return currentLogId; // Already saved, return existing ID
     
     const logId = await saveLogEntry(true); // Skip validation for partial saves
     if (logId) {
@@ -236,9 +236,9 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
         title: 'Entry Auto-saved',
         description: 'Log entry saved to flag this issue',
       });
-      return true;
+      return logId; // Return the new ID
     }
-    return false;
+    return null; // Failed to save
   };
 
   return (
