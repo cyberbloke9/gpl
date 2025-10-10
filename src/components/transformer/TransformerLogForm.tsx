@@ -65,12 +65,17 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
 
   // Load logged hours for selected date
   const loadLoggedHours = async () => {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
     const { data, error } = await supabase
       .from('transformer_logs')
       .select('id, transformer_number, hour')
       .eq('date', format(selectedDate, 'yyyy-MM-dd'))
       .eq('transformer_number', transformerNumber)
       .eq('hour', selectedHour)
+      .eq('user_id', user.id)
       .maybeSingle();
 
     if (!error && data) {
@@ -79,11 +84,12 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
       setCurrentLogId(null);
     }
 
-    // Also load all logged hours for the day
+    // Also load all logged hours for the day - FOR THIS USER ONLY
     const { data: allLogs, error: logsError } = await supabase
       .from('transformer_logs')
       .select('transformer_number, hour')
-      .eq('date', format(selectedDate, 'yyyy-MM-dd'));
+      .eq('date', format(selectedDate, 'yyyy-MM-dd'))
+      .eq('user_id', user.id);
 
     if (!logsError && allLogs) {
       const t1Hours = allLogs.filter(d => d.transformer_number === 1).map(d => d.hour);
