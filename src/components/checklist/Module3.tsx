@@ -24,6 +24,15 @@ export const ChecklistModule3 = ({ checklistId, userId, data, onSave }: Module3P
     setFormData((prev: any) => ({ ...prev, [field]: value }));
   };
 
+  const isModule3Complete = () => {
+    // Check if required fields are filled
+    return formData.sump_level_photo &&
+           formData.sump_condition &&
+           formData.motor_1hp_status &&
+           formData.gv_sump_unit1_photo &&
+           formData.gv_sump_unit2_photo;
+  };
+
   return (
     <div className="space-y-6 p-4">
       <h2 className="text-2xl font-bold">Module 3: De-watering Sump</h2>
@@ -139,7 +148,12 @@ export const ChecklistModule3 = ({ checklistId, userId, data, onSave }: Module3P
         </div>
       </div>
 
-      <Button onClick={() => onSave(formData)} size="lg" className="w-full">
+      <Button 
+        onClick={() => onSave(formData)} 
+        size="lg" 
+        className="w-full"
+        disabled={!isModule3Complete()}
+      >
         Save Module 3
       </Button>
     </div>

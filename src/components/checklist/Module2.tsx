@@ -148,6 +148,23 @@ export const ChecklistModule2 = ({ checklistId, userId, data, onSave }: Module2P
     </div>
   );
 
+  const isModule2Complete = () => {
+    // Check if required daily check fields are filled for both units
+    const unit1Valid = 
+      formData.unit1?.daily?.winding_temp > 0 &&
+      formData.unit1?.daily?.dnd_temp > 0 &&
+      formData.unit1?.daily?.vibration &&
+      formData.unit1?.daily?.cover_bolt;
+    
+    const unit2Valid = 
+      formData.unit2?.daily?.winding_temp > 0 &&
+      formData.unit2?.daily?.dnd_temp > 0 &&
+      formData.unit2?.daily?.vibration &&
+      formData.unit2?.daily?.cover_bolt;
+    
+    return unit1Valid && unit2Valid;
+  };
+
   return (
     <div className="space-y-6 p-4">
       <h2 className="text-2xl font-bold">Module 2: Generator</h2>
@@ -157,7 +174,12 @@ export const ChecklistModule2 = ({ checklistId, userId, data, onSave }: Module2P
         {renderUnitSection('unit2', 'Unit 2 (0.7 MW)')}
       </div>
 
-      <Button onClick={() => onSave(formData)} size="lg" className="w-full">
+      <Button 
+        onClick={() => onSave(formData)} 
+        size="lg" 
+        className="w-full"
+        disabled={!isModule2Complete()}
+      >
         Save Module 2
       </Button>
     </div>

@@ -78,7 +78,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error };
       }
 
-      console.log('Attempting signup for:', email);
+      if (import.meta.env.DEV) {
+        console.log('Attempting signup for:', email);
+      }
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -92,7 +94,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) {
-        console.error('Signup error:', error);
+        if (import.meta.env.DEV) {
+          console.error('Signup error:', error);
+        }
         if (error.message.includes('timeout')) {
           toast.error('Server is taking too long to respond. Please try again.');
         } else if (error.message.includes('already registered')) {

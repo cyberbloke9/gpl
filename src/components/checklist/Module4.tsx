@@ -28,6 +28,16 @@ export const ChecklistModule4 = ({ checklistId, userId, data, onSave }: Module4P
     }));
   };
 
+  const isModule4Complete = () => {
+    // Check if both sections have some data
+    const odYardHasData = formData.section1_od_yard && 
+                          Object.keys(formData.section1_od_yard).length > 0;
+    const controlRoomHasData = formData.section2_control_room && 
+                                Object.keys(formData.section2_control_room).length > 0;
+    
+    return odYardHasData && controlRoomHasData;
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6 p-2 sm:p-4">
       <h2 className="text-xl sm:text-2xl font-bold">Module 4: Electrical Systems</h2>
@@ -56,7 +66,12 @@ export const ChecklistModule4 = ({ checklistId, userId, data, onSave }: Module4P
         </TabsContent>
       </Tabs>
 
-      <Button onClick={() => onSave(formData)} size="lg" className="w-full">
+      <Button 
+        onClick={() => onSave(formData)} 
+        size="lg" 
+        className="w-full"
+        disabled={!isModule4Complete()}
+      >
         Save Module 4
       </Button>
     </div>

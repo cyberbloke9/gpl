@@ -124,6 +124,15 @@ export const TransformerLogForm = () => {
   };
 
   const handleLogEntry = async () => {
+    if (!isFormComplete()) {
+      toast({
+        title: 'Incomplete Form',
+        description: 'Please fill in all required fields before logging',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -450,7 +459,7 @@ export const TransformerLogForm = () => {
 
         <Button
           onClick={handleLogEntry}
-          disabled={saving || isFormDisabled}
+          disabled={saving || isFormDisabled || !isFormComplete()}
           size="lg"
           className="w-full"
         >

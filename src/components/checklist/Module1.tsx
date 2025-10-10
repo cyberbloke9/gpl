@@ -351,6 +351,23 @@ export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1P
     </div>
   );
 
+  const isModule1Complete = () => {
+    // Check if required numeric fields and photos are filled for both units
+    const unit1Valid = 
+      formData.unit1?.opu?.pressure > 0 &&
+      formData.unit1?.turbine?.servomotor_photo &&
+      formData.unit1?.gearbox?.los_pressure_photo &&
+      formData.unit1?.cooling?.flow_indicators_photo;
+    
+    const unit2Valid = 
+      formData.unit2?.opu?.pressure > 0 &&
+      formData.unit2?.turbine?.servomotor_photo &&
+      formData.unit2?.gearbox?.los_pressure_photo &&
+      formData.unit2?.cooling?.flow_indicators_photo;
+    
+    return unit1Valid && unit2Valid;
+  };
+
   return (
     <div className="space-y-6 p-4">
       <h2 className="text-2xl font-bold">Module 1: Turbine, OPU and Cooling System</h2>
@@ -360,7 +377,12 @@ export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1P
         {renderUnitSection('unit2', 'Unit 2 (0.7 MW)')}
       </div>
 
-      <Button onClick={() => onSave(formData)} size="lg" className="w-full">
+      <Button 
+        onClick={() => onSave(formData)} 
+        size="lg" 
+        className="w-full"
+        disabled={!isModule1Complete()}
+      >
         Save Module 1
       </Button>
     </div>
