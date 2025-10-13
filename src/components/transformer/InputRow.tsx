@@ -13,6 +13,7 @@ interface InputRowProps {
   min?: number;
   max?: number;
   step?: string;
+  inputMode?: 'decimal' | 'numeric' | 'text';
   isValid?: boolean;
   isWarning?: boolean;
   isError?: boolean;
@@ -28,7 +29,8 @@ export function InputRow({
   placeholder = '0.00',
   min,
   max,
-  step = '0.01',
+  step = 'any',
+  inputMode = 'decimal',
   isValid,
   isWarning,
   isError,
@@ -49,6 +51,7 @@ export function InputRow({
           min={min}
           max={max}
           step={step}
+          inputMode={inputMode}
           className={cn(
             "transition-all text-sm h-9 sm:h-10",
             disabled && "cursor-not-allowed opacity-60",

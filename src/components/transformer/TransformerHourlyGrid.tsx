@@ -185,7 +185,8 @@ export const TransformerHourlyGrid = ({ transformerNumber, date }: TransformerHo
             <Label className="text-xs">Active Power (kW)</Label>
             <Input
               type="number"
-              step="0.01"
+              step="any"
+              inputMode="decimal"
               value={data.active_power}
               onChange={(e) => updateHourField(hour, 'active_power', parseFloat(e.target.value) || 0)}
               className="h-8"
@@ -196,7 +197,8 @@ export const TransformerHourlyGrid = ({ transformerNumber, date }: TransformerHo
             <Label className="text-xs">Reactive Power (kVAR)</Label>
             <Input
               type="number"
-              step="0.01"
+              step="any"
+              inputMode="decimal"
               value={data.reactive_power}
               onChange={(e) => updateHourField(hour, 'reactive_power', parseFloat(e.target.value) || 0)}
               className="h-8"
@@ -207,7 +209,8 @@ export const TransformerHourlyGrid = ({ transformerNumber, date }: TransformerHo
             <Label className="text-xs">Frequency (Hz)</Label>
             <Input
               type="number"
-              step="0.01"
+              step="any"
+              inputMode="decimal"
               value={data.frequency}
               onChange={(e) => updateHourField(hour, 'frequency', parseFloat(e.target.value) || 0)}
               className={`h-8 ${!validateValue('frequency', data.frequency) && data.frequency > 0 ? 'bg-red-50 border-red-300' : ''}`}
@@ -218,7 +221,8 @@ export const TransformerHourlyGrid = ({ transformerNumber, date }: TransformerHo
             <Label className="text-xs">Oil Temp (°C)</Label>
             <Input
               type="number"
-              step="0.1"
+              step="any"
+              inputMode="decimal"
               value={data.oil_temperature}
               onChange={(e) => updateHourField(hour, 'oil_temperature', parseFloat(e.target.value) || 0)}
               className={`h-8 ${!validateValue('oil_temperature', data.oil_temperature) && data.oil_temperature > 0 ? 'bg-red-50 border-red-300' : ''}`}
@@ -230,6 +234,8 @@ export const TransformerHourlyGrid = ({ transformerNumber, date }: TransformerHo
             <div className="grid grid-cols-3 gap-1">
               <Input
                 type="number"
+                step="any"
+                inputMode="decimal"
                 placeholder="R"
                 value={data.voltage_ry}
                 onChange={(e) => updateHourField(hour, 'voltage_ry', parseFloat(e.target.value) || 0)}
@@ -237,6 +243,8 @@ export const TransformerHourlyGrid = ({ transformerNumber, date }: TransformerHo
               />
               <Input
                 type="number"
+                step="any"
+                inputMode="decimal"
                 placeholder="Y"
                 value={data.voltage_yb}
                 onChange={(e) => updateHourField(hour, 'voltage_yb', parseFloat(e.target.value) || 0)}
@@ -244,6 +252,8 @@ export const TransformerHourlyGrid = ({ transformerNumber, date }: TransformerHo
               />
               <Input
                 type="number"
+                step="any"
+                inputMode="decimal"
                 placeholder="B"
                 value={data.voltage_rb}
                 onChange={(e) => updateHourField(hour, 'voltage_rb', parseFloat(e.target.value) || 0)}
@@ -257,6 +267,8 @@ export const TransformerHourlyGrid = ({ transformerNumber, date }: TransformerHo
             <div className="grid grid-cols-3 gap-1">
               <Input
                 type="number"
+                step="any"
+                inputMode="decimal"
                 placeholder="R"
                 value={data.current_r}
                 onChange={(e) => updateHourField(hour, 'current_r', parseFloat(e.target.value) || 0)}
@@ -264,6 +276,8 @@ export const TransformerHourlyGrid = ({ transformerNumber, date }: TransformerHo
               />
               <Input
                 type="number"
+                step="any"
+                inputMode="decimal"
                 placeholder="Y"
                 value={data.current_y}
                 onChange={(e) => updateHourField(hour, 'current_y', parseFloat(e.target.value) || 0)}
@@ -271,6 +285,8 @@ export const TransformerHourlyGrid = ({ transformerNumber, date }: TransformerHo
               />
               <Input
                 type="number"
+                step="any"
+                inputMode="decimal"
                 placeholder="B"
                 value={data.current_b}
                 onChange={(e) => updateHourField(hour, 'current_b', parseFloat(e.target.value) || 0)}

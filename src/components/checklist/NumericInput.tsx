@@ -87,7 +87,8 @@ export const NumericInput = ({
       <div className="relative">
         <Input
           type="number"
-          step="0.01"
+          step="any"
+          inputMode="decimal"
           value={value}
           onChange={(e) => {
             const inputValue = e.target.value;
