@@ -18,9 +18,9 @@ const getTransformerName = (number: number): string => {
 interface TransformerLog {
   hour: number;
   frequency: number;
-  voltage_r: number;
-  voltage_y: number;
-  voltage_b: number;
+  voltage_ry: number;
+  voltage_yb: number;
+  voltage_rb: number;
   current_r: number;
   current_y: number;
   current_b: number;
@@ -205,15 +205,15 @@ export const TransformerReportViewer = ({ isOpen, onClose, report, userName, emp
                             {getIssue(hour, 'Frequency') && <span className="ml-1">⚠️</span>}
                           </TableCell>
                           <TableCell className={getIssue(hour, 'Voltage R') ? getSeverityColor(getIssue(hour, 'Voltage R')?.severity) : ''}>
-                            {log.voltage_r.toFixed(0)}
+                            {log.voltage_ry.toFixed(0)}
                             {getIssue(hour, 'Voltage R') && <span className="ml-1">⚠️</span>}
                           </TableCell>
                           <TableCell className={getIssue(hour, 'Voltage Y') ? getSeverityColor(getIssue(hour, 'Voltage Y')?.severity) : ''}>
-                            {log.voltage_y.toFixed(0)}
+                            {log.voltage_yb.toFixed(0)}
                             {getIssue(hour, 'Voltage Y') && <span className="ml-1">⚠️</span>}
                           </TableCell>
                           <TableCell className={getIssue(hour, 'Voltage B') ? getSeverityColor(getIssue(hour, 'Voltage B')?.severity) : ''}>
-                            {log.voltage_b.toFixed(0)}
+                            {log.voltage_rb.toFixed(0)}
                             {getIssue(hour, 'Voltage B') && <span className="ml-1">⚠️</span>}
                           </TableCell>
                           <TableCell className={getIssue(hour, 'Current R') ? getSeverityColor(getIssue(hour, 'Current R')?.severity) : ''}>
