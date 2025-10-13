@@ -30,6 +30,11 @@ export function TimePicker({
   placeholder = "Select time",
   className,
 }: TimePickerProps) {
+  // Debug logging
+  React.useEffect(() => {
+    console.log('[TimePicker Debug]', { value, disabled });
+  }, [value, disabled]);
+
   // Parse the time value (HH:MM format)
   const [hours, minutes] = value ? value.split(":") : ["", ""];
 

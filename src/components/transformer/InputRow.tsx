@@ -35,6 +35,21 @@ export function InputRow({
   isWarning,
   isError,
 }: InputRowProps) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (type === 'number') {
+      // Block 'e', 'E', '+' for scientific notation
+      const blockedKeys = ['e', 'E', '+'];
+      if (blockedKeys.includes(e.key)) {
+        e.preventDefault();
+        return;
+      }
+      // Allow minus only at the start
+      if (e.key === '-' && e.currentTarget.selectionStart !== 0) {
+        e.preventDefault();
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
       <label className="text-xs sm:text-sm font-medium text-foreground flex items-center gap-2 sm:w-36 md:w-40 flex-shrink-0">
@@ -46,6 +61,7 @@ export function InputRow({
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           disabled={disabled}
           placeholder={placeholder}
           min={min}

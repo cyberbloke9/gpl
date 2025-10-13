@@ -499,7 +499,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                 <InputRow label="Reactive Power" value={formData.ltac_kvar} onChange={(v) => updateField('ltac_kvar', v)} disabled={isFieldDisabled} unit="kVAR" />
                 <InputRow label="KWH" value={formData.ltac_kwh} onChange={(v) => updateField('ltac_kwh', v)} disabled={isFieldDisabled} />
                 <InputRow label="KVAH" value={formData.ltac_kvah} onChange={(v) => updateField('ltac_kvah', v)} disabled={isFieldDisabled} />
-                <InputRow label="KVARH" value={formData.ltac_kvarh} onChange={(v) => updateField('ltac_kvarh', v)} disabled={isFieldDisabled} />
+                <InputRow label="KVARH" value={formData.ltac_kvarh} onChange={(v) => updateField('ltac_kvarh', v)} disabled={isFieldDisabled} type="number" />
                 
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Temperature & Grid Status</div>
                 <InputRow label="Oil Temperature" value={formData.ltac_oil_temperature} onChange={(v) => updateField('ltac_oil_temperature', v)} disabled={isFieldDisabled} unit="°C" />
@@ -547,11 +547,11 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                 <InputRow label="X'MER Export" value={formData.gen_xmer_export} onChange={(v) => updateField('gen_xmer_export', v)} disabled={isFieldDisabled} />
                 <InputRow label="AUX Consumption" value={formData.gen_aux_consumption} onChange={(v) => updateField('gen_aux_consumption', v)} disabled={isFieldDisabled} />
                 <InputRow label="GPL Main Export" value={formData.gen_main_export} onChange={(v) => updateField('gen_main_export', v)} disabled={isFieldDisabled} />
-                <InputRow label="GPL Check Export" value={formData.gen_check_export} onChange={(v) => updateField('gen_check_export', v)} disabled={isFieldDisabled} />
+                <InputRow label="GPL Check Export" value={formData.gen_check_export} onChange={(v) => updateField('gen_check_export', v)} disabled={isFieldDisabled} type="number" />
                 <InputRow label="GPL Main Import" value={formData.gen_main_import} onChange={(v) => updateField('gen_main_import', v)} disabled={isFieldDisabled} />
                 <InputRow label="GPL Check Import" value={formData.gen_check_import} onChange={(v) => updateField('gen_check_import', v)} disabled={isFieldDisabled} />
                 <InputRow label="GPL Standby Export" value={formData.gen_standby_export} onChange={(v) => updateField('gen_standby_export', v)} disabled={isFieldDisabled} />
-                <InputRow label="GPL Standby Import" value={formData.gen_standby_import} onChange={(v) => updateField('gen_standby_import', v)} disabled={isFieldDisabled} />
+                <InputRow label="GPL Standby Import" value={formData.gen_standby_import} onChange={(v) => updateField('gen_standby_import', v)} disabled={isFieldDisabled} type="number" />
               </AccordionContent>
             </AccordionItem>
           </Accordion>

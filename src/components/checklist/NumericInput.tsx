@@ -99,6 +99,16 @@ export const NumericInput = ({
             const parsed = parseFloat(inputValue);
             onChange(isNaN(parsed) ? 0 : parsed);
           }}
+          onKeyDown={(e) => {
+            const blockedKeys = ['e', 'E', '+'];
+            if (blockedKeys.includes(e.key)) {
+              e.preventDefault();
+              return;
+            }
+            if (e.key === '-' && e.currentTarget.selectionStart !== 0) {
+              e.preventDefault();
+            }
+          }}
           onFocus={(e) => e.target.select()}
           disabled={disabled}
           className={`${getBgColor()} ${validation.status !== 'normal' ? getRangeColor(validation.status) : ''}`}
