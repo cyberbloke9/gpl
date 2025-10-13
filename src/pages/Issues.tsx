@@ -8,6 +8,16 @@ import { AlertCircle, Clock, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationEllipsis, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from '@/components/ui/pagination';
+import React from 'react';
 
 interface FlaggedIssue {
   id: string;
@@ -41,17 +51,24 @@ export default function Issues() {
   const { user, userRole } = useAuth();
   const [issues, setIssues] = useState<FlaggedIssue[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState('7'); // last 7 days
+  const [dateRange, setDateRange] = useState('7');
   const [statusFilter, setStatusFilter] = useState<'all' | 'reported' | 'in_progress' | 'resolved'>('all');
   const [severityFilter, setSeverityFilter] = useState<'all' | 'low' | 'medium' | 'high' | 'critical'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     const fetchIssues = async () => {
       if (!user) return;
 
       try {
+        setLoading(true);
         const daysAgo = new Date();
         daysAgo.setDate(daysAgo.getDate() - parseInt(dateRange));
+
+        const from = (currentPage - 1) * ITEMS_PER_PAGE;
+        const to = from + ITEMS_PER_PAGE - 1;
 
         let query = supabase
           .from('flagged_issues')
@@ -63,29 +80,28 @@ export default function Issues() {
             ),
             checklists:checklist_id (date),
             transformer_logs:transformer_log_id (date, hour, transformer_number)
-          `)
+          `, { count: 'exact' })
           .gte('reported_at', daysAgo.toISOString())
-          .order('reported_at', { ascending: false });
+          .order('reported_at', { ascending: false })
+          .range(from, to);
 
-        // Status filter
         if (statusFilter !== 'all') {
           query = query.eq('status', statusFilter);
         }
 
-        // Severity filter
         if (severityFilter !== 'all') {
           query = query.eq('severity', severityFilter);
         }
 
-        // If not admin, only show user's own issues
         if (userRole !== 'admin') {
           query = query.eq('user_id', user.id);
         }
 
-        const { data, error } = await query;
+        const { data, error, count } = await query;
 
         if (error) throw error;
         setIssues(data || []);
+        setTotalCount(count || 0);
       } catch (error) {
         console.error('Error fetching issues:', error);
       } finally {
@@ -114,7 +130,11 @@ export default function Issues() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, userRole, dateRange, statusFilter, severityFilter]);
+  }, [user, userRole, dateRange, statusFilter, severityFilter, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [dateRange, statusFilter, severityFilter]);
 
   const getIssueContext = (issue: FlaggedIssue) => {
     if (issue.checklist_id && issue.checklists) {
@@ -158,51 +178,57 @@ export default function Issues() {
     <div className="min-h-screen bg-background">
       <Navigation />
       <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-2 mb-6">
-          <AlertCircle className="h-8 w-8" />
-          <h1 className="text-3xl font-bold">Issues</h1>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">Flagged Issues</h1>
+          <p className="text-muted-foreground mt-2">
+            Monitor and track reported issues
+          </p>
         </div>
 
-        {/* Filters */}
-        <div className="flex gap-4 mb-6 flex-wrap">
-          <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Date range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">Last 7 days</SelectItem>
-              <SelectItem value="14">Last 14 days</SelectItem>
-              <SelectItem value="30">Last 30 days</SelectItem>
-              <SelectItem value="90">Last 90 days</SelectItem>
-              <SelectItem value="365">Last year</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'reported' | 'in_progress' | 'resolved')}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="reported">Reported</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="resolved">Resolved</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={severityFilter} onValueChange={(value) => setSeverityFilter(value as 'all' | 'low' | 'medium' | 'high' | 'critical')}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Severity" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Severity</SelectItem>
-              <SelectItem value="critical">Critical</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Card className="p-4 mb-6">
+          <div className="flex flex-col gap-4">
+            <h3 className="text-sm font-medium">Filter Issues</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <Select value={dateRange} onValueChange={setDateRange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">Last 7 days</SelectItem>
+                  <SelectItem value="14">Last 14 days</SelectItem>
+                  <SelectItem value="30">Last 30 days</SelectItem>
+                  <SelectItem value="90">Last 90 days</SelectItem>
+                  <SelectItem value="365">Last year</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'reported' | 'in_progress' | 'resolved')}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="reported">Reported</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="resolved">Resolved</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={severityFilter} onValueChange={(value) => setSeverityFilter(value as 'all' | 'low' | 'medium' | 'high' | 'critical')}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Severity" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Severity</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </Card>
 
         {loading ? (
           <div className="space-y-4">
@@ -289,6 +315,58 @@ export default function Issues() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        )}
+
+        {totalCount > ITEMS_PER_PAGE && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6">
+            <p className="text-sm text-muted-foreground">
+              Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)} of {totalCount} issues
+            </p>
+            
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: Math.ceil(totalCount / ITEMS_PER_PAGE) }, (_, i) => i + 1)
+                  .filter(page => {
+                    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+                    return page === 1 || 
+                           page === totalPages || 
+                           Math.abs(page - currentPage) <= 1;
+                  })
+                  .map((page, idx, arr) => (
+                    <React.Fragment key={page}>
+                      {idx > 0 && arr[idx - 1] !== page - 1 && (
+                        <PaginationItem>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      )}
+                      <PaginationItem>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(page)}
+                          isActive={currentPage === page}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    </React.Fragment>
+                  ))}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(totalCount / ITEMS_PER_PAGE), p + 1))}
+                    className={currentPage >= Math.ceil(totalCount / ITEMS_PER_PAGE) ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         )}
       </main>

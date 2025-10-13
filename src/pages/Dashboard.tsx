@@ -33,13 +33,13 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
           <Link to="/checklist">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardHeader>
-                <ClipboardCheck className="h-10 w-10 text-primary mb-2" />
-                <CardTitle>Daily Checklist</CardTitle>
-                <CardDescription>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+              <CardHeader className="space-y-3">
+                <ClipboardCheck className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                <CardTitle className="text-lg sm:text-xl">Daily Checklist</CardTitle>
+                <CardDescription className="text-sm">
                   Complete your daily inspection checklist across 4 modules
                 </CardDescription>
               </CardHeader>
@@ -50,11 +50,11 @@ export default function Dashboard() {
           </Link>
 
           <Link to="/transformer">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardHeader>
-                <Gauge className="h-10 w-10 text-primary mb-2" />
-                <CardTitle>Transformer Log</CardTitle>
-                <CardDescription>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+              <CardHeader className="space-y-3">
+                <Gauge className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                <CardTitle className="text-lg sm:text-xl">Transformer Log</CardTitle>
+                <CardDescription className="text-sm">
                   Record hourly transformer readings and parameters
                 </CardDescription>
               </CardHeader>

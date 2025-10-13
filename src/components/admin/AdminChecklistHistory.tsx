@@ -7,6 +7,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, User, Calendar, Clock } from 'lucide-react';
 import { format } from 'date-fns';
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationEllipsis, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from '@/components/ui/pagination';
+import React from 'react';
 
 interface AdminChecklistHistoryProps {
   onViewReport: (checklistId: string) => void;
@@ -15,11 +25,18 @@ interface AdminChecklistHistoryProps {
 export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryProps) => {
   const [checklists, setChecklists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState('7'); // days
+  const [dateRange, setDateRange] = useState('7');
   const [statusFilter, setStatusFilter] = useState<'all' | 'submitted' | 'draft'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     loadChecklists();
+  }, [dateRange, statusFilter, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
   }, [dateRange, statusFilter]);
 
   const loadChecklists = async () => {
@@ -27,6 +44,9 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
     try {
       const daysAgo = new Date();
       daysAgo.setDate(daysAgo.getDate() - parseInt(dateRange));
+
+      const from = (currentPage - 1) * ITEMS_PER_PAGE;
+      const to = from + ITEMS_PER_PAGE - 1;
 
       let query = supabase
         .from('checklists')
@@ -36,25 +56,27 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
             full_name,
             employee_id
           )
-        `)
+        `, { count: 'exact' })
         .gte('date', daysAgo.toISOString().split('T')[0])
         .order('date', { ascending: false })
-        .order('submitted_at', { ascending: false });
+        .order('submitted_at', { ascending: false })
+        .range(from, to);
 
-      // Add status filter
       if (statusFilter === 'submitted') {
         query = query.eq('submitted', true);
       } else if (statusFilter === 'draft') {
         query = query.eq('submitted', false);
       }
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
 
       if (error) throw error;
       setChecklists(data || []);
+      setTotalCount(count || 0);
     } catch (error) {
-      // Silent fail - RLS will handle unauthorized access
+      console.error('Error loading checklists:', error);
       setChecklists([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
@@ -100,17 +122,17 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div>
           <h3 className="text-lg font-semibold">Checklist History</h3>
           <p className="text-sm text-muted-foreground">
             View all submitted checklists from all users
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'submitted' | 'draft')}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -120,7 +142,7 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
             </SelectContent>
           </Select>
           <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Select range" />
             </SelectTrigger>
             <SelectContent>
@@ -135,41 +157,44 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
 
       <div className="space-y-4">
         {checklists.map((checklist) => (
-          <Card key={checklist.id} className="p-6 hover:shadow-md transition-shadow">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="space-y-3 flex-1">
-                <div className="flex items-center gap-4 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-muted-foreground" />
-                    <span className="font-medium">
+          <Card key={checklist.id} className="p-4 sm:p-6 hover:shadow-md transition-shadow">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="space-y-3 flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <User className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <span className="font-medium text-sm sm:text-base truncate">
                       {checklist.profiles?.full_name || 'Unknown User'}
                     </span>
-                    {checklist.profiles?.employee_id && (
-                      <Badge variant="outline" className="text-xs">
-                        ID: {checklist.profiles.employee_id}
-                      </Badge>
-                    )}
                   </div>
+                  {checklist.profiles?.employee_id && (
+                    <Badge variant="outline" className="text-xs flex-shrink-0">
+                      ID: {checklist.profiles.employee_id}
+                    </Badge>
+                  )}
+                </div>
+                
+                <div className="flex items-center gap-2 flex-wrap">
                   <Badge variant={
                     checklist.submitted ? 'default' : 
                     getChecklistStatus(checklist) === 'Missed' ? 'destructive' : 
                     'secondary'
-                  }>
+                  } className="text-xs">
                     {getChecklistStatus(checklist)}
                   </Badge>
                   {checklist.shift && (
-                    <Badge variant="outline">{checklist.shift} Shift</Badge>
+                    <Badge variant="outline" className="text-xs">{checklist.shift} Shift</Badge>
                   )}
                 </div>
 
-                <div className="flex items-center gap-6 text-sm text-muted-foreground flex-wrap">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
+                    <Calendar className="w-4 h-4 flex-shrink-0" />
                     <span>{format(new Date(checklist.date), 'PPP')}</span>
                   </div>
                   {checklist.submitted_at && (
                     <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
+                      <Clock className="w-4 h-4 flex-shrink-0" />
                       <span>
                         Submitted: {format(new Date(checklist.submitted_at), 'p')}
                       </span>
@@ -177,17 +202,17 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
                   )}
                 </div>
 
-                <div className="flex items-center gap-4 text-sm">
-                  <span className="text-muted-foreground">
+                <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm flex-wrap">
+                  <span className="text-muted-foreground whitespace-nowrap">
                     Completion: {checklist.completion_percentage || 0}%
                   </span>
                   {checklist.flagged_issues_count > 0 && (
-                    <Badge variant="destructive" className="text-xs">
+                    <Badge variant="destructive" className="text-xs flex-shrink-0">
                       {checklist.flagged_issues_count} Issue{checklist.flagged_issues_count !== 1 ? 's' : ''}
                     </Badge>
                   )}
                   {checklist.problem_count > 0 && (
-                    <Badge variant="outline" className="text-xs border-orange-500 text-orange-700">
+                    <Badge variant="outline" className="text-xs border-orange-500 text-orange-700 flex-shrink-0">
                       {checklist.problem_count} Problem{checklist.problem_count !== 1 ? 's' : ''}
                     </Badge>
                   )}
@@ -197,7 +222,8 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
               <Button
                 onClick={() => onViewReport(checklist.id)}
                 disabled={!checklist.submitted}
-                className="md:w-auto w-full"
+                className="w-full lg:w-auto flex-shrink-0"
+                size="sm"
               >
                 <FileText className="w-4 h-4 mr-2" />
                 View Report
@@ -206,6 +232,58 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
           </Card>
         ))}
       </div>
+
+      {totalCount > ITEMS_PER_PAGE && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+          <p className="text-sm text-muted-foreground">
+            Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)} of {totalCount} checklists
+          </p>
+          
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: Math.ceil(totalCount / ITEMS_PER_PAGE) }, (_, i) => i + 1)
+                .filter(page => {
+                  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+                  return page === 1 || 
+                         page === totalPages || 
+                         Math.abs(page - currentPage) <= 1;
+                })
+                .map((page, idx, arr) => (
+                  <React.Fragment key={page}>
+                    {idx > 0 && arr[idx - 1] !== page - 1 && (
+                      <PaginationItem>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )}
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={() => setCurrentPage(page)}
+                        isActive={currentPage === page}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  </React.Fragment>
+                ))}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => setCurrentPage(p => Math.min(Math.ceil(totalCount / ITEMS_PER_PAGE), p + 1))}
+                  className={currentPage >= Math.ceil(totalCount / ITEMS_PER_PAGE) ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
 };

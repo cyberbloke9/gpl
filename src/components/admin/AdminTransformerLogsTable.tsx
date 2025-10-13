@@ -24,42 +24,43 @@ export const AdminTransformerLogsTable = ({ logs, onViewReport }: AdminTransform
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Transformer</TableHead>
-            <TableHead>User</TableHead>
-            <TableHead>Employee ID</TableHead>
-            <TableHead>Hours Logged</TableHead>
-            <TableHead>Progress</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="whitespace-nowrap">Date</TableHead>
+            <TableHead className="whitespace-nowrap">Transformer</TableHead>
+            <TableHead className="whitespace-nowrap">User</TableHead>
+            <TableHead className="hidden md:table-cell whitespace-nowrap">Employee ID</TableHead>
+            <TableHead className="whitespace-nowrap">Hours</TableHead>
+            <TableHead className="hidden sm:table-cell whitespace-nowrap">Progress</TableHead>
+            <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {logs.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center text-muted-foreground">
+              <TableCell colSpan={7} className="text-center text-muted-foreground py-8 text-sm">
                 No transformer logs for today
               </TableCell>
             </TableRow>
           ) : (
             logs.map((log, index) => (
               <TableRow key={`${log.date}-${log.transformer_number}-${index}`}>
-                <TableCell className="font-medium">
-                  {format(new Date(log.date), 'MMM d, yyyy')}
+                <TableCell className="font-medium text-sm whitespace-nowrap">
+                  {format(new Date(log.date), 'MMM d')}
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">T{log.transformer_number}</Badge>
+                  <Badge variant="outline" className="text-xs">T{log.transformer_number}</Badge>
                 </TableCell>
-                <TableCell>{log.user_name}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">
+                <TableCell className="text-sm max-w-[120px] truncate">{log.user_name}</TableCell>
+                <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
                   {log.employee_id}
                 </TableCell>
-                <TableCell>
-                  <span className="font-medium">{log.hours_logged}/24</span>
+                <TableCell className="text-sm">
+                  <span className="font-medium">{log.hours_logged}</span>
+                  <span className="text-muted-foreground">/24</span>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden sm:table-cell">
                   <div className="flex items-center gap-2">
-                    <Progress value={log.completion_percentage} className="w-24" />
-                    <span className="text-sm text-muted-foreground">
+                    <Progress value={log.completion_percentage} className="w-16 sm:w-20 h-2" />
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
                       {log.completion_percentage}%
                     </span>
                   </div>
@@ -69,8 +70,10 @@ export const AdminTransformerLogsTable = ({ logs, onViewReport }: AdminTransform
                     variant="outline"
                     size="sm"
                     onClick={() => onViewReport(log.date, log.transformer_number)}
+                    className="text-xs"
                   >
-                    View Report
+                    <span className="hidden sm:inline">View</span>
+                    <span className="sm:hidden">📊</span>
                   </Button>
                 </TableCell>
               </TableRow>
