@@ -129,7 +129,6 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   const [formData, setFormData] = useState<TransformerData>(initialFormState);
   const [loggedHours, setLoggedHours] = useState<number[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [autoSaveStatus, setAutoSaveStatus] = useState<string>('');
 
   const currentHour = new Date().getHours();
   const isToday = true; // Always today
@@ -316,23 +315,6 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   const updateField = (field: keyof TransformerData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
-
-  useEffect(() => {
-    if (isFormDisabled) return;
-    
-    const timeoutId = setTimeout(async () => {
-      setAutoSaveStatus('Saving...');
-      try {
-        await saveLogEntry(false);
-        setAutoSaveStatus('Saved ✓');
-        setTimeout(() => setAutoSaveStatus(''), 2000);
-      } catch (error) {
-        setAutoSaveStatus('');
-      }
-    }, 3000);
-
-    return () => clearTimeout(timeoutId);
-  }, [formData, isFormDisabled]);
 
   // Check if all required fields are filled
   const isFormComplete = () => {
@@ -581,11 +563,6 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
 
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-40 px-3 sm:px-4 py-2 sm:py-3">
         <div className="container mx-auto max-w-7xl">
-          {autoSaveStatus && (
-            <div className="text-center text-xs text-muted-foreground mb-2">
-              {autoSaveStatus}
-            </div>
-          )}
           <div className="flex items-center justify-between gap-2 sm:gap-3">
             <Button
               size="sm"
