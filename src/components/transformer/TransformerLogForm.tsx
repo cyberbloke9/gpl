@@ -332,40 +332,89 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     return () => clearTimeout(timeoutId);
   }, [formData, isFormDisabled]);
 
+  // Check if all required fields are filled
+  const isFormComplete = () => {
+    return (
+      formData.frequency !== '' &&
+      formData.voltage_ry !== '' &&
+      formData.voltage_yb !== '' &&
+      formData.voltage_rb !== '' &&
+      formData.current_r !== '' &&
+      formData.current_y !== '' &&
+      formData.current_b !== '' &&
+      formData.active_power !== '' &&
+      formData.reactive_power !== '' &&
+      formData.kva !== '' &&
+      formData.mwh !== '' &&
+      formData.mvarh !== '' &&
+      formData.mvah !== '' &&
+      formData.cos_phi !== '' &&
+      formData.oil_temperature !== '' &&
+      formData.winding_temperature !== '' &&
+      formData.oil_level !== '' &&
+      formData.tap_position !== '' &&
+      formData.tap_counter !== '' &&
+      formData.silica_gel_colour !== '' &&
+      formData.ltac_current_r !== '' &&
+      formData.ltac_current_y !== '' &&
+      formData.ltac_current_b !== '' &&
+      formData.ltac_voltage_ry !== '' &&
+      formData.ltac_voltage_yb !== '' &&
+      formData.ltac_voltage_rb !== '' &&
+      formData.ltac_kw !== '' &&
+      formData.ltac_kva !== '' &&
+      formData.ltac_kvar !== '' &&
+      formData.ltac_kwh !== '' &&
+      formData.ltac_kvah !== '' &&
+      formData.ltac_kvarh !== '' &&
+      formData.ltac_oil_temperature !== '' &&
+      formData.ltac_grid_fail_time !== '' &&
+      formData.ltac_grid_resume_time !== '' &&
+      formData.ltac_supply_interruption !== '' &&
+      formData.gen_total_generation !== '' &&
+      formData.gen_xmer_export !== '' &&
+      formData.gen_aux_consumption !== '' &&
+      formData.gen_main_export !== '' &&
+      formData.gen_check_export !== '' &&
+      formData.gen_main_import !== '' &&
+      formData.gen_check_import !== '' &&
+      formData.gen_standby_export !== '' &&
+      formData.gen_standby_import !== ''
+    );
+  };
+
   const progressText = `${loggedHours.length}/24 hours logged`;
 
   return (
     <div className="space-y-6 pb-24">
       <Card>
-        <CardHeader className="pb-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <CardTitle>Transformer Log Sheet - Power Transformer</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Gayatri Power Private Limited • {format(selectedDate, 'PPP')}
-              </p>
-            </div>
+        <CardHeader className="pb-3 sm:pb-4">
+          <div className="flex flex-col space-y-2">
+            <CardTitle className="text-lg sm:text-xl">Transformer Log Sheet - Power Transformer</CardTitle>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Gayatri Power Private Limited • {format(selectedDate, 'PPP')}
+            </p>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Badge variant="secondary" className="text-sm">
+        <CardContent className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+            <Badge variant="secondary" className="text-xs sm:text-sm">
               {progressText}
             </Badge>
             {isFinalized && (
-              <Badge variant="destructive">
+              <Badge variant="destructive" className="text-xs sm:text-sm">
                 Finalized - Read Only
               </Badge>
             )}
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Select Hour</label>
+            <label className="text-xs sm:text-sm font-medium">Select Hour</label>
             <Select
               value={selectedHour.toString()}
               onValueChange={(value) => handleHourChange(parseInt(value))}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full h-9 sm:h-10 text-sm">
                 <SelectValue placeholder="Select hour" />
               </SelectTrigger>
               <SelectContent>
@@ -379,6 +428,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                       key={hour} 
                       value={hour.toString()}
                       disabled={isFuture}
+                      className="text-sm"
                     >
                       <div className="flex items-center gap-2">
                         <span>{hour.toString().padStart(2, '0')}:00</span>
@@ -395,16 +445,16 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
       </Card>
 
       <Card>
-        <CardContent className="pt-6">
-          <Accordion type="multiple" defaultValue={['ptr', 'ltac', 'generation']} className="space-y-4">
+        <CardContent className="pt-4 sm:pt-6">
+          <Accordion type="multiple" defaultValue={['ptr', 'ltac', 'generation']} className="space-y-3 sm:space-y-4">
             <AccordionItem value="ptr" className="border rounded-lg">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                <h3 className="text-base font-semibold">
+              <AccordionTrigger className="px-3 sm:px-4 py-2 sm:py-3 hover:no-underline">
+                <h3 className="text-sm sm:text-base font-semibold">
                   PTR Feeder (3.2 MVA, 33 KV / 3.3 KV)
                 </h3>
               </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 space-y-3">
-                <div className="text-sm font-medium text-muted-foreground mb-2">Current Readings</div>
+              <AccordionContent className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2 sm:space-y-3">
+                <div className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Current Readings</div>
                 <InputRow label="R Phase Current" value={formData.current_r} onChange={(v) => updateField('current_r', v)} disabled={isFormDisabled} unit="A" />
                 <InputRow label="Y Phase Current" value={formData.current_y} onChange={(v) => updateField('current_y', v)} disabled={isFormDisabled} unit="A" />
                 <InputRow label="B Phase Current" value={formData.current_b} onChange={(v) => updateField('current_b', v)} disabled={isFormDisabled} unit="A" />
@@ -435,13 +485,13 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
             </AccordionItem>
 
             <AccordionItem value="ltac" className="border rounded-lg">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                <h3 className="text-base font-semibold">
+              <AccordionTrigger className="px-3 sm:px-4 py-2 sm:py-3 hover:no-underline">
+                <h3 className="text-sm sm:text-base font-semibold">
                   LTAC Feeder (100 KVA, 33 KV / 0.433 KV)
                 </h3>
               </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 space-y-3">
-                <div className="text-sm font-medium text-muted-foreground mb-2">Current Readings</div>
+              <AccordionContent className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2 sm:space-y-3">
+                <div className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Current Readings</div>
                 <InputRow label="R Phase Current" value={formData.ltac_current_r} onChange={(v) => updateField('ltac_current_r', v)} disabled={isFormDisabled} unit="A" />
                 <InputRow label="Y Phase Current" value={formData.ltac_current_y} onChange={(v) => updateField('ltac_current_y', v)} disabled={isFormDisabled} unit="A" />
                 <InputRow label="B Phase Current" value={formData.ltac_current_b} onChange={(v) => updateField('ltac_current_b', v)} disabled={isFormDisabled} unit="A" />
@@ -468,12 +518,12 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
             </AccordionItem>
 
             <AccordionItem value="generation" className="border rounded-lg">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                <h3 className="text-base font-semibold">
+              <AccordionTrigger className="px-3 sm:px-4 py-2 sm:py-3 hover:no-underline">
+                <h3 className="text-sm sm:text-base font-semibold">
                   Generation Details
                 </h3>
               </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 space-y-3">
+              <AccordionContent className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2 sm:space-y-3">
                 <InputRow label="Total Generation" value={formData.gen_total_generation} onChange={(v) => updateField('gen_total_generation', v)} disabled={isFormDisabled} />
                 <InputRow label="X'MER Export" value={formData.gen_xmer_export} onChange={(v) => updateField('gen_xmer_export', v)} disabled={isFormDisabled} />
                 <InputRow label="AUX Consumption" value={formData.gen_aux_consumption} onChange={(v) => updateField('gen_aux_consumption', v)} disabled={isFormDisabled} />
@@ -487,45 +537,46 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
             </AccordionItem>
           </Accordion>
 
-          <div className="space-y-2 mt-6">
-            <label className="text-sm font-medium">Remarks</label>
+          <div className="space-y-2 mt-4 sm:mt-6">
+            <label className="text-xs sm:text-sm font-medium">Remarks</label>
             <Textarea
               value={formData.remarks}
               onChange={(e) => updateField('remarks', e.target.value)}
               disabled={isFormDisabled}
               placeholder="Add any observations or notes..."
-              className="min-h-[80px]"
+              className="min-h-[60px] sm:min-h-[80px] text-sm"
             />
           </div>
         </CardContent>
       </Card>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-40 px-4 py-3">
-        <div className="container mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-40 px-3 sm:px-4 py-2 sm:py-3">
+        <div className="container mx-auto max-w-7xl">
           {autoSaveStatus && (
             <div className="text-center text-xs text-muted-foreground mb-2">
               {autoSaveStatus}
             </div>
           )}
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 sm:gap-3">
             <Button
               size="sm"
               variant="outline"
               onClick={handleClear}
               disabled={isFormDisabled}
+              className="flex-1 sm:flex-none sm:min-w-[140px] h-9 sm:h-10 text-xs sm:text-sm"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Clear
+              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              Delete Data
             </Button>
             
             <Button
               size="sm"
               onClick={() => saveLogEntry(true)}
-              disabled={isSaving || isFormDisabled}
-              className="bg-green-600 hover:bg-green-700"
+              disabled={isSaving || isFormDisabled || !isFormComplete()}
+              className="flex-1 sm:flex-none sm:min-w-[140px] h-9 sm:h-10 text-xs sm:text-sm bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50"
             >
-              <Save className="h-4 w-4 mr-2" />
-              {isSaving ? 'Saving...' : 'Save Entry'}
+              <Save className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              {isSaving ? 'Logging...' : 'Log Entry'}
             </Button>
           </div>
         </div>
