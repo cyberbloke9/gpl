@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Save, Trash2 } from 'lucide-react';
+import { TimePicker } from '@/components/ui/time-picker';
 
 interface TransformerLogFormProps {
   isFinalized: boolean;
@@ -133,7 +134,8 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   const currentHour = new Date().getHours();
   const isToday = true; // Always today
   const isPastHour = selectedHour < currentHour;
-  const isFormDisabled = isFinalized || isPastHour;
+  // Allow editing current hour, only disable if finalized or strictly past
+  const isFormDisabled = isFinalized || (selectedHour < currentHour);
 
   useEffect(() => {
     loadHourData();
@@ -511,8 +513,35 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                 
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Temperature & Grid Status</div>
                 <InputRow label="Oil Temperature" value={formData.ltac_oil_temperature} onChange={(v) => updateField('ltac_oil_temperature', v)} disabled={isFormDisabled} unit="°C" />
-                <InputRow label="Grid Fail Time" value={formData.ltac_grid_fail_time} onChange={(v) => updateField('ltac_grid_fail_time', v)} disabled={isFormDisabled} type="time" />
-                <InputRow label="Grid Resume Time" value={formData.ltac_grid_resume_time} onChange={(v) => updateField('ltac_grid_resume_time', v)} disabled={isFormDisabled} type="time" />
+                
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                  <label className="text-xs sm:text-sm font-medium text-foreground sm:w-36 md:w-40 flex-shrink-0">
+                    Grid Fail Time
+                  </label>
+                  <div className="flex-1">
+                    <TimePicker
+                      value={formData.ltac_grid_fail_time}
+                      onChange={(v) => updateField('ltac_grid_fail_time', v)}
+                      disabled={isFormDisabled}
+                      placeholder="Select fail time"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                  <label className="text-xs sm:text-sm font-medium text-foreground sm:w-36 md:w-40 flex-shrink-0">
+                    Grid Resume Time
+                  </label>
+                  <div className="flex-1">
+                    <TimePicker
+                      value={formData.ltac_grid_resume_time}
+                      onChange={(v) => updateField('ltac_grid_resume_time', v)}
+                      disabled={isFormDisabled}
+                      placeholder="Select resume time"
+                    />
+                  </div>
+                </div>
+                
                 <InputRow label="Supply Interruption" value={formData.ltac_supply_interruption} onChange={(v) => updateField('ltac_supply_interruption', v)} disabled={isFormDisabled} type="text" />
               </AccordionContent>
             </AccordionItem>
