@@ -129,6 +129,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   const [formData, setFormData] = useState<TransformerData>(initialFormState);
   const [loggedHours, setLoggedHours] = useState<number[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   const currentHour = new Date().getHours();
   const isToday = true; // Always today
@@ -145,12 +146,15 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   });
 
   useEffect(() => {
-    loadHourData();
-  }, [selectedDate, selectedHour, transformerNumber, user]);
+    if (user?.id && !isDirty) {
+      loadHourData();
+    }
+  }, [selectedDate, selectedHour, transformerNumber, user?.id]);
 
   const loadHourData = async () => {
     if (!user) return;
 
+    setIsDirty(false); // Reset when loading new hour data
     const dateString = format(selectedDate, 'yyyy-MM-dd');
 
     const { data: logs } = await supabase
@@ -302,6 +306,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
         });
       }
     } else {
+      setIsDirty(false); // Reset after successful save
       if (showToast) {
         toast({
           title: 'Success',
@@ -322,6 +327,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
 
   const updateField = (field: keyof TransformerData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setIsDirty(true); // Mark form as dirty when user types
   };
 
   // Check if all required fields are filled
