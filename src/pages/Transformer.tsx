@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { TransformerLogForm } from '@/components/transformer/TransformerLogForm';
+import { TransformerLogHistory } from '@/components/transformer/TransformerLogHistory';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function Transformer() {
   const { user } = useAuth();
@@ -91,11 +93,26 @@ export default function Transformer() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <TransformerLogForm 
-        isFinalized={isFinalized} 
-        onDateChange={setSelectedDate}
-        onFinalizeDay={handleFinalizeDay}
-      />
+      <div className="container mx-auto px-4 py-6">
+        <Tabs defaultValue="log-entry" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="log-entry">Log Entry</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="log-entry">
+            <TransformerLogForm 
+              isFinalized={isFinalized} 
+              onDateChange={setSelectedDate}
+              onFinalizeDay={handleFinalizeDay}
+            />
+          </TabsContent>
+          
+          <TabsContent value="history">
+            <TransformerLogHistory userId={user?.id} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
