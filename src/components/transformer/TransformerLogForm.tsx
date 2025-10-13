@@ -132,9 +132,12 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
 
   const currentHour = new Date().getHours();
   const isToday = true; // Always today
-  const isPastHour = selectedHour < currentHour;
-  // Allow editing current hour, only disable if finalized or strictly past
-  const isFormDisabled = isFinalized || (selectedHour < currentHour);
+  
+  // Function to check if fields should be disabled
+  const isFieldDisabled = () => {
+    if (isFinalized) return true;
+    return selectedHour < currentHour;
+  };
 
   useEffect(() => {
     loadHourData();
@@ -218,7 +221,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   };
 
   const saveLogEntry = async (showToast: boolean = true) => {
-    if (!user || isFormDisabled) return;
+    if (!user || isFieldDisabled()) return;
 
     setIsSaving(true);
     const dateString = format(selectedDate, 'yyyy-MM-dd');
@@ -439,32 +442,32 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
               </AccordionTrigger>
               <AccordionContent className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2 sm:space-y-3">
                 <div className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Current Readings</div>
-                <InputRow label="R Phase Current" value={formData.current_r} onChange={(v) => updateField('current_r', v)} disabled={isFormDisabled} unit="A" />
-                <InputRow label="Y Phase Current" value={formData.current_y} onChange={(v) => updateField('current_y', v)} disabled={isFormDisabled} unit="A" />
-                <InputRow label="B Phase Current" value={formData.current_b} onChange={(v) => updateField('current_b', v)} disabled={isFormDisabled} unit="A" />
+                <InputRow label="R Phase Current" value={formData.current_r} onChange={(v) => updateField('current_r', v)} disabled={isFieldDisabled()} unit="A" />
+                <InputRow label="Y Phase Current" value={formData.current_y} onChange={(v) => updateField('current_y', v)} disabled={isFieldDisabled()} unit="A" />
+                <InputRow label="B Phase Current" value={formData.current_b} onChange={(v) => updateField('current_b', v)} disabled={isFieldDisabled()} unit="A" />
                 
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Voltage Readings</div>
-                <InputRow label="RY Phase Voltage" value={formData.voltage_ry} onChange={(v) => updateField('voltage_ry', v)} disabled={isFormDisabled} unit="V" />
-                <InputRow label="YB Phase Voltage" value={formData.voltage_yb} onChange={(v) => updateField('voltage_yb', v)} disabled={isFormDisabled} unit="V" />
-                <InputRow label="RB Phase Voltage" value={formData.voltage_rb} onChange={(v) => updateField('voltage_rb', v)} disabled={isFormDisabled} unit="V" />
+                <InputRow label="RY Phase Voltage" value={formData.voltage_ry} onChange={(v) => updateField('voltage_ry', v)} disabled={isFieldDisabled()} unit="V" />
+                <InputRow label="YB Phase Voltage" value={formData.voltage_yb} onChange={(v) => updateField('voltage_yb', v)} disabled={isFieldDisabled()} unit="V" />
+                <InputRow label="RB Phase Voltage" value={formData.voltage_rb} onChange={(v) => updateField('voltage_rb', v)} disabled={isFieldDisabled()} unit="V" />
                 
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Power Measurements</div>
-                <InputRow label="Active Power" value={formData.active_power} onChange={(v) => updateField('active_power', v)} disabled={isFormDisabled} unit="kW" />
-                <InputRow label="Reactive Power" value={formData.reactive_power} onChange={(v) => updateField('reactive_power', v)} disabled={isFormDisabled} unit="kVAR" />
-                <InputRow label="Apparent Power" value={formData.kva} onChange={(v) => updateField('kva', v)} disabled={isFormDisabled} unit="kVA" />
-                <InputRow label="MWH" value={formData.mwh} onChange={(v) => updateField('mwh', v)} disabled={isFormDisabled} />
-                <InputRow label="MVARH" value={formData.mvarh} onChange={(v) => updateField('mvarh', v)} disabled={isFormDisabled} />
-                <InputRow label="MVAH" value={formData.mvah} onChange={(v) => updateField('mvah', v)} disabled={isFormDisabled} />
-                <InputRow label="COS Phi" value={formData.cos_phi} onChange={(v) => updateField('cos_phi', v)} disabled={isFormDisabled} />
-                <InputRow label="Frequency" value={formData.frequency} onChange={(v) => updateField('frequency', v)} disabled={isFormDisabled} unit="Hz" />
+                <InputRow label="Active Power" value={formData.active_power} onChange={(v) => updateField('active_power', v)} disabled={isFieldDisabled()} unit="kW" />
+                <InputRow label="Reactive Power" value={formData.reactive_power} onChange={(v) => updateField('reactive_power', v)} disabled={isFieldDisabled()} unit="kVAR" />
+                <InputRow label="Apparent Power" value={formData.kva} onChange={(v) => updateField('kva', v)} disabled={isFieldDisabled()} unit="kVA" />
+                <InputRow label="MWH" value={formData.mwh} onChange={(v) => updateField('mwh', v)} disabled={isFieldDisabled()} />
+                <InputRow label="MVARH" value={formData.mvarh} onChange={(v) => updateField('mvarh', v)} disabled={isFieldDisabled()} />
+                <InputRow label="MVAH" value={formData.mvah} onChange={(v) => updateField('mvah', v)} disabled={isFieldDisabled()} />
+                <InputRow label="COS Phi" value={formData.cos_phi} onChange={(v) => updateField('cos_phi', v)} disabled={isFieldDisabled()} />
+                <InputRow label="Frequency" value={formData.frequency} onChange={(v) => updateField('frequency', v)} disabled={isFieldDisabled()} unit="Hz" />
                 
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Temperature & Status</div>
-                <InputRow label="Winding Temperature" value={formData.winding_temperature} onChange={(v) => updateField('winding_temperature', v)} disabled={isFormDisabled} unit="°C" />
-                <InputRow label="Oil Temperature" value={formData.oil_temperature} onChange={(v) => updateField('oil_temperature', v)} disabled={isFormDisabled} unit="°C" />
-                <InputRow label="Oil Level" value={formData.oil_level} onChange={(v) => updateField('oil_level', v)} disabled={isFormDisabled} type="text" />
-                <InputRow label="Tap Position" value={formData.tap_position} onChange={(v) => updateField('tap_position', v)} disabled={isFormDisabled} type="text" />
-                <InputRow label="Tap Counter" value={formData.tap_counter} onChange={(v) => updateField('tap_counter', v)} disabled={isFormDisabled} />
-                <InputRow label="Silica Gel Colour" value={formData.silica_gel_colour} onChange={(v) => updateField('silica_gel_colour', v)} disabled={isFormDisabled} type="text" />
+                <InputRow label="Winding Temperature" value={formData.winding_temperature} onChange={(v) => updateField('winding_temperature', v)} disabled={isFieldDisabled()} unit="°C" />
+                <InputRow label="Oil Temperature" value={formData.oil_temperature} onChange={(v) => updateField('oil_temperature', v)} disabled={isFieldDisabled()} unit="°C" />
+                <InputRow label="Oil Level" value={formData.oil_level} onChange={(v) => updateField('oil_level', v)} disabled={isFieldDisabled()} type="text" />
+                <InputRow label="Tap Position" value={formData.tap_position} onChange={(v) => updateField('tap_position', v)} disabled={isFieldDisabled()} type="text" />
+                <InputRow label="Tap Counter" value={formData.tap_counter} onChange={(v) => updateField('tap_counter', v)} disabled={isFieldDisabled()} />
+                <InputRow label="Silica Gel Colour" value={formData.silica_gel_colour} onChange={(v) => updateField('silica_gel_colour', v)} disabled={isFieldDisabled()} type="text" placeholder="Color" />
               </AccordionContent>
             </AccordionItem>
 
@@ -476,25 +479,25 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
               </AccordionTrigger>
               <AccordionContent className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2 sm:space-y-3">
                 <div className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Current Readings</div>
-                <InputRow label="R Phase Current" value={formData.ltac_current_r} onChange={(v) => updateField('ltac_current_r', v)} disabled={isFormDisabled} unit="A" />
-                <InputRow label="Y Phase Current" value={formData.ltac_current_y} onChange={(v) => updateField('ltac_current_y', v)} disabled={isFormDisabled} unit="A" />
-                <InputRow label="B Phase Current" value={formData.ltac_current_b} onChange={(v) => updateField('ltac_current_b', v)} disabled={isFormDisabled} unit="A" />
+                <InputRow label="R Phase Current" value={formData.ltac_current_r} onChange={(v) => updateField('ltac_current_r', v)} disabled={isFieldDisabled()} unit="A" />
+                <InputRow label="Y Phase Current" value={formData.ltac_current_y} onChange={(v) => updateField('ltac_current_y', v)} disabled={isFieldDisabled()} unit="A" />
+                <InputRow label="B Phase Current" value={formData.ltac_current_b} onChange={(v) => updateField('ltac_current_b', v)} disabled={isFieldDisabled()} unit="A" />
                 
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Voltage Readings</div>
-                <InputRow label="RY Phase Voltage" value={formData.ltac_voltage_ry} onChange={(v) => updateField('ltac_voltage_ry', v)} disabled={isFormDisabled} unit="V" />
-                <InputRow label="YB Phase Voltage" value={formData.ltac_voltage_yb} onChange={(v) => updateField('ltac_voltage_yb', v)} disabled={isFormDisabled} unit="V" />
-                <InputRow label="RB Phase Voltage" value={formData.ltac_voltage_rb} onChange={(v) => updateField('ltac_voltage_rb', v)} disabled={isFormDisabled} unit="V" />
+                <InputRow label="RY Phase Voltage" value={formData.ltac_voltage_ry} onChange={(v) => updateField('ltac_voltage_ry', v)} disabled={isFieldDisabled()} unit="V" />
+                <InputRow label="YB Phase Voltage" value={formData.ltac_voltage_yb} onChange={(v) => updateField('ltac_voltage_yb', v)} disabled={isFieldDisabled()} unit="V" />
+                <InputRow label="RB Phase Voltage" value={formData.ltac_voltage_rb} onChange={(v) => updateField('ltac_voltage_rb', v)} disabled={isFieldDisabled()} unit="V" />
                 
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Power Measurements</div>
-                <InputRow label="Active Power" value={formData.ltac_kw} onChange={(v) => updateField('ltac_kw', v)} disabled={isFormDisabled} unit="kW" />
-                <InputRow label="Apparent Power" value={formData.ltac_kva} onChange={(v) => updateField('ltac_kva', v)} disabled={isFormDisabled} unit="kVA" />
-                <InputRow label="Reactive Power" value={formData.ltac_kvar} onChange={(v) => updateField('ltac_kvar', v)} disabled={isFormDisabled} unit="kVAR" />
-                <InputRow label="KWH" value={formData.ltac_kwh} onChange={(v) => updateField('ltac_kwh', v)} disabled={isFormDisabled} />
-                <InputRow label="KVAH" value={formData.ltac_kvah} onChange={(v) => updateField('ltac_kvah', v)} disabled={isFormDisabled} />
-                <InputRow label="KVARH" value={formData.ltac_kvarh} onChange={(v) => updateField('ltac_kvarh', v)} disabled={isFormDisabled} />
+                <InputRow label="Active Power" value={formData.ltac_kw} onChange={(v) => updateField('ltac_kw', v)} disabled={isFieldDisabled()} unit="kW" />
+                <InputRow label="Apparent Power" value={formData.ltac_kva} onChange={(v) => updateField('ltac_kva', v)} disabled={isFieldDisabled()} unit="kVA" />
+                <InputRow label="Reactive Power" value={formData.ltac_kvar} onChange={(v) => updateField('ltac_kvar', v)} disabled={isFieldDisabled()} unit="kVAR" />
+                <InputRow label="KWH" value={formData.ltac_kwh} onChange={(v) => updateField('ltac_kwh', v)} disabled={isFieldDisabled()} />
+                <InputRow label="KVAH" value={formData.ltac_kvah} onChange={(v) => updateField('ltac_kvah', v)} disabled={isFieldDisabled()} />
+                <InputRow label="KVARH" value={formData.ltac_kvarh} onChange={(v) => updateField('ltac_kvarh', v)} disabled={isFieldDisabled()} />
                 
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Temperature & Grid Status</div>
-                <InputRow label="Oil Temperature" value={formData.ltac_oil_temperature} onChange={(v) => updateField('ltac_oil_temperature', v)} disabled={isFormDisabled} unit="°C" />
+                <InputRow label="Oil Temperature" value={formData.ltac_oil_temperature} onChange={(v) => updateField('ltac_oil_temperature', v)} disabled={isFieldDisabled()} unit="°C" />
                 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                   <label className="text-xs sm:text-sm font-medium text-foreground sm:w-36 md:w-40 flex-shrink-0">
@@ -504,7 +507,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                     <TimePicker
                       value={formData.ltac_grid_fail_time}
                       onChange={(v) => updateField('ltac_grid_fail_time', v)}
-                      disabled={isFormDisabled}
+                      disabled={isFieldDisabled()}
                       placeholder="Select fail time"
                     />
                   </div>
@@ -518,13 +521,13 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                     <TimePicker
                       value={formData.ltac_grid_resume_time}
                       onChange={(v) => updateField('ltac_grid_resume_time', v)}
-                      disabled={isFormDisabled}
+                      disabled={isFieldDisabled()}
                       placeholder="Select resume time"
                     />
                   </div>
                 </div>
                 
-                <InputRow label="Supply Interruption" value={formData.ltac_supply_interruption} onChange={(v) => updateField('ltac_supply_interruption', v)} disabled={isFormDisabled} type="text" />
+                <InputRow label="Supply Interruption" value={formData.ltac_supply_interruption} onChange={(v) => updateField('ltac_supply_interruption', v)} disabled={isFieldDisabled()} type="text" />
               </AccordionContent>
             </AccordionItem>
 
@@ -535,15 +538,15 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                 </h3>
               </AccordionTrigger>
               <AccordionContent className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2 sm:space-y-3">
-                <InputRow label="Total Generation" value={formData.gen_total_generation} onChange={(v) => updateField('gen_total_generation', v)} disabled={isFormDisabled} />
-                <InputRow label="X'MER Export" value={formData.gen_xmer_export} onChange={(v) => updateField('gen_xmer_export', v)} disabled={isFormDisabled} />
-                <InputRow label="AUX Consumption" value={formData.gen_aux_consumption} onChange={(v) => updateField('gen_aux_consumption', v)} disabled={isFormDisabled} />
-                <InputRow label="GPL Main Export" value={formData.gen_main_export} onChange={(v) => updateField('gen_main_export', v)} disabled={isFormDisabled} />
-                <InputRow label="GPL Check Export" value={formData.gen_check_export} onChange={(v) => updateField('gen_check_export', v)} disabled={isFormDisabled} />
-                <InputRow label="GPL Main Import" value={formData.gen_main_import} onChange={(v) => updateField('gen_main_import', v)} disabled={isFormDisabled} />
-                <InputRow label="GPL Check Import" value={formData.gen_check_import} onChange={(v) => updateField('gen_check_import', v)} disabled={isFormDisabled} />
-                <InputRow label="GPL Standby Export" value={formData.gen_standby_export} onChange={(v) => updateField('gen_standby_export', v)} disabled={isFormDisabled} />
-                <InputRow label="GPL Standby Import" value={formData.gen_standby_import} onChange={(v) => updateField('gen_standby_import', v)} disabled={isFormDisabled} />
+                <InputRow label="Total Generation" value={formData.gen_total_generation} onChange={(v) => updateField('gen_total_generation', v)} disabled={isFieldDisabled()} />
+                <InputRow label="X'MER Export" value={formData.gen_xmer_export} onChange={(v) => updateField('gen_xmer_export', v)} disabled={isFieldDisabled()} />
+                <InputRow label="AUX Consumption" value={formData.gen_aux_consumption} onChange={(v) => updateField('gen_aux_consumption', v)} disabled={isFieldDisabled()} />
+                <InputRow label="GPL Main Export" value={formData.gen_main_export} onChange={(v) => updateField('gen_main_export', v)} disabled={isFieldDisabled()} />
+                <InputRow label="GPL Check Export" value={formData.gen_check_export} onChange={(v) => updateField('gen_check_export', v)} disabled={isFieldDisabled()} />
+                <InputRow label="GPL Main Import" value={formData.gen_main_import} onChange={(v) => updateField('gen_main_import', v)} disabled={isFieldDisabled()} />
+                <InputRow label="GPL Check Import" value={formData.gen_check_import} onChange={(v) => updateField('gen_check_import', v)} disabled={isFieldDisabled()} />
+                <InputRow label="GPL Standby Export" value={formData.gen_standby_export} onChange={(v) => updateField('gen_standby_export', v)} disabled={isFieldDisabled()} />
+                <InputRow label="GPL Standby Import" value={formData.gen_standby_import} onChange={(v) => updateField('gen_standby_import', v)} disabled={isFieldDisabled()} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -553,7 +556,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
             <Textarea
               value={formData.remarks}
               onChange={(e) => updateField('remarks', e.target.value)}
-              disabled={isFormDisabled}
+              disabled={isFieldDisabled()}
               placeholder="Add any observations or notes..."
               className="min-h-[60px] sm:min-h-[80px] text-sm"
             />
@@ -568,7 +571,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
               size="sm"
               variant="outline"
               onClick={handleClear}
-              disabled={isFormDisabled}
+              disabled={isFieldDisabled()}
               className="flex-1 sm:flex-none sm:min-w-[140px] h-9 sm:h-10 text-xs sm:text-sm"
             >
               <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -578,7 +581,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
             <Button
               size="sm"
               onClick={() => saveLogEntry(true)}
-              disabled={isSaving || isFormDisabled || !isFormComplete()}
+              disabled={isSaving || isFieldDisabled() || !isFormComplete()}
               className="flex-1 sm:flex-none sm:min-w-[140px] h-9 sm:h-10 text-xs sm:text-sm bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50"
             >
               <Save className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
