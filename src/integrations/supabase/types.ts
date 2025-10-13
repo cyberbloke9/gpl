@@ -203,6 +203,7 @@ export type Database = {
       transformer_logs: {
         Row: {
           active_power: number | null
+          cos_phi: number | null
           created_at: string | null
           current_b: number | null
           current_r: number | null
@@ -212,22 +213,56 @@ export type Database = {
           finalized_at: string | null
           finalized_by: string | null
           frequency: number | null
+          gen_aux_consumption: number | null
+          gen_check_export: number | null
+          gen_check_import: number | null
+          gen_main_export: number | null
+          gen_main_import: number | null
+          gen_standby_export: number | null
+          gen_standby_import: number | null
+          gen_total_generation: number | null
+          gen_xmer_export: number | null
           hour: number
           id: string
+          kva: number | null
           logged_at: string | null
+          ltac_current_b: number | null
+          ltac_current_r: number | null
+          ltac_current_y: number | null
+          ltac_grid_fail_time: string | null
+          ltac_grid_resume_time: string | null
+          ltac_kva: number | null
+          ltac_kvah: number | null
+          ltac_kvar: number | null
+          ltac_kvarh: number | null
+          ltac_kw: number | null
+          ltac_kwh: number | null
+          ltac_oil_temperature: number | null
+          ltac_supply_interruption: string | null
+          ltac_voltage_rb: number | null
+          ltac_voltage_ry: number | null
+          ltac_voltage_yb: number | null
+          mvah: number | null
+          mvarh: number | null
+          mwh: number | null
+          oil_level: string | null
           oil_temperature: number | null
           reactive_power: number | null
           remarks: string | null
+          silica_gel_colour: string | null
+          tap_counter: number | null
+          tap_position: string | null
           transformer_number: number
           updated_at: string | null
           user_id: string
-          voltage_b: number | null
-          voltage_r: number | null
-          voltage_y: number | null
+          voltage_rb: number | null
+          voltage_ry: number | null
+          voltage_yb: number | null
           winding_temperature: number | null
         }
         Insert: {
           active_power?: number | null
+          cos_phi?: number | null
           created_at?: string | null
           current_b?: number | null
           current_r?: number | null
@@ -237,22 +272,56 @@ export type Database = {
           finalized_at?: string | null
           finalized_by?: string | null
           frequency?: number | null
+          gen_aux_consumption?: number | null
+          gen_check_export?: number | null
+          gen_check_import?: number | null
+          gen_main_export?: number | null
+          gen_main_import?: number | null
+          gen_standby_export?: number | null
+          gen_standby_import?: number | null
+          gen_total_generation?: number | null
+          gen_xmer_export?: number | null
           hour: number
           id?: string
+          kva?: number | null
           logged_at?: string | null
+          ltac_current_b?: number | null
+          ltac_current_r?: number | null
+          ltac_current_y?: number | null
+          ltac_grid_fail_time?: string | null
+          ltac_grid_resume_time?: string | null
+          ltac_kva?: number | null
+          ltac_kvah?: number | null
+          ltac_kvar?: number | null
+          ltac_kvarh?: number | null
+          ltac_kw?: number | null
+          ltac_kwh?: number | null
+          ltac_oil_temperature?: number | null
+          ltac_supply_interruption?: string | null
+          ltac_voltage_rb?: number | null
+          ltac_voltage_ry?: number | null
+          ltac_voltage_yb?: number | null
+          mvah?: number | null
+          mvarh?: number | null
+          mwh?: number | null
+          oil_level?: string | null
           oil_temperature?: number | null
           reactive_power?: number | null
           remarks?: string | null
+          silica_gel_colour?: string | null
+          tap_counter?: number | null
+          tap_position?: string | null
           transformer_number: number
           updated_at?: string | null
           user_id: string
-          voltage_b?: number | null
-          voltage_r?: number | null
-          voltage_y?: number | null
+          voltage_rb?: number | null
+          voltage_ry?: number | null
+          voltage_yb?: number | null
           winding_temperature?: number | null
         }
         Update: {
           active_power?: number | null
+          cos_phi?: number | null
           created_at?: string | null
           current_b?: number | null
           current_r?: number | null
@@ -262,18 +331,51 @@ export type Database = {
           finalized_at?: string | null
           finalized_by?: string | null
           frequency?: number | null
+          gen_aux_consumption?: number | null
+          gen_check_export?: number | null
+          gen_check_import?: number | null
+          gen_main_export?: number | null
+          gen_main_import?: number | null
+          gen_standby_export?: number | null
+          gen_standby_import?: number | null
+          gen_total_generation?: number | null
+          gen_xmer_export?: number | null
           hour?: number
           id?: string
+          kva?: number | null
           logged_at?: string | null
+          ltac_current_b?: number | null
+          ltac_current_r?: number | null
+          ltac_current_y?: number | null
+          ltac_grid_fail_time?: string | null
+          ltac_grid_resume_time?: string | null
+          ltac_kva?: number | null
+          ltac_kvah?: number | null
+          ltac_kvar?: number | null
+          ltac_kvarh?: number | null
+          ltac_kw?: number | null
+          ltac_kwh?: number | null
+          ltac_oil_temperature?: number | null
+          ltac_supply_interruption?: string | null
+          ltac_voltage_rb?: number | null
+          ltac_voltage_ry?: number | null
+          ltac_voltage_yb?: number | null
+          mvah?: number | null
+          mvarh?: number | null
+          mwh?: number | null
+          oil_level?: string | null
           oil_temperature?: number | null
           reactive_power?: number | null
           remarks?: string | null
+          silica_gel_colour?: string | null
+          tap_counter?: number | null
+          tap_position?: string | null
           transformer_number?: number
           updated_at?: string | null
           user_id?: string
-          voltage_b?: number | null
-          voltage_r?: number | null
-          voltage_y?: number | null
+          voltage_rb?: number | null
+          voltage_ry?: number | null
+          voltage_yb?: number | null
           winding_temperature?: number | null
         }
         Relationships: [

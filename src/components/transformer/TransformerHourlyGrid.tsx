@@ -9,9 +9,9 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface TransformerData {
-  voltage_r: number;
-  voltage_y: number;
-  voltage_b: number;
+  voltage_ry: number;
+  voltage_yb: number;
+  voltage_rb: number;
   current_r: number;
   current_y: number;
   current_b: number;
@@ -29,9 +29,9 @@ interface TransformerHourlyGridProps {
 }
 
 const emptyData: TransformerData = {
-  voltage_r: 0,
-  voltage_y: 0,
-  voltage_b: 0,
+  voltage_ry: 0,
+  voltage_yb: 0,
+  voltage_rb: 0,
   current_r: 0,
   current_y: 0,
   current_b: 0,
@@ -86,9 +86,9 @@ export const TransformerHourlyGrid = ({ transformerNumber, date }: TransformerHo
       
       data.forEach((log) => {
         loaded[log.hour] = {
-          voltage_r: log.voltage_r || 0,
-          voltage_y: log.voltage_y || 0,
-          voltage_b: log.voltage_b || 0,
+          voltage_ry: log.voltage_ry || 0,
+          voltage_yb: log.voltage_yb || 0,
+          voltage_rb: log.voltage_rb || 0,
           current_r: log.current_r || 0,
           current_y: log.current_y || 0,
           current_b: log.current_b || 0,
@@ -152,9 +152,9 @@ export const TransformerHourlyGrid = ({ transformerNumber, date }: TransformerHo
     switch (field) {
       case 'frequency':
         return value >= 49 && value <= 51;
-      case 'voltage_r':
-      case 'voltage_y':
-      case 'voltage_b':
+      case 'voltage_ry':
+      case 'voltage_yb':
+      case 'voltage_rb':
         return value >= 10000 && value <= 13000; // ±10% of 11kV
       case 'oil_temperature':
       case 'winding_temperature':
@@ -231,23 +231,23 @@ export const TransformerHourlyGrid = ({ transformerNumber, date }: TransformerHo
               <Input
                 type="number"
                 placeholder="R"
-                value={data.voltage_r}
-                onChange={(e) => updateHourField(hour, 'voltage_r', parseFloat(e.target.value) || 0)}
-                className={`h-8 ${!validateValue('voltage_r', data.voltage_r) && data.voltage_r > 0 ? 'bg-red-50' : ''}`}
+                value={data.voltage_ry}
+                onChange={(e) => updateHourField(hour, 'voltage_ry', parseFloat(e.target.value) || 0)}
+                className={`h-8 ${!validateValue('voltage_ry', data.voltage_ry) && data.voltage_ry > 0 ? 'bg-red-50' : ''}`}
               />
               <Input
                 type="number"
                 placeholder="Y"
-                value={data.voltage_y}
-                onChange={(e) => updateHourField(hour, 'voltage_y', parseFloat(e.target.value) || 0)}
-                className={`h-8 ${!validateValue('voltage_y', data.voltage_y) && data.voltage_y > 0 ? 'bg-red-50' : ''}`}
+                value={data.voltage_yb}
+                onChange={(e) => updateHourField(hour, 'voltage_yb', parseFloat(e.target.value) || 0)}
+                className={`h-8 ${!validateValue('voltage_yb', data.voltage_yb) && data.voltage_yb > 0 ? 'bg-red-50' : ''}`}
               />
               <Input
                 type="number"
                 placeholder="B"
-                value={data.voltage_b}
-                onChange={(e) => updateHourField(hour, 'voltage_b', parseFloat(e.target.value) || 0)}
-                className={`h-8 ${!validateValue('voltage_b', data.voltage_b) && data.voltage_b > 0 ? 'bg-red-50' : ''}`}
+                value={data.voltage_rb}
+                onChange={(e) => updateHourField(hour, 'voltage_rb', parseFloat(e.target.value) || 0)}
+                className={`h-8 ${!validateValue('voltage_rb', data.voltage_rb) && data.voltage_rb > 0 ? 'bg-red-50' : ''}`}
               />
             </div>
           </div>

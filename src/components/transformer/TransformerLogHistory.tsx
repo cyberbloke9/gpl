@@ -18,9 +18,9 @@ interface TransformerLog {
   transformer_number: number;
   hour: number;
   frequency: number;
-  voltage_r: number;
-  voltage_y: number;
-  voltage_b: number;
+  voltage_ry: number;
+  voltage_yb: number;
+  voltage_rb: number;
   current_r: number;
   current_y: number;
   current_b: number;
