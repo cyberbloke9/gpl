@@ -14,6 +14,11 @@ import { useToast } from '@/hooks/use-toast';
 import { NumericInput } from '../checklist/NumericInput';
 import { IssueFlagger } from '../checklist/IssueFlagger';
 
+// Helper function to get transformer display name
+const getTransformerName = (number: number): string => {
+  return number === 1 ? 'Power Transformer' : 'Auxiliary Transformer';
+};
+
 interface TransformerData {
   frequency: number;
   voltage_r: number;
@@ -153,6 +158,20 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Prevent logging future hours
+      const now = new Date();
+      const selectedDateTime = new Date(selectedDate);
+      selectedDateTime.setHours(selectedHour, 0, 0, 0);
+      
+      if (selectedDateTime > now) {
+        toast({
+          title: 'Invalid Hour',
+          description: 'Cannot log data for future hours',
+          variant: 'destructive',
+        });
+        return null;
+      }
+
       if (!skipValidation && !isFormComplete()) {
         toast({
           title: 'Incomplete Form',
@@ -192,7 +211,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
       if (!skipValidation) {
         toast({
           title: 'Entry Logged',
-          description: `Transformer ${transformerNumber} - Hour ${selectedHour}:00 saved successfully`,
+          description: `${getTransformerName(transformerNumber)} - Hour ${selectedHour}:00 saved successfully`,
         });
 
         // Reload logged hours
@@ -206,7 +225,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
         
         toast({
           title: `Daily Progress: ${progress}%`,
-          description: `${updatedHours.length}/24 hours logged for Transformer ${transformerNumber}`,
+          description: `${updatedHours.length}/24 hours logged for ${getTransformerName(transformerNumber)}`,
         });
 
         // Reset form
@@ -295,7 +314,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
           <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800 dark:text-green-200">
-              Hour {selectedHour}:00 already logged for Transformer {transformerNumber}. 
+              Hour {selectedHour}:00 already logged for {getTransformerName(transformerNumber)}. 
               Select a different hour or transformer to continue.
             </AlertDescription>
           </Alert>
@@ -310,8 +329,8 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">Transformer 1</SelectItem>
-                <SelectItem value="2">Transformer 2</SelectItem>
+                <SelectItem value="1">Power Transformer</SelectItem>
+                <SelectItem value="2">Auxiliary Transformer</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -352,7 +371,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
                   const isCurrentDate = format(selectedDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
                   const isPast = isCurrentDate && hour < currentHour;
                   const isFuture = isCurrentDate && hour > currentHour;
-                  const isDisabled = isLogged || isPast;
+                  const isDisabled = isLogged || isPast || isFuture;
                   
                   return (
                     <SelectItem 
@@ -387,7 +406,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
-            section={`Transformer ${transformerNumber}`}
+            section={getTransformerName(transformerNumber)}
             item={`Frequency - Hour ${selectedHour}`}
             onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
@@ -402,7 +421,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
-            section={`Transformer ${transformerNumber}`}
+            section={getTransformerName(transformerNumber)}
             item={`Voltage R - Hour ${selectedHour}`}
             onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
@@ -417,7 +436,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
-            section={`Transformer ${transformerNumber}`}
+            section={getTransformerName(transformerNumber)}
             item={`Voltage Y - Hour ${selectedHour}`}
             onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
@@ -432,7 +451,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
-            section={`Transformer ${transformerNumber}`}
+            section={getTransformerName(transformerNumber)}
             item={`Voltage B - Hour ${selectedHour}`}
             onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
@@ -447,7 +466,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
-            section={`Transformer ${transformerNumber}`}
+            section={getTransformerName(transformerNumber)}
             item={`Current R - Hour ${selectedHour}`}
             onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
@@ -462,7 +481,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
-            section={`Transformer ${transformerNumber}`}
+            section={getTransformerName(transformerNumber)}
             item={`Current Y - Hour ${selectedHour}`}
             onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
@@ -477,7 +496,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
-            section={`Transformer ${transformerNumber}`}
+            section={getTransformerName(transformerNumber)}
             item={`Current B - Hour ${selectedHour}`}
             onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
@@ -492,7 +511,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
-            section={`Transformer ${transformerNumber}`}
+            section={getTransformerName(transformerNumber)}
             item={`Active Power - Hour ${selectedHour}`}
             onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
@@ -507,7 +526,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
-            section={`Transformer ${transformerNumber}`}
+            section={getTransformerName(transformerNumber)}
             item={`Reactive Power - Hour ${selectedHour}`}
             onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
@@ -522,7 +541,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
-            section={`Transformer ${transformerNumber}`}
+            section={getTransformerName(transformerNumber)}
             item={`Winding Temperature - Hour ${selectedHour}`}
             onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
@@ -537,7 +556,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
-            section={`Transformer ${transformerNumber}`}
+            section={getTransformerName(transformerNumber)}
             item={`Oil Temperature - Hour ${selectedHour}`}
             onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
@@ -556,7 +575,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
                 <IssueFlagger
                   transformerLogId={currentLogId || 'pending'}
                   module="Transformer Logs"
-                  section={`Transformer ${transformerNumber}`}
+                  section={getTransformerName(transformerNumber)}
                   item={`Remarks - Hour ${selectedHour}`}
                   disabled={!canFlagIssues}
                   onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}

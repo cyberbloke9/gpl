@@ -94,7 +94,7 @@ export default function Transformer() {
     setIsFinalized(true);
     toast({
       title: 'Logs Finalized',
-      description: `Transformer ${transformerNumber} logs for ${format(new Date(selectedDate), 'PP')} are now locked.`,
+      description: `${transformerNumber === 1 ? 'Power Transformer' : 'Auxiliary Transformer'} logs for ${format(new Date(selectedDate), 'PP')} are now locked.`,
     });
   };
 
@@ -105,7 +105,7 @@ export default function Transformer() {
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Transformer Logs</h1>
           <p className="text-muted-foreground mt-2">
-            Log hourly readings for transformers 1 and 2
+            Log hourly readings for Power Transformer and Auxiliary Transformer
           </p>
         </div>
 

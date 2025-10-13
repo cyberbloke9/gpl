@@ -1,6 +1,11 @@
 import { forwardRef } from 'react';
 import { format } from 'date-fns';
 
+// Helper function to get transformer display name
+const getTransformerName = (number: number): string => {
+  return number === 1 ? 'Power Transformer' : 'Auxiliary Transformer';
+};
+
 interface TransformerLog {
   hour: number;
   frequency: number;
@@ -34,7 +39,7 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
     // Helper to check if a field is flagged
     const getIssue = (hour: number, field: string) => {
       return flaggedIssues.find(issue => 
-        issue.section === `Transformer ${transformerNumber}` &&
+        issue.section === getTransformerName(transformerNumber) &&
         issue.item?.includes(`Hour ${hour}`) &&
         issue.item?.includes(field)
       );
@@ -70,7 +75,7 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
         {/* Header */}
         <div className="border-b-2 border-gray-800 pb-4 mb-6">
           <h1 className="text-3xl font-bold text-center mb-2">
-            Transformer {transformerNumber} - Hourly Log Report
+            {getTransformerName(transformerNumber)} - Hourly Log Report
           </h1>
           <p className="text-center text-sm text-gray-600">
             Generated on {format(new Date(), 'PPpp')}
@@ -253,7 +258,7 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
         {/* Footer */}
         <div className="mt-8 pt-4 border-t-2 border-gray-300 text-center text-sm text-gray-600">
           <p>This is an official transformer log report.</p>
-          <p>Transformer {transformerNumber} - {format(new Date(date), 'yyyy-MM-dd')}</p>
+          <p>{getTransformerName(transformerNumber)} - {format(new Date(date), 'yyyy-MM-dd')}</p>
         </div>
       </div>
     );

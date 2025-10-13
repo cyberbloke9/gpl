@@ -7,6 +7,11 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { TransformerReportViewer } from './TransformerReportViewer';
 
+// Helper function to get transformer display name
+const getTransformerName = (number: number): string => {
+  return number === 1 ? 'Power Transformer' : 'Auxiliary Transformer';
+};
+
 interface TransformerLog {
   id: string;
   date: string;
@@ -150,7 +155,7 @@ export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
                 {logs.transformer1.length > 0 && (
                   <div className="border rounded-lg p-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">Transformer 1</h3>
+                      <h3 className="font-semibold">{getTransformerName(1)}</h3>
                       {getProgressBadge(logs.transformer1.length)}
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -169,7 +174,7 @@ export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
                 {logs.transformer2.length > 0 && (
                   <div className="border rounded-lg p-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">Transformer 2</h3>
+                      <h3 className="font-semibold">{getTransformerName(2)}</h3>
                       {getProgressBadge(logs.transformer2.length)}
                     </div>
                     <p className="text-sm text-muted-foreground">

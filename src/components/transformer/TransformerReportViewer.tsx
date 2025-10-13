@@ -10,6 +10,11 @@ import { useReactToPrint } from 'react-to-print';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
+// Helper function to get transformer display name
+const getTransformerName = (number: number): string => {
+  return number === 1 ? 'Power Transformer' : 'Auxiliary Transformer';
+};
+
 interface TransformerLog {
   hour: number;
   frequency: number;
@@ -73,7 +78,7 @@ export const TransformerReportViewer = ({ isOpen, onClose, report, userName, emp
   // Helper to check if a field is flagged
   const getIssue = (hour: number, field: string) => {
     return flaggedIssues.find(issue => 
-      issue.section === `Transformer ${transformerNumber}` &&
+      issue.section === getTransformerName(transformerNumber) &&
       issue.item?.includes(`Hour ${hour}`) &&
       issue.item?.includes(field)
     );
@@ -116,7 +121,7 @@ export const TransformerReportViewer = ({ isOpen, onClose, report, userName, emp
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle className="text-2xl">
-                Transformer {transformerNumber} Report - {format(new Date(date), 'MMMM d, yyyy')}
+                {getTransformerName(transformerNumber)} Report - {format(new Date(date), 'MMMM d, yyyy')}
               </DialogTitle>
               <Button onClick={handlePrint} variant="outline" size="sm">
                 <Download className="h-4 w-4 mr-2" />

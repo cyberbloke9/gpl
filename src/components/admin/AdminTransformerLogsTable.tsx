@@ -47,7 +47,7 @@ export const AdminTransformerLogsTable = ({ logs, onViewReport }: AdminTransform
                   {format(new Date(log.date), 'MMM d')}
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="text-xs">T{log.transformer_number}</Badge>
+                  <Badge variant="outline" className="text-xs">{log.transformer_number === 1 ? 'PT' : 'AT'}</Badge>
                 </TableCell>
                 <TableCell className="text-sm max-w-[120px] truncate">{log.user_name}</TableCell>
                 <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
