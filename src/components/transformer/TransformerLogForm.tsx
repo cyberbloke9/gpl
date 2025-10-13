@@ -127,6 +127,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
   const currentTransformerKey = `transformer${transformerNumber}` as keyof typeof loggedHours;
   const isCurrentHourLogged = loggedHours[currentTransformerKey].includes(selectedHour);
   const isFormDisabled = isCurrentHourLogged || isFinalized;
+  const canFlagIssues = true; // Always allow flagging issues
 
   const updateField = (field: keyof TransformerData, value: number | string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -383,10 +384,12 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             unit="Hz"
             required
             disabled={isFormDisabled}
+            canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Frequency - Hour ${selectedHour}`}
+            onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
 
           <NumericInput
@@ -396,10 +399,12 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 10000, max: 12000 }}
             unit="V"
             disabled={isFormDisabled}
+            canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Voltage R - Hour ${selectedHour}`}
+            onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
 
           <NumericInput
@@ -409,10 +414,12 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 10000, max: 12000 }}
             unit="V"
             disabled={isFormDisabled}
+            canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Voltage Y - Hour ${selectedHour}`}
+            onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
 
           <NumericInput
@@ -422,10 +429,12 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 10000, max: 12000 }}
             unit="V"
             disabled={isFormDisabled}
+            canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Voltage B - Hour ${selectedHour}`}
+            onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
 
           <NumericInput
@@ -435,10 +444,12 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 0, max: 500 }}
             unit="A"
             disabled={isFormDisabled}
+            canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Current R - Hour ${selectedHour}`}
+            onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
 
           <NumericInput
@@ -448,10 +459,12 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 0, max: 500 }}
             unit="A"
             disabled={isFormDisabled}
+            canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Current Y - Hour ${selectedHour}`}
+            onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
 
           <NumericInput
@@ -461,10 +474,12 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 0, max: 500 }}
             unit="A"
             disabled={isFormDisabled}
+            canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Current B - Hour ${selectedHour}`}
+            onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
 
           <NumericInput
@@ -474,10 +489,12 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 0, max: 5000 }}
             unit="kW"
             disabled={isFormDisabled}
+            canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Active Power - Hour ${selectedHour}`}
+            onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
 
           <NumericInput
@@ -487,10 +504,12 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: -2000, max: 2000 }}
             unit="kVAR"
             disabled={isFormDisabled}
+            canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Reactive Power - Hour ${selectedHour}`}
+            onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
 
           <NumericInput
@@ -500,10 +519,12 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 0, max: 100 }}
             unit="°C"
             disabled={isFormDisabled}
+            canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Winding Temperature - Hour ${selectedHour}`}
+            onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
 
           <NumericInput
@@ -513,10 +534,12 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
             range={{ min: 0, max: 100 }}
             unit="°C"
             disabled={isFormDisabled}
+            canFlagIssues={canFlagIssues}
             transformerLogId={currentLogId || 'pending'}
             module="Transformer Logs"
             section={`Transformer ${transformerNumber}`}
             item={`Oil Temperature - Hour ${selectedHour}`}
+            onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
           />
         </div>
 
@@ -535,7 +558,7 @@ export const TransformerLogForm = ({ isFinalized = false, onDateChange, onFinali
                   module="Transformer Logs"
                   section={`Transformer ${transformerNumber}`}
                   item={`Remarks - Hour ${selectedHour}`}
-                  disabled={isFormDisabled}
+                  disabled={!canFlagIssues}
                   onPendingIssue={(issue) => setPendingIssues(prev => [...prev, issue])}
                 />
                 {pendingIssues.length > 0 && (

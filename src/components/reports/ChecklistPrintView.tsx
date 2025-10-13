@@ -128,12 +128,59 @@ export const ChecklistPrintView = forwardRef<HTMLDivElement, ChecklistPrintViewP
         <style>
           {`
             @media print {
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+              }
+
+              /* Severity Legend Colors */
+              .bg-red-100 { background-color: #fee2e2 !important; }
+              .text-red-900 { color: #7f1d1d !important; }
+              .border-red-500 { border-color: #ef4444 !important; }
+              
+              .bg-orange-100 { background-color: #ffedd5 !important; }
+              .text-orange-900 { color: #7c2d12 !important; }
+              .border-orange-500 { border-color: #f97316 !important; }
+              
+              .bg-yellow-100 { background-color: #fef3c7 !important; }
+              .text-yellow-900 { color: #78350f !important; }
+              .border-yellow-500 { border-color: #eab308 !important; }
+              
+              .bg-yellow-50 { background-color: #fefce8 !important; }
+              .text-yellow-800 { color: #854d0e !important; }
+              .border-yellow-300 { border-color: #fde047 !important; }
+              
+              .bg-orange-50 { background-color: #fff7ed !important; }
+              .text-orange-800 { color: #9a3412 !important; }
+              
+              /* Gray colors for summary section */
+              .bg-gray-100 { background-color: #f3f4f6 !important; }
+              .text-gray-600 { color: #4b5563 !important; }
+              .border-gray-300 { border-color: #d1d5db !important; }
+              .border-gray-800 { border-color: #1f2937 !important; }
+              
+              /* Status colors */
+              .bg-green-100 { background-color: #dcfce7 !important; }
+              .text-green-600 { color: #16a34a !important; }
+              .text-green-800 { color: #166534 !important; }
+              .border-green-200 { border-color: #bbf7d0 !important; }
+              
+              /* Ensure borders render */
+              .border-2 { border-width: 2px !important; }
+              .border { border-width: 1px !important; }
+
               .page-break-before {
                 page-break-before: always;
               }
               .page-break-inside-avoid {
                 page-break-inside: avoid;
               }
+            }
+            
+            @page {
+              size: A4;
+              margin: 15mm;
             }
           `}
         </style>

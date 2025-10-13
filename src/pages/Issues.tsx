@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { AlertCircle, Clock, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface FlaggedIssue {
   id: string;
@@ -40,12 +41,18 @@ export default function Issues() {
   const { user, userRole } = useAuth();
   const [issues, setIssues] = useState<FlaggedIssue[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState('7'); // last 7 days
+  const [statusFilter, setStatusFilter] = useState<'all' | 'reported' | 'in_progress' | 'resolved'>('all');
+  const [severityFilter, setSeverityFilter] = useState<'all' | 'low' | 'medium' | 'high' | 'critical'>('all');
 
   useEffect(() => {
     const fetchIssues = async () => {
       if (!user) return;
 
       try {
+        const daysAgo = new Date();
+        daysAgo.setDate(daysAgo.getDate() - parseInt(dateRange));
+
         let query = supabase
           .from('flagged_issues')
           .select(`
@@ -57,7 +64,18 @@ export default function Issues() {
             checklists:checklist_id (date),
             transformer_logs:transformer_log_id (date, hour, transformer_number)
           `)
+          .gte('reported_at', daysAgo.toISOString())
           .order('reported_at', { ascending: false });
+
+        // Status filter
+        if (statusFilter !== 'all') {
+          query = query.eq('status', statusFilter);
+        }
+
+        // Severity filter
+        if (severityFilter !== 'all') {
+          query = query.eq('severity', severityFilter);
+        }
 
         // If not admin, only show user's own issues
         if (userRole !== 'admin') {
@@ -96,7 +114,7 @@ export default function Issues() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, userRole]);
+  }, [user, userRole, dateRange, statusFilter, severityFilter]);
 
   const getIssueContext = (issue: FlaggedIssue) => {
     if (issue.checklist_id && issue.checklists) {
@@ -143,6 +161,47 @@ export default function Issues() {
         <div className="flex items-center gap-2 mb-6">
           <AlertCircle className="h-8 w-8" />
           <h1 className="text-3xl font-bold">Issues</h1>
+        </div>
+
+        {/* Filters */}
+        <div className="flex gap-4 mb-6 flex-wrap">
+          <Select value={dateRange} onValueChange={setDateRange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Date range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Last 7 days</SelectItem>
+              <SelectItem value="14">Last 14 days</SelectItem>
+              <SelectItem value="30">Last 30 days</SelectItem>
+              <SelectItem value="90">Last 90 days</SelectItem>
+              <SelectItem value="365">Last year</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'reported' | 'in_progress' | 'resolved')}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="reported">Reported</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="resolved">Resolved</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={severityFilter} onValueChange={(value) => setSeverityFilter(value as 'all' | 'low' | 'medium' | 'high' | 'critical')}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Severity" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Severity</SelectItem>
+              <SelectItem value="critical">Critical</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="low">Low</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {loading ? (

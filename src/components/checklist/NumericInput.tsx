@@ -21,6 +21,8 @@ interface NumericInputProps {
   module?: string;
   section?: string;
   item?: string;
+  canFlagIssues?: boolean;
+  onPendingIssue?: (issue: any) => void;
 }
 
 export const NumericInput = ({ 
@@ -37,7 +39,9 @@ export const NumericInput = ({
   transformerLogId,
   module,
   section,
-  item
+  item,
+  canFlagIssues = true,
+  onPendingIssue
 }: NumericInputProps) => {
   const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
   // Only validate if value is not 0 (default/empty state)
@@ -113,7 +117,7 @@ export const NumericInput = ({
             section={section}
             item={item}
             unit={unit}
-            disabled={disabled}
+            disabled={!canFlagIssues}
             defaultSeverity={
               validation.status === 'danger' ? 'critical' : 
               validation.status === 'warning' ? 'high' : 
@@ -126,6 +130,7 @@ export const NumericInput = ({
                 ? `Value ${numValue}${unit || ''} is outside ideal range`
                 : undefined
             }
+            onPendingIssue={onPendingIssue}
           />
         </div>
       )}

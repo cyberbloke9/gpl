@@ -16,10 +16,11 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
   const [checklists, setChecklists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('7'); // days
+  const [statusFilter, setStatusFilter] = useState<'all' | 'submitted' | 'draft'>('all');
 
   useEffect(() => {
     loadChecklists();
-  }, [dateRange]);
+  }, [dateRange, statusFilter]);
 
   const loadChecklists = async () => {
     setLoading(true);
@@ -27,7 +28,7 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
       const daysAgo = new Date();
       daysAgo.setDate(daysAgo.getDate() - parseInt(dateRange));
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('checklists')
         .select(`
           *,
@@ -40,6 +41,15 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
         .order('date', { ascending: false })
         .order('submitted_at', { ascending: false });
 
+      // Add status filter
+      if (statusFilter === 'submitted') {
+        query = query.eq('submitted', true);
+      } else if (statusFilter === 'draft') {
+        query = query.eq('submitted', false);
+      }
+
+      const { data, error } = await query;
+
       if (error) throw error;
       setChecklists(data || []);
     } catch (error) {
@@ -48,6 +58,21 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
     } finally {
       setLoading(false);
     }
+  };
+
+  const getChecklistStatus = (checklist: any) => {
+    if (checklist.submitted) return 'Submitted';
+    
+    const checklistDate = new Date(checklist.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    checklistDate.setHours(0, 0, 0, 0);
+    
+    if (checklistDate < today) {
+      return 'Missed';
+    }
+    
+    return 'In Progress';
   };
 
   if (loading) {
@@ -83,17 +108,29 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
             View all submitted checklists from all users
           </p>
         </div>
-        <Select value={dateRange} onValueChange={setDateRange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select range" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7">Last 7 days</SelectItem>
-            <SelectItem value="14">Last 14 days</SelectItem>
-            <SelectItem value="30">Last 30 days</SelectItem>
-            <SelectItem value="90">Last 90 days</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2">
+          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'submitted' | 'draft')}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="submitted">Submitted Only</SelectItem>
+              <SelectItem value="draft">Draft Only</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={dateRange} onValueChange={setDateRange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Last 7 days</SelectItem>
+              <SelectItem value="14">Last 14 days</SelectItem>
+              <SelectItem value="30">Last 30 days</SelectItem>
+              <SelectItem value="90">Last 90 days</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -113,8 +150,12 @@ export const AdminChecklistHistory = ({ onViewReport }: AdminChecklistHistoryPro
                       </Badge>
                     )}
                   </div>
-                  <Badge variant={checklist.submitted ? 'default' : 'secondary'}>
-                    {checklist.submitted ? 'Submitted' : 'Draft'}
+                  <Badge variant={
+                    checklist.submitted ? 'default' : 
+                    getChecklistStatus(checklist) === 'Missed' ? 'destructive' : 
+                    'secondary'
+                  }>
+                    {getChecklistStatus(checklist)}
                   </Badge>
                   {checklist.shift && (
                     <Badge variant="outline">{checklist.shift} Shift</Badge>

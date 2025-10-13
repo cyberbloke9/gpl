@@ -75,39 +75,39 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
       return;
     }
 
-    // Handle pending transformer log issues (store locally, don't save to DB yet)
-    if (transformerLogId === 'pending' && onPendingIssue) {
-      onPendingIssue({
-        module,
-        section,
-        item,
-        unit,
-        severity,
-        description: trimmedDesc,
-      });
-      
-      toast({ 
-        title: 'Issue flagged', 
-        description: 'Issue will be saved when you log the entry'
-      });
-      setOpen(false);
-      setDescription('');
-      return;
-    }
-
-    // For immediate save - allow if either ID is present (let database handle validation)
+    // Check if we have valid IDs
     const hasChecklistId = checklistId && checklistId !== 'pending';
     const hasTransformerLogId = transformerLogId && transformerLogId !== 'pending';
 
-    // Validate that we have a valid reference
+    // If no valid IDs yet but onPendingIssue callback exists → store locally
     if (!hasChecklistId && !hasTransformerLogId) {
-      toast({
-        title: 'Cannot flag issue',
-        description: 'Please save the log entry first before flagging issues.',
-        variant: 'destructive'
-      });
-      return;
+      if (onPendingIssue) {
+        onPendingIssue({
+          module,
+          section,
+          item,
+          unit,
+          severity,
+          description: trimmedDesc,
+        });
+        toast({
+          title: 'Issue recorded locally',
+          description: 'It will be synced once this log is saved.',
+        });
+        setOpen(false);
+        setDescription('');
+        return;
+      } else {
+        toast({
+          title: 'Cannot flag issue',
+          description: 'Log must be saved first before flagging issues.',
+          variant: 'destructive',
+        });
+        return;
+      }
     }
+
+    // If we reach here, at least one ID exists → proceed with immediate insert
 
     setLoading(true);
     try {
