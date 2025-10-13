@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { AdminOverviewCards } from '@/components/admin/AdminOverviewCards';
 import { TodaysChecklistsTable } from '@/components/admin/TodaysChecklistsTable';
 import { AdminTransformerLogsTable } from '@/components/admin/AdminTransformerLogsTable';
+import { AdminChecklistHistory } from '@/components/admin/AdminChecklistHistory';
 import { ChecklistReportViewer } from '@/components/checklist/ChecklistReportViewer';
 import { TransformerReportViewer } from '@/components/transformer/TransformerReportViewer';
 import { Card } from '@/components/ui/card';
@@ -274,10 +275,7 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="history">
-            <Card className="p-3 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Historical Reports</h2>
-              <p className="text-sm text-muted-foreground">Coming soon - date range reports and analytics</p>
-            </Card>
+            <AdminChecklistHistory onViewReport={handleViewReport} />
           </TabsContent>
         </Tabs>
       </main>

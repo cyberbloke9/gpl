@@ -99,6 +99,16 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
     const hasChecklistId = checklistId && checklistId !== 'pending';
     const hasTransformerLogId = transformerLogId && transformerLogId !== 'pending';
 
+    // Validate that we have a valid reference
+    if (!hasChecklistId && !hasTransformerLogId) {
+      toast({
+        title: 'Cannot flag issue',
+        description: 'Please save the log entry first before flagging issues.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const prefix = hasTransformerLogId ? 'TRF' : 'CHK';

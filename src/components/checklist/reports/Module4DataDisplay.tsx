@@ -27,7 +27,7 @@ export const Module4DataDisplay = ({ data, flaggedIssues }: Module4DataDisplayPr
   };
 
   const renderSection = (sectionData: any, sectionName: string) => {
-    if (!sectionData || Object.keys(sectionData).length === 0) return null;
+    if (!sectionData) return null;
 
     return (
       <Card className="p-4 space-y-3">
