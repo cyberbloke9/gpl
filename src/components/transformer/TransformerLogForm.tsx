@@ -10,10 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, CheckCircle2, Save, Trash2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { CheckCircle2, Save, Trash2 } from 'lucide-react';
 
 interface TransformerLogFormProps {
   isFinalized: boolean;
@@ -125,8 +122,8 @@ const getTransformerName = (number: number): string => {
 
 export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }: TransformerLogFormProps) {
   const { user } = useAuth();
-  const [transformerNumber, setTransformerNumber] = useState<number>(1);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [transformerNumber] = useState<number>(1); // Fixed to Power Transformer
+  const selectedDate = new Date(); // Always current date
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
   const [formData, setFormData] = useState<TransformerData>(initialFormState);
   const [loggedHours, setLoggedHours] = useState<number[]>([]);
@@ -134,8 +131,8 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   const [autoSaveStatus, setAutoSaveStatus] = useState<string>('');
 
   const currentHour = new Date().getHours();
-  const isToday = format(selectedDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
-  const isPastHour = isToday && selectedHour < currentHour;
+  const isToday = true; // Always today
+  const isPastHour = selectedHour < currentHour;
   const isFormDisabled = isFinalized || isPastHour;
 
   useEffect(() => {
@@ -314,11 +311,6 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     setSelectedHour(hour);
   };
 
-  const handleDateChange = (date: Date) => {
-    setSelectedDate(date);
-    onDateChange(format(date, 'yyyy-MM-dd'));
-  };
-
   const updateField = (field: keyof TransformerData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -348,57 +340,14 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
         <CardHeader className="pb-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <CardTitle>Transformer Log Sheet</CardTitle>
+              <CardTitle>Transformer Log Sheet - Power Transformer</CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                Gayatri Power Private Limited
+                Gayatri Power Private Limited • {format(selectedDate, 'PPP')}
               </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-[200px] justify-start text-left font-normal",
-                      !selectedDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedDate ? format(selectedDate, 'PPP') : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date) => date && handleDateChange(date)}
-                    disabled={(date) => date > new Date()}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              onClick={() => setTransformerNumber(1)}
-              variant={transformerNumber === 1 ? "default" : "outline"}
-              className="flex-1"
-            >
-              Power Transformer
-            </Button>
-            <Button
-              onClick={() => setTransformerNumber(2)}
-              variant={transformerNumber === 2 ? "default" : "outline"}
-              className="flex-1"
-            >
-              Auxiliary Transformer
-            </Button>
-          </div>
-
           <div className="flex items-center justify-between">
             <Badge variant="secondary" className="text-sm">
               {progressText}

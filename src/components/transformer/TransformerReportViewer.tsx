@@ -1,34 +1,65 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { format } from 'date-fns';
-import { CheckCircle2, XCircle, Download } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Download, CheckCircle2 } from 'lucide-react';
 import { TransformerPrintView } from '@/components/reports/TransformerPrintView';
-import { useReactToPrint } from 'react-to-print';
-import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-
-// Helper function to get transformer display name
-const getTransformerName = (number: number): string => {
-  return number === 1 ? 'Power Transformer' : 'Auxiliary Transformer';
-};
+import { cn } from '@/lib/utils';
 
 interface TransformerLog {
   hour: number;
-  frequency: number;
-  voltage_ry: number;
-  voltage_yb: number;
-  voltage_rb: number;
-  current_r: number;
-  current_y: number;
-  current_b: number;
-  active_power: number;
-  reactive_power: number;
-  winding_temperature: number;
-  oil_temperature: number;
-  remarks: string;
+  frequency: number | null;
+  voltage_ry: number | null;
+  voltage_yb: number | null;
+  voltage_rb: number | null;
+  current_r: number | null;
+  current_y: number | null;
+  current_b: number | null;
+  active_power: number | null;
+  reactive_power: number | null;
+  kva: number | null;
+  mwh: number | null;
+  mvarh: number | null;
+  mvah: number | null;
+  cos_phi: number | null;
+  oil_temperature: number | null;
+  winding_temperature: number | null;
+  oil_level: string | null;
+  tap_position: string | null;
+  tap_counter: number | null;
+  silica_gel_colour: string | null;
+  ltac_current_r: number | null;
+  ltac_current_y: number | null;
+  ltac_current_b: number | null;
+  ltac_voltage_ry: number | null;
+  ltac_voltage_yb: number | null;
+  ltac_voltage_rb: number | null;
+  ltac_kw: number | null;
+  ltac_kva: number | null;
+  ltac_kvar: number | null;
+  ltac_kwh: number | null;
+  ltac_kvah: number | null;
+  ltac_kvarh: number | null;
+  ltac_oil_temperature: number | null;
+  ltac_grid_fail_time: string | null;
+  ltac_grid_resume_time: string | null;
+  ltac_supply_interruption: string | null;
+  gen_total_generation: number | null;
+  gen_xmer_export: number | null;
+  gen_aux_consumption: number | null;
+  gen_main_export: number | null;
+  gen_check_export: number | null;
+  gen_main_import: number | null;
+  gen_check_import: number | null;
+  gen_standby_export: number | null;
+  gen_standby_import: number | null;
+  remarks: string | null;
+  logged_at: string | null;
 }
 
 interface TransformerReportViewerProps {
@@ -43,225 +74,269 @@ interface TransformerReportViewerProps {
   employeeId?: string;
 }
 
-export const TransformerReportViewer = ({ isOpen, onClose, report, userName, employeeId }: TransformerReportViewerProps) => {
+const getTransformerName = (number: number): string => {
+  return number === 1 ? 'Power Transformer' : 'Auxiliary Transformer';
+};
+
+export function TransformerReportViewer({ isOpen, onClose, report, userName, employeeId }: TransformerReportViewerProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const [flaggedIssues, setFlaggedIssues] = useState<any[]>([]);
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: `Transformer${report?.transformerNumber}_${format(new Date(report?.date || new Date()), 'yyyy-MM-dd')}_${employeeId || 'Report'}`,
-    onAfterPrint: () => toast.success('PDF downloaded successfully'),
+    documentTitle: report ? `Transformer_Report_${report.date}_T${report.transformerNumber}` : 'Transformer_Report',
   });
 
-  // Fetch flagged issues for transformer logs
   useEffect(() => {
     const fetchFlaggedIssues = async () => {
-      if (!report?.logs || report.logs.length === 0) return;
+      if (!report || !isOpen) return;
       
       const { data } = await supabase
         .from('flagged_issues')
         .select('*')
-        .eq('module', 'Transformer Logs');
+        .eq('module', 'transformer')
+        .eq('section', getTransformerName(report.transformerNumber));
       
       setFlaggedIssues(data || []);
     };
-    
-    if (isOpen && report) {
-      fetchFlaggedIssues();
-    }
-  }, [isOpen, report]);
+
+    fetchFlaggedIssues();
+  }, [report, isOpen]);
 
   if (!report) return null;
 
-  const { date, transformerNumber, logs } = report;
-  
-  // Helper to check if a field is flagged
   const getIssue = (hour: number, field: string) => {
     return flaggedIssues.find(issue => 
-      issue.section === getTransformerName(transformerNumber) &&
       issue.item?.includes(`Hour ${hour}`) &&
       issue.item?.includes(field)
     );
   };
 
-  // Helper to get severity color
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'bg-red-100 text-red-900';
-      case 'high': return 'bg-orange-100 text-orange-900';
-      case 'medium': return 'bg-yellow-100 text-yellow-900';
-      case 'low': return 'bg-yellow-50 text-yellow-800';
+      case 'critical': return 'bg-red-100 dark:bg-red-950';
+      case 'warning': return 'bg-yellow-100 dark:bg-yellow-950';
+      case 'info': return 'bg-blue-100 dark:bg-blue-950';
       default: return '';
     }
   };
-  
-  // Create a map of hour -> log for quick lookup
-  const logsByHour = new Map(logs.map(log => [log.hour, log]));
-  
-  // Generate all 24 hours
-  const allHours = Array.from({ length: 24 }, (_, i) => i);
 
   return (
-    <>
-      {/* Hidden print view */}
-      <div className="hidden">
-        <TransformerPrintView 
-          ref={printRef} 
-          date={date} 
-          transformerNumber={transformerNumber} 
-          logs={logs}
-          userName={userName}
-          employeeId={employeeId}
-          flaggedIssues={flaggedIssues}
-        />
-      </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-[95vw] max-h-[90vh] overflow-hidden">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <DialogTitle>
+              Transformer Report - {getTransformerName(report.transformerNumber)}
+            </DialogTitle>
+            <Button onClick={handlePrint} size="sm" variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Download PDF
+            </Button>
+          </div>
+        </DialogHeader>
 
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-2xl">
-                {getTransformerName(transformerNumber)} Report - {format(new Date(date), 'MMMM d, yyyy')}
-              </DialogTitle>
-              <Button onClick={handlePrint} variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
-            </div>
-          </DialogHeader>
+        <div className="hidden">
+          <TransformerPrintView
+            ref={printRef}
+            date={report.date}
+            transformerNumber={report.transformerNumber}
+            logs={report.logs}
+            userName={userName}
+            employeeId={employeeId}
+            flaggedIssues={flaggedIssues}
+          />
+        </div>
 
         <div className="space-y-4">
-          {/* Severity Legend */}
           {flaggedIssues.length > 0 && (
-            <div className="p-4 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg">
-              <h4 className="font-semibold text-orange-800 mb-3">Flagged Issues Severity Legend</h4>
-              <div className="flex flex-wrap gap-3 text-sm">
-                <span className="px-3 py-1.5 bg-red-100 text-red-900 border-2 border-red-500 rounded font-medium">
-                  🔴 Critical
-                </span>
-                <span className="px-3 py-1.5 bg-orange-100 text-orange-900 border-2 border-orange-500 rounded font-medium">
-                  🟠 High
-                </span>
-                <span className="px-3 py-1.5 bg-yellow-100 text-yellow-900 border-2 border-yellow-500 rounded font-medium">
-                  🟡 Medium
-                </span>
-                <span className="px-3 py-1.5 bg-yellow-50 text-yellow-800 border-2 border-yellow-300 rounded font-medium">
-                  ⚪ Low
-                </span>
-              </div>
+            <div className="flex gap-2 items-center text-sm">
+              <span className="font-medium">Severity Legend:</span>
+              <Badge variant="destructive" className="text-xs">Critical</Badge>
+              <Badge className="bg-yellow-500 text-xs">Warning</Badge>
+              <Badge variant="secondary" className="text-xs">Info</Badge>
             </div>
           )}
 
-          <div className="flex items-center gap-4">
-            <Badge variant="outline">
-              {logs.length}/24 Hours Logged ({Math.round((logs.length / 24) * 100)}%)
-            </Badge>
-          </div>
+          <Tabs defaultValue="ptr" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="ptr">PTR Feeder</TabsTrigger>
+              <TabsTrigger value="ltac">LTAC Feeder</TabsTrigger>
+              <TabsTrigger value="generation">Generation</TabsTrigger>
+            </TabsList>
 
-          <div className="border rounded-lg overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-16">Hour</TableHead>
-                  <TableHead className="w-20">Status</TableHead>
-                  <TableHead>Freq (Hz)</TableHead>
-                  <TableHead>V-R (V)</TableHead>
-                  <TableHead>V-Y (V)</TableHead>
-                  <TableHead>V-B (V)</TableHead>
-                  <TableHead>I-R (A)</TableHead>
-                  <TableHead>I-Y (A)</TableHead>
-                  <TableHead>I-B (A)</TableHead>
-                  <TableHead>P (kW)</TableHead>
-                  <TableHead>Q (kVAR)</TableHead>
-                  <TableHead>Winding (°C)</TableHead>
-                  <TableHead>Oil (°C)</TableHead>
-                  <TableHead className="min-w-[200px]">Remarks</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {allHours.map((hour) => {
-                  const log = logsByHour.get(hour);
-                  const isLogged = !!log;
-                  
-                  return (
-                    <TableRow 
-                      key={hour} 
-                      className={isLogged ? '' : 'bg-muted/30'}
-                    >
-                      <TableCell className="font-medium">
-                        {hour.toString().padStart(2, '0')}:00
-                      </TableCell>
-                      <TableCell>
-                        {isLogged ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <XCircle className="h-4 w-4 text-red-400" />
-                        )}
-                      </TableCell>
-                      {isLogged ? (
-                        <>
-                          <TableCell className={getIssue(hour, 'Frequency') ? getSeverityColor(getIssue(hour, 'Frequency')?.severity) : ''}>
-                            {log.frequency.toFixed(2)}
-                            {getIssue(hour, 'Frequency') && <span className="ml-1">⚠️</span>}
-                          </TableCell>
-                          <TableCell className={getIssue(hour, 'Voltage R') ? getSeverityColor(getIssue(hour, 'Voltage R')?.severity) : ''}>
-                            {log.voltage_ry.toFixed(0)}
-                            {getIssue(hour, 'Voltage R') && <span className="ml-1">⚠️</span>}
-                          </TableCell>
-                          <TableCell className={getIssue(hour, 'Voltage Y') ? getSeverityColor(getIssue(hour, 'Voltage Y')?.severity) : ''}>
-                            {log.voltage_yb.toFixed(0)}
-                            {getIssue(hour, 'Voltage Y') && <span className="ml-1">⚠️</span>}
-                          </TableCell>
-                          <TableCell className={getIssue(hour, 'Voltage B') ? getSeverityColor(getIssue(hour, 'Voltage B')?.severity) : ''}>
-                            {log.voltage_rb.toFixed(0)}
-                            {getIssue(hour, 'Voltage B') && <span className="ml-1">⚠️</span>}
-                          </TableCell>
-                          <TableCell className={getIssue(hour, 'Current R') ? getSeverityColor(getIssue(hour, 'Current R')?.severity) : ''}>
-                            {log.current_r.toFixed(1)}
-                            {getIssue(hour, 'Current R') && <span className="ml-1">⚠️</span>}
-                          </TableCell>
-                          <TableCell className={getIssue(hour, 'Current Y') ? getSeverityColor(getIssue(hour, 'Current Y')?.severity) : ''}>
-                            {log.current_y.toFixed(1)}
-                            {getIssue(hour, 'Current Y') && <span className="ml-1">⚠️</span>}
-                          </TableCell>
-                          <TableCell className={getIssue(hour, 'Current B') ? getSeverityColor(getIssue(hour, 'Current B')?.severity) : ''}>
-                            {log.current_b.toFixed(1)}
-                            {getIssue(hour, 'Current B') && <span className="ml-1">⚠️</span>}
-                          </TableCell>
-                          <TableCell className={getIssue(hour, 'Active Power') ? getSeverityColor(getIssue(hour, 'Active Power')?.severity) : ''}>
-                            {log.active_power.toFixed(1)}
-                            {getIssue(hour, 'Active Power') && <span className="ml-1">⚠️</span>}
-                          </TableCell>
-                          <TableCell className={getIssue(hour, 'Reactive Power') ? getSeverityColor(getIssue(hour, 'Reactive Power')?.severity) : ''}>
-                            {log.reactive_power.toFixed(1)}
-                            {getIssue(hour, 'Reactive Power') && <span className="ml-1">⚠️</span>}
-                          </TableCell>
-                          <TableCell className={getIssue(hour, 'Winding Temperature') ? getSeverityColor(getIssue(hour, 'Winding Temperature')?.severity) : ''}>
-                            {log.winding_temperature.toFixed(1)}
-                            {getIssue(hour, 'Winding Temperature') && <span className="ml-1">⚠️</span>}
-                          </TableCell>
-                          <TableCell className={getIssue(hour, 'Oil Temperature') ? getSeverityColor(getIssue(hour, 'Oil Temperature')?.severity) : ''}>
-                            {log.oil_temperature.toFixed(1)}
-                            {getIssue(hour, 'Oil Temperature') && <span className="ml-1">⚠️</span>}
-                          </TableCell>
-                          <TableCell className="text-sm">{log.remarks || '-'}</TableCell>
-                        </>
-                      ) : (
-                        <>
-                          <TableCell colSpan={12} className="text-center text-muted-foreground">
-                            Not logged
-                          </TableCell>
-                        </>
-                      )}
+            <TabsContent value="ptr" className="space-y-4">
+              <ScrollArea className="h-[500px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-16">Hour</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Freq</TableHead>
+                      <TableHead>V-RY</TableHead>
+                      <TableHead>V-YB</TableHead>
+                      <TableHead>V-RB</TableHead>
+                      <TableHead>I-R</TableHead>
+                      <TableHead>I-Y</TableHead>
+                      <TableHead>I-B</TableHead>
+                      <TableHead>kW</TableHead>
+                      <TableHead>kVAR</TableHead>
+                      <TableHead>kVA</TableHead>
+                      <TableHead>MWH</TableHead>
+                      <TableHead>MVARH</TableHead>
+                      <TableHead>MVAH</TableHead>
+                      <TableHead>Cos φ</TableHead>
+                      <TableHead>Oil °C</TableHead>
+                      <TableHead>Wind °C</TableHead>
+                      <TableHead>Oil Lvl</TableHead>
+                      <TableHead>Tap</TableHead>
                     </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+                  </TableHeader>
+                  <TableBody>
+                    {Array.from({ length: 24 }, (_, i) => {
+                      const log = report.logs.find(l => l.hour === i);
+                      const issue = getIssue(i, 'any');
+                      
+                      return (
+                        <TableRow key={i} className={cn(issue && getSeverityColor(issue.severity))}>
+                          <TableCell className="font-medium">{i.toString().padStart(2, '0')}:00</TableCell>
+                          <TableCell>
+                            {log ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <span className="text-xs text-muted-foreground">Not logged</span>}
+                          </TableCell>
+                          <TableCell>{log?.frequency?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.voltage_ry?.toFixed(1) || '-'}</TableCell>
+                          <TableCell>{log?.voltage_yb?.toFixed(1) || '-'}</TableCell>
+                          <TableCell>{log?.voltage_rb?.toFixed(1) || '-'}</TableCell>
+                          <TableCell>{log?.current_r?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.current_y?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.current_b?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.active_power?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.reactive_power?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.kva?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.mwh?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.mvarh?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.mvah?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.cos_phi?.toFixed(3) || '-'}</TableCell>
+                          <TableCell>{log?.oil_temperature?.toFixed(1) || '-'}</TableCell>
+                          <TableCell>{log?.winding_temperature?.toFixed(1) || '-'}</TableCell>
+                          <TableCell>{log?.oil_level || '-'}</TableCell>
+                          <TableCell>{log?.tap_position || '-'}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </TabsContent>
+
+            <TabsContent value="ltac" className="space-y-4">
+              <ScrollArea className="h-[500px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-16">Hour</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>I-R</TableHead>
+                      <TableHead>I-Y</TableHead>
+                      <TableHead>I-B</TableHead>
+                      <TableHead>V-RY</TableHead>
+                      <TableHead>V-YB</TableHead>
+                      <TableHead>V-RB</TableHead>
+                      <TableHead>kW</TableHead>
+                      <TableHead>kVA</TableHead>
+                      <TableHead>kVAR</TableHead>
+                      <TableHead>KWH</TableHead>
+                      <TableHead>KVAH</TableHead>
+                      <TableHead>KVARH</TableHead>
+                      <TableHead>Oil °C</TableHead>
+                      <TableHead>Fail Time</TableHead>
+                      <TableHead>Resume</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Array.from({ length: 24 }, (_, i) => {
+                      const log = report.logs.find(l => l.hour === i);
+                      const issue = getIssue(i, 'any');
+                      
+                      return (
+                        <TableRow key={i} className={cn(issue && getSeverityColor(issue.severity))}>
+                          <TableCell className="font-medium">{i.toString().padStart(2, '0')}:00</TableCell>
+                          <TableCell>
+                            {log ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <span className="text-xs text-muted-foreground">Not logged</span>}
+                          </TableCell>
+                          <TableCell>{log?.ltac_current_r?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.ltac_current_y?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.ltac_current_b?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.ltac_voltage_ry?.toFixed(1) || '-'}</TableCell>
+                          <TableCell>{log?.ltac_voltage_yb?.toFixed(1) || '-'}</TableCell>
+                          <TableCell>{log?.ltac_voltage_rb?.toFixed(1) || '-'}</TableCell>
+                          <TableCell>{log?.ltac_kw?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.ltac_kva?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.ltac_kvar?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.ltac_kwh?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.ltac_kvah?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.ltac_kvarh?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.ltac_oil_temperature?.toFixed(1) || '-'}</TableCell>
+                          <TableCell>{log?.ltac_grid_fail_time || '-'}</TableCell>
+                          <TableCell>{log?.ltac_grid_resume_time || '-'}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </TabsContent>
+
+            <TabsContent value="generation" className="space-y-4">
+              <ScrollArea className="h-[500px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-16">Hour</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Total Gen</TableHead>
+                      <TableHead>X'MER Exp</TableHead>
+                      <TableHead>AUX Cons</TableHead>
+                      <TableHead>Main Exp</TableHead>
+                      <TableHead>Check Exp</TableHead>
+                      <TableHead>Main Imp</TableHead>
+                      <TableHead>Check Imp</TableHead>
+                      <TableHead>Stby Exp</TableHead>
+                      <TableHead>Stby Imp</TableHead>
+                      <TableHead>Remarks</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Array.from({ length: 24 }, (_, i) => {
+                      const log = report.logs.find(l => l.hour === i);
+                      const issue = getIssue(i, 'any');
+                      
+                      return (
+                        <TableRow key={i} className={cn(issue && getSeverityColor(issue.severity))}>
+                          <TableCell className="font-medium">{i.toString().padStart(2, '0')}:00</TableCell>
+                          <TableCell>
+                            {log ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <span className="text-xs text-muted-foreground">Not logged</span>}
+                          </TableCell>
+                          <TableCell>{log?.gen_total_generation?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.gen_xmer_export?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.gen_aux_consumption?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.gen_main_export?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.gen_check_export?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.gen_main_import?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.gen_check_import?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.gen_standby_export?.toFixed(2) || '-'}</TableCell>
+                          <TableCell>{log?.gen_standby_import?.toFixed(2) || '-'}</TableCell>
+                          <TableCell className="max-w-xs truncate">{log?.remarks || '-'}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
         </div>
       </DialogContent>
     </Dialog>
-    </>
   );
-};
+}

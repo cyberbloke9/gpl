@@ -1,25 +1,59 @@
 import { forwardRef } from 'react';
 import { format } from 'date-fns';
 
-// Helper function to get transformer display name
 const getTransformerName = (number: number): string => {
   return number === 1 ? 'Power Transformer' : 'Auxiliary Transformer';
 };
 
 interface TransformerLog {
   hour: number;
-  frequency: number;
-  voltage_ry: number;
-  voltage_yb: number;
-  voltage_rb: number;
-  current_r: number;
-  current_y: number;
-  current_b: number;
-  active_power: number;
-  reactive_power: number;
-  winding_temperature: number;
-  oil_temperature: number;
-  remarks: string;
+  frequency: number | null;
+  voltage_ry: number | null;
+  voltage_yb: number | null;
+  voltage_rb: number | null;
+  current_r: number | null;
+  current_y: number | null;
+  current_b: number | null;
+  active_power: number | null;
+  reactive_power: number | null;
+  kva: number | null;
+  mwh: number | null;
+  mvarh: number | null;
+  mvah: number | null;
+  cos_phi: number | null;
+  oil_temperature: number | null;
+  winding_temperature: number | null;
+  oil_level: string | null;
+  tap_position: string | null;
+  tap_counter: number | null;
+  silica_gel_colour: string | null;
+  ltac_current_r: number | null;
+  ltac_current_y: number | null;
+  ltac_current_b: number | null;
+  ltac_voltage_ry: number | null;
+  ltac_voltage_yb: number | null;
+  ltac_voltage_rb: number | null;
+  ltac_kw: number | null;
+  ltac_kva: number | null;
+  ltac_kvar: number | null;
+  ltac_kwh: number | null;
+  ltac_kvah: number | null;
+  ltac_kvarh: number | null;
+  ltac_oil_temperature: number | null;
+  ltac_grid_fail_time: string | null;
+  ltac_grid_resume_time: string | null;
+  ltac_supply_interruption: string | null;
+  gen_total_generation: number | null;
+  gen_xmer_export: number | null;
+  gen_aux_consumption: number | null;
+  gen_main_export: number | null;
+  gen_check_export: number | null;
+  gen_main_import: number | null;
+  gen_check_import: number | null;
+  gen_standby_export: number | null;
+  gen_standby_import: number | null;
+  remarks: string | null;
+  logged_at: string | null;
 }
 
 interface TransformerPrintViewProps {
@@ -36,7 +70,6 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
     const allHours = Array.from({ length: 24 }, (_, i) => i);
     const logsByHour = new Map(logs.map(log => [log.hour, log]));
 
-    // Helper to check if a field is flagged
     const getIssue = (hour: number, field: string) => {
       return flaggedIssues.find(issue => 
         issue.section === getTransformerName(transformerNumber) &&
@@ -45,209 +78,114 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
       );
     };
 
-    // Helper to get severity color for print
     const getSeverityColor = (severity: string) => {
       switch (severity) {
-        case 'critical': return 'bg-red-200 border-red-500';
-        case 'high': return 'bg-orange-200 border-orange-500';
-        case 'medium': return 'bg-yellow-200 border-yellow-500';
-        case 'low': return 'bg-yellow-100 border-yellow-300';
+        case 'critical': return 'bg-red-100';
+        case 'warning': return 'bg-yellow-100';
+        case 'info': return 'bg-blue-100';
         default: return '';
       }
     };
 
-    // Calculate summary statistics
-    const avgFrequency = logs.length > 0 
-      ? logs.reduce((sum, log) => sum + log.frequency, 0) / logs.length 
-      : 0;
-    const avgActivePower = logs.length > 0
-      ? logs.reduce((sum, log) => sum + log.active_power, 0) / logs.length
-      : 0;
-    const maxWindingTemp = logs.length > 0
-      ? Math.max(...logs.map(log => log.winding_temperature))
-      : 0;
+    const avgFreq = logs.length > 0 
+      ? (logs.reduce((sum, l) => sum + (l.frequency || 0), 0) / logs.length).toFixed(2)
+      : '-';
+    
+    const avgPower = logs.length > 0
+      ? (logs.reduce((sum, l) => sum + (l.active_power || 0), 0) / logs.length).toFixed(2)
+      : '-';
+    
     const maxOilTemp = logs.length > 0
-      ? Math.max(...logs.map(log => log.oil_temperature))
-      : 0;
+      ? Math.max(...logs.map(l => l.oil_temperature || 0)).toFixed(1)
+      : '-';
+    
+    const maxWindingTemp = logs.length > 0
+      ? Math.max(...logs.map(l => l.winding_temperature || 0)).toFixed(1)
+      : '-';
 
     return (
-      <div ref={ref} className="p-8 bg-white text-black">
+      <div ref={ref} className="p-8 bg-white text-black" style={{ width: '210mm', minHeight: '297mm' }}>
         {/* Header */}
-        <div className="border-b-2 border-gray-800 pb-4 mb-6">
-          <h1 className="text-3xl font-bold text-center mb-2">
-            {getTransformerName(transformerNumber)} - Hourly Log Report
-          </h1>
-          <p className="text-center text-sm text-gray-600">
-            Generated on {format(new Date(), 'PPpp')}
-          </p>
+        <div className="text-center mb-6 border-b-2 border-black pb-4">
+          <h1 className="text-2xl font-bold">GAYATRI POWER PRIVATE LIMITED</h1>
+          <h2 className="text-xl mt-2">TRANSFORMER LOG SHEET</h2>
+          <p className="text-sm mt-1">Generated on: {format(new Date(), 'PPP HH:mm')}</p>
         </div>
 
-        {/* Summary Section */}
-        <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-100 rounded">
+        {/* Summary Info */}
+        <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
           <div>
-            <p className="text-sm font-semibold text-gray-600">Date</p>
-            <p className="text-lg">{format(new Date(date), 'MMMM d, yyyy')}</p>
+            <p><strong>Date:</strong> {format(new Date(date), 'PPP')}</p>
+            <p><strong>Transformer:</strong> {getTransformerName(transformerNumber)}</p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-600">Transformer Number</p>
-            <p className="text-lg font-bold">T{transformerNumber}</p>
-          </div>
-          {userName && (
-            <div>
-              <p className="text-sm font-semibold text-gray-600">Operator</p>
-              <p className="text-lg">{userName}</p>
-            </div>
-          )}
-          {employeeId && (
-            <div>
-              <p className="text-sm font-semibold text-gray-600">Employee ID</p>
-              <p className="text-lg">{employeeId}</p>
-            </div>
-          )}
-          <div>
-            <p className="text-sm font-semibold text-gray-600">Hours Logged</p>
-            <p className="text-lg font-semibold">{logs.length}/24 ({Math.round((logs.length / 24) * 100)}%)</p>
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-gray-600">Completion Status</p>
-            <p className={`text-lg font-semibold ${logs.length === 24 ? 'text-green-600' : 'text-yellow-600'}`}>
-              {logs.length === 24 ? 'Complete' : 'Incomplete'}
-            </p>
+            {userName && <p><strong>Operator:</strong> {userName}</p>}
+            {employeeId && <p><strong>Employee ID:</strong> {employeeId}</p>}
+            <p><strong>Logged Hours:</strong> {logs.length}/24</p>
           </div>
         </div>
 
         {/* Severity Legend */}
         {flaggedIssues.length > 0 && (
-          <div className="mb-6 p-4 bg-orange-50 border-2 border-orange-500 rounded">
-            <h2 className="text-xl font-bold text-orange-800 mb-3">⚠️ Flagged Issues Severity Legend</h2>
-            <div className="flex gap-4 text-sm">
-              <span className="px-3 py-1.5 bg-red-100 text-red-900 border-2 border-red-500 rounded font-medium">
-                🔴 Critical
-              </span>
-              <span className="px-3 py-1.5 bg-orange-100 text-orange-900 border-2 border-orange-500 rounded font-medium">
-                🟠 High
-              </span>
-              <span className="px-3 py-1.5 bg-yellow-100 text-yellow-900 border-2 border-yellow-500 rounded font-medium">
-                🟡 Medium
-              </span>
-              <span className="px-3 py-1.5 bg-yellow-50 text-yellow-800 border-2 border-yellow-300 rounded font-medium">
-                ⚪ Low
-              </span>
-            </div>
+          <div className="mb-4 p-2 border border-gray-300 text-xs">
+            <strong>Severity Legend:</strong>
+            <span className="ml-2 bg-red-100 px-2 py-1">Critical</span>
+            <span className="ml-2 bg-yellow-100 px-2 py-1">Warning</span>
+            <span className="ml-2 bg-blue-100 px-2 py-1">Info</span>
           </div>
         )}
 
-        {/* Statistics Summary */}
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-300 rounded">
-          <h2 className="text-xl font-bold text-blue-800 mb-3">Summary Statistics</h2>
+        {/* Summary Statistics */}
+        <div className="mb-6 p-4 border border-gray-300">
+          <h3 className="font-bold mb-2">Summary Statistics</h3>
           <div className="grid grid-cols-4 gap-4 text-sm">
-            <div>
-              <p className="text-gray-600">Avg Frequency</p>
-              <p className="text-lg font-semibold">{avgFrequency.toFixed(2)} Hz</p>
-            </div>
-            <div>
-              <p className="text-gray-600">Avg Active Power</p>
-              <p className="text-lg font-semibold">{avgActivePower.toFixed(1)} kW</p>
-            </div>
-            <div>
-              <p className="text-gray-600">Max Winding Temp</p>
-              <p className="text-lg font-semibold">{maxWindingTemp.toFixed(1)} °C</p>
-            </div>
-            <div>
-              <p className="text-gray-600">Max Oil Temp</p>
-              <p className="text-lg font-semibold">{maxOilTemp.toFixed(1)} °C</p>
-            </div>
+            <div><strong>Avg Frequency:</strong> {avgFreq} Hz</div>
+            <div><strong>Avg Power:</strong> {avgPower} kW</div>
+            <div><strong>Max Oil Temp:</strong> {maxOilTemp} °C</div>
+            <div><strong>Max Winding Temp:</strong> {maxWindingTemp} °C</div>
           </div>
         </div>
 
-        {/* Hourly Data Table */}
+        {/* PTR Feeder Data */}
         <div className="mb-6">
-          <h2 className="text-xl font-bold mb-3">Hourly Readings</h2>
-          <table className="w-full border-collapse text-xs">
+          <h3 className="font-bold text-lg mb-2 border-b border-gray-400">PTR Feeder (3.2 MVA, 33 KV / 3.3 KV)</h3>
+          <table className="w-full text-xs border-collapse">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border border-gray-400 p-2">Hour</th>
-                <th className="border border-gray-400 p-2">Status</th>
-                <th className="border border-gray-400 p-2">Freq<br/>(Hz)</th>
-                <th className="border border-gray-400 p-2">V-R<br/>(V)</th>
-                <th className="border border-gray-400 p-2">V-Y<br/>(V)</th>
-                <th className="border border-gray-400 p-2">V-B<br/>(V)</th>
-                <th className="border border-gray-400 p-2">I-R<br/>(A)</th>
-                <th className="border border-gray-400 p-2">I-Y<br/>(A)</th>
-                <th className="border border-gray-400 p-2">I-B<br/>(A)</th>
-                <th className="border border-gray-400 p-2">P<br/>(kW)</th>
-                <th className="border border-gray-400 p-2">Q<br/>(kVAR)</th>
-                <th className="border border-gray-400 p-2">Wind<br/>(°C)</th>
-                <th className="border border-gray-400 p-2">Oil<br/>(°C)</th>
-                <th className="border border-gray-400 p-2">Remarks</th>
+                <th className="border border-gray-400 p-1">Hr</th>
+                <th className="border border-gray-400 p-1">Freq</th>
+                <th className="border border-gray-400 p-1">V-RY</th>
+                <th className="border border-gray-400 p-1">V-YB</th>
+                <th className="border border-gray-400 p-1">V-RB</th>
+                <th className="border border-gray-400 p-1">I-R</th>
+                <th className="border border-gray-400 p-1">I-Y</th>
+                <th className="border border-gray-400 p-1">I-B</th>
+                <th className="border border-gray-400 p-1">kW</th>
+                <th className="border border-gray-400 p-1">kVAR</th>
+                <th className="border border-gray-400 p-1">kVA</th>
+                <th className="border border-gray-400 p-1">Oil°C</th>
+                <th className="border border-gray-400 p-1">Wind°C</th>
               </tr>
             </thead>
             <tbody>
-              {allHours.map((hour) => {
+              {allHours.map(hour => {
                 const log = logsByHour.get(hour);
-                const isLogged = !!log;
-                
+                const issue = getIssue(hour, 'any');
                 return (
-                  <tr key={hour} className={isLogged ? '' : 'bg-gray-100'}>
-                    <td className="border border-gray-400 p-2 font-semibold text-center">
-                      {hour.toString().padStart(2, '0')}:00
-                    </td>
-                    <td className="border border-gray-400 p-2 text-center">
-                      {isLogged ? '✓' : '✗'}
-                    </td>
-                    {isLogged ? (
-                      <>
-                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Frequency') ? getSeverityColor(getIssue(hour, 'Frequency')?.severity) : ''}`}>
-                          {log.frequency.toFixed(2)}
-                          {getIssue(hour, 'Frequency') && <span className="ml-1">⚠️</span>}
-                        </td>
-                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Voltage R') ? getSeverityColor(getIssue(hour, 'Voltage R')?.severity) : ''}`}>
-                          {log.voltage_ry.toFixed(0)}
-                          {getIssue(hour, 'Voltage R') && <span className="ml-1">⚠️</span>}
-                        </td>
-                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Voltage Y') ? getSeverityColor(getIssue(hour, 'Voltage Y')?.severity) : ''}`}>
-                          {log.voltage_yb.toFixed(0)}
-                          {getIssue(hour, 'Voltage Y') && <span className="ml-1">⚠️</span>}
-                        </td>
-                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Voltage B') ? getSeverityColor(getIssue(hour, 'Voltage B')?.severity) : ''}`}>
-                          {log.voltage_rb.toFixed(0)}
-                          {getIssue(hour, 'Voltage B') && <span className="ml-1">⚠️</span>}
-                        </td>
-                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Current R') ? getSeverityColor(getIssue(hour, 'Current R')?.severity) : ''}`}>
-                          {log.current_r.toFixed(1)}
-                          {getIssue(hour, 'Current R') && <span className="ml-1">⚠️</span>}
-                        </td>
-                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Current Y') ? getSeverityColor(getIssue(hour, 'Current Y')?.severity) : ''}`}>
-                          {log.current_y.toFixed(1)}
-                          {getIssue(hour, 'Current Y') && <span className="ml-1">⚠️</span>}
-                        </td>
-                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Current B') ? getSeverityColor(getIssue(hour, 'Current B')?.severity) : ''}`}>
-                          {log.current_b.toFixed(1)}
-                          {getIssue(hour, 'Current B') && <span className="ml-1">⚠️</span>}
-                        </td>
-                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Active Power') ? getSeverityColor(getIssue(hour, 'Active Power')?.severity) : ''}`}>
-                          {log.active_power.toFixed(1)}
-                          {getIssue(hour, 'Active Power') && <span className="ml-1">⚠️</span>}
-                        </td>
-                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Reactive Power') ? getSeverityColor(getIssue(hour, 'Reactive Power')?.severity) : ''}`}>
-                          {log.reactive_power.toFixed(1)}
-                          {getIssue(hour, 'Reactive Power') && <span className="ml-1">⚠️</span>}
-                        </td>
-                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Winding Temperature') ? getSeverityColor(getIssue(hour, 'Winding Temperature')?.severity) : ''}`}>
-                          {log.winding_temperature.toFixed(1)}
-                          {getIssue(hour, 'Winding Temperature') && <span className="ml-1">⚠️</span>}
-                        </td>
-                        <td className={`border border-gray-400 p-2 text-right ${getIssue(hour, 'Oil Temperature') ? getSeverityColor(getIssue(hour, 'Oil Temperature')?.severity) : ''}`}>
-                          {log.oil_temperature.toFixed(1)}
-                          {getIssue(hour, 'Oil Temperature') && <span className="ml-1">⚠️</span>}
-                        </td>
-                        <td className="border border-gray-400 p-2 text-xs">{log.remarks || '-'}</td>
-                      </>
-                    ) : (
-                      <td colSpan={12} className="border border-gray-400 p-2 text-center text-gray-500">
-                        Not logged
-                      </td>
-                    )}
+                  <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ''}>
+                    <td className="border border-gray-400 p-1 text-center font-medium">{hour.toString().padStart(2, '0')}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.frequency?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_ry?.toFixed(1) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_yb?.toFixed(1) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_rb?.toFixed(1) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_r?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_y?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_b?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.active_power?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.reactive_power?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.kva?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.oil_temperature?.toFixed(1) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.winding_temperature?.toFixed(1) || '-'}</td>
                   </tr>
                 );
               })}
@@ -255,11 +193,101 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
           </table>
         </div>
 
-        {/* Footer */}
-        <div className="mt-8 pt-4 border-t-2 border-gray-300 text-center text-sm text-gray-600">
-          <p>This is an official transformer log report.</p>
-          <p>{getTransformerName(transformerNumber)} - {format(new Date(date), 'yyyy-MM-dd')}</p>
+        <div style={{ pageBreakBefore: 'always' }} />
+
+        {/* LTAC Feeder Data */}
+        <div className="mb-6">
+          <h3 className="font-bold text-lg mb-2 border-b border-gray-400">LTAC Feeder (100 KVA, 33 KV / 0.433 KV)</h3>
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-400 p-1">Hr</th>
+                <th className="border border-gray-400 p-1">I-R</th>
+                <th className="border border-gray-400 p-1">I-Y</th>
+                <th className="border border-gray-400 p-1">I-B</th>
+                <th className="border border-gray-400 p-1">V-RY</th>
+                <th className="border border-gray-400 p-1">V-YB</th>
+                <th className="border border-gray-400 p-1">V-RB</th>
+                <th className="border border-gray-400 p-1">kW</th>
+                <th className="border border-gray-400 p-1">kVA</th>
+                <th className="border border-gray-400 p-1">kVAR</th>
+                <th className="border border-gray-400 p-1">Oil°C</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allHours.map(hour => {
+                const log = logsByHour.get(hour);
+                return (
+                  <tr key={hour}>
+                    <td className="border border-gray-400 p-1 text-center font-medium">{hour.toString().padStart(2, '0')}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_r?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_y?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_b?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_ry?.toFixed(1) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_yb?.toFixed(1) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_rb?.toFixed(1) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kw?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kva?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kvar?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_oil_temperature?.toFixed(1) || '-'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
+
+        {/* Generation Details */}
+        <div className="mb-6">
+          <h3 className="font-bold text-lg mb-2 border-b border-gray-400">Generation Details</h3>
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-400 p-1">Hr</th>
+                <th className="border border-gray-400 p-1">Total Gen</th>
+                <th className="border border-gray-400 p-1">X'MER Exp</th>
+                <th className="border border-gray-400 p-1">AUX Cons</th>
+                <th className="border border-gray-400 p-1">Main Exp</th>
+                <th className="border border-gray-400 p-1">Check Exp</th>
+                <th className="border border-gray-400 p-1">Main Imp</th>
+                <th className="border border-gray-400 p-1">Check Imp</th>
+                <th className="border border-gray-400 p-1">Stby Exp</th>
+                <th className="border border-gray-400 p-1">Stby Imp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allHours.map(hour => {
+                const log = logsByHour.get(hour);
+                return (
+                  <tr key={hour}>
+                    <td className="border border-gray-400 p-1 text-center font-medium">{hour.toString().padStart(2, '0')}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_total_generation?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_xmer_export?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_aux_consumption?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_main_export?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_check_export?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_main_import?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_check_import?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_standby_export?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_standby_import?.toFixed(2) || '-'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Remarks Section */}
+        {logs.some(l => l.remarks) && (
+          <div className="mt-6">
+            <h3 className="font-bold text-lg mb-2 border-b border-gray-400">Remarks</h3>
+            {logs.filter(l => l.remarks).map(log => (
+              <div key={log.hour} className="text-xs mb-2">
+                <strong>Hour {log.hour.toString().padStart(2, '0')}:00</strong> - {log.remarks}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
