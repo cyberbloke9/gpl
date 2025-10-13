@@ -138,12 +138,16 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   const isFieldDisabled = isFinalized || selectedHour < currentHour;
   
   // Debug logging
-  console.log('[Transformer Log Debug]', {
-    selectedHour,
-    currentHour,
-    isFinalized,
-    isFieldDisabled
-  });
+  useEffect(() => {
+    console.log('[TransformerLog] State:', {
+      selectedHour,
+      currentHour,
+      isDirty,
+      isFieldDisabled,
+      isSaving,
+      isFinalized,
+    });
+  }, [selectedHour, isDirty, isFieldDisabled, isSaving, isFinalized]);
 
   useEffect(() => {
     if (user?.id && !isDirty) {
@@ -321,7 +325,12 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     setFormData(initialFormState);
   };
 
-  const handleHourChange = (hour: number) => {
+  const handleHourChange = async (hour: number) => {
+    // Auto-save current hour data before switching to prevent data loss
+    if (isDirty && !isFieldDisabled) {
+      await saveLogEntry(false); // Save without showing toast
+    }
+    setIsDirty(false); // Reset dirty flag before switching hours
     setSelectedHour(hour);
   };
 
