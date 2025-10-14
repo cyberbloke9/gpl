@@ -65,20 +65,8 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
     const allHours = Array.from({ length: 24 }, (_, i) => i);
     const logsByHour = new Map(logs.map(log => [log.hour, log]));
 
-    // Helper functions for default values
-    const displayValue = (value: number | null | undefined): string => {
-      return value !== null && value !== undefined ? value.toString() : '0';
-    };
-
-    const displayText = (value: string | null | undefined): string => {
-      return value || '-';
-    };
-
-    const getIssue = (hour: number, field: string) => {
-      return flaggedIssues.find(issue => 
-        issue.item?.includes(`Hour ${hour}`) &&
-        issue.item?.includes(field)
-      );
+    const getIssue = (hour: number) => {
+      return flaggedIssues.find(issue => issue.item?.includes(`Hour ${hour}`));
     };
 
     const getSeverityColor = (severity: string) => {
@@ -92,68 +80,109 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
 
     const avgFreq = logs.length > 0 
       ? (logs.reduce((sum, l) => sum + (l.frequency || 0), 0) / logs.length).toFixed(2)
-      : '-';
+      : '0';
     
     const avgPower = logs.length > 0
       ? (logs.reduce((sum, l) => sum + (l.active_power || 0), 0) / logs.length).toFixed(2)
-      : '-';
+      : '0';
     
     const maxOilTemp = logs.length > 0
       ? Math.max(...logs.map(l => l.oil_temperature || 0)).toFixed(1)
-      : '-';
+      : '0';
     
     const maxWindingTemp = logs.length > 0
       ? Math.max(...logs.map(l => l.winding_temperature || 0)).toFixed(1)
-      : '-';
+      : '0';
+
+    // Split hours into chunks for better pagination
+    const ptrHoursChunk1 = allHours.slice(0, 12); // Hours 0-11
+    const ptrHoursChunk2 = allHours.slice(12, 24); // Hours 12-23
 
     return (
-      <div ref={ref} className="p-8 bg-white text-black" style={{ width: '210mm', minHeight: '297mm' }}>
-        {/* Header */}
-        <div className="text-center mb-6 border-b-2 border-black pb-4">
-          <h1 className="text-2xl font-bold">GAYATRI POWER PRIVATE LIMITED</h1>
-          <h2 className="text-xl mt-2">UNIFIED TRANSFORMER LOG SHEET</h2>
-          <p className="text-sm mt-1">PTR Feeder • LTAC Feeder • Generation Details</p>
-          <p className="text-sm mt-1">Generated on: {format(new Date(), 'PPP HH:mm')}</p>
+      <div ref={ref} className="bg-white text-black" style={{ width: '210mm' }}>
+        <style>{`
+          @media print {
+            @page {
+              size: A4;
+              margin: 10mm;
+            }
+            .page-break {
+              page-break-before: always;
+            }
+            .avoid-break {
+              page-break-inside: avoid;
+            }
+            body {
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
+          }
+        `}</style>
+
+        {/* PAGE 1: Cover & Table of Contents */}
+        <div className="p-8 min-h-[297mm]">
+          {/* Header */}
+          <div className="text-center mb-8 border-b-2 border-black pb-4">
+            <h1 className="text-3xl font-bold">GAYATRI POWER PRIVATE LIMITED</h1>
+            <h2 className="text-2xl mt-3">UNIFIED TRANSFORMER LOG SHEET</h2>
+            <p className="text-base mt-2">Date: {format(new Date(date), 'PPP')}</p>
+            <p className="text-sm mt-1">Generated: {format(new Date(), 'PPP HH:mm')}</p>
+          </div>
+
+          {/* Summary Info */}
+          <div className="grid grid-cols-2 gap-6 mb-8 text-sm avoid-break">
+            <div className="space-y-2">
+              <p><strong>Report Date:</strong> {format(new Date(date), 'PPP')}</p>
+              <p><strong>Logged Hours:</strong> {logs.length}/24</p>
+            </div>
+            <div className="space-y-2">
+              {userName && <p><strong>Operator:</strong> {userName}</p>}
+              {employeeId && <p><strong>Employee ID:</strong> {employeeId}</p>}
+            </div>
+          </div>
+
+          {/* Summary Statistics */}
+          <div className="mb-8 p-6 border-2 border-gray-300 avoid-break">
+            <h3 className="font-bold text-xl mb-4">Summary Statistics</h3>
+            <div className="grid grid-cols-2 gap-4 text-base">
+              <div><strong>Avg Frequency:</strong> {avgFreq} Hz</div>
+              <div><strong>Avg Power:</strong> {avgPower} kW</div>
+              <div><strong>Max Oil Temp:</strong> {maxOilTemp} °C</div>
+              <div><strong>Max Winding Temp:</strong> {maxWindingTemp} °C</div>
+            </div>
+          </div>
+
+          {/* Table of Contents */}
+          <div className="mb-8 avoid-break">
+            <h3 className="font-bold text-xl mb-4 border-b border-gray-400 pb-2">Table of Contents</h3>
+            <div className="space-y-2 text-base pl-4">
+              <p>📄 Page 1: Cover & Summary</p>
+              <p>📄 Page 2-3: PTR Feeder Data (3.2 MVA, 33 KV / 3.3 KV)</p>
+              <p>📄 Page 4: LTAC Feeder Data (100 KVA, 33 KV / 0.433 KV)</p>
+              <p>📄 Page 5: Generation Details</p>
+              {logs.some(l => l.remarks) && <p>📄 Page 6: Remarks & Observations</p>}
+            </div>
+          </div>
+
+          {/* Severity Legend */}
+          {flaggedIssues.length > 0 && (
+            <div className="p-4 border border-gray-300 text-sm avoid-break">
+              <strong className="block mb-2">Severity Legend:</strong>
+              <div className="flex gap-4">
+                <span className="bg-red-100 px-3 py-1 border border-red-300">Critical</span>
+                <span className="bg-yellow-100 px-3 py-1 border border-yellow-300">Warning</span>
+                <span className="bg-blue-100 px-3 py-1 border border-blue-300">Info</span>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Summary Info */}
-        <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
-          <div>
-            <p><strong>Date:</strong> {format(new Date(date), 'PPP')}</p>
-            <p><strong>Report Type:</strong> Unified Transformer Report</p>
-          </div>
-          <div>
-            {userName && <p><strong>Operator:</strong> {userName}</p>}
-            {employeeId && <p><strong>Employee ID:</strong> {employeeId}</p>}
-            <p><strong>Logged Hours:</strong> {logs.length}/24</p>
-          </div>
-        </div>
-
-        {/* Severity Legend */}
-        {flaggedIssues.length > 0 && (
-          <div className="mb-4 p-2 border border-gray-300 text-xs">
-            <strong>Severity Legend:</strong>
-            <span className="ml-2 bg-red-100 px-2 py-1">Critical</span>
-            <span className="ml-2 bg-yellow-100 px-2 py-1">Warning</span>
-            <span className="ml-2 bg-blue-100 px-2 py-1">Info</span>
-          </div>
-        )}
-
-        {/* Summary Statistics */}
-        <div className="mb-6 p-4 border border-gray-300">
-          <h3 className="font-bold mb-2">Summary Statistics</h3>
-          <div className="grid grid-cols-4 gap-4 text-sm">
-            <div><strong>Avg Frequency:</strong> {avgFreq} Hz</div>
-            <div><strong>Avg Power:</strong> {avgPower} kW</div>
-            <div><strong>Max Oil Temp:</strong> {maxOilTemp} °C</div>
-            <div><strong>Max Winding Temp:</strong> {maxWindingTemp} °C</div>
-          </div>
-        </div>
-
-        {/* PTR Feeder Data */}
-        <div className="mb-6">
-          <h3 className="font-bold text-lg mb-2 border-b border-gray-400">PTR Feeder (3.2 MVA, 33 KV / 3.3 KV)</h3>
-          <table className="w-full text-xs border-collapse">
+        {/* PAGE 2: PTR Feeder Data (Hours 0-11) */}
+        <div className="page-break p-8">
+          <h3 className="font-bold text-xl mb-4 border-b-2 border-gray-400 pb-2">
+            PTR Feeder (3.2 MVA, 33 KV / 3.3 KV) - Hours 00:00 to 11:00
+          </h3>
+          <table className="w-full text-[9px] border-collapse">
             <thead>
               <tr className="bg-gray-200">
                 <th className="border border-gray-400 p-1">Hr</th>
@@ -167,29 +196,31 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                 <th className="border border-gray-400 p-1">kW</th>
                 <th className="border border-gray-400 p-1">kVAR</th>
                 <th className="border border-gray-400 p-1">kVA</th>
+                <th className="border border-gray-400 p-1">Cos φ</th>
                 <th className="border border-gray-400 p-1">Oil°C</th>
                 <th className="border border-gray-400 p-1">Wind°C</th>
               </tr>
             </thead>
             <tbody>
-              {allHours.map(hour => {
+              {ptrHoursChunk1.map(hour => {
                 const log = logsByHour.get(hour);
-                const issue = getIssue(hour, 'any');
+                const issue = getIssue(hour);
                 return (
                   <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ''}>
                     <td className="border border-gray-400 p-1 text-center font-medium">{hour.toString().padStart(2, '0')}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.frequency ? log.frequency.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_ry ? log.voltage_ry.toFixed(1) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_yb ? log.voltage_yb.toFixed(1) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_rb ? log.voltage_rb.toFixed(1) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.current_r ? log.current_r.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.current_y ? log.current_y.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.current_b ? log.current_b.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.active_power ? log.active_power.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.reactive_power ? log.reactive_power.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.kva ? log.kva.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.oil_temperature ? log.oil_temperature.toFixed(1) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.winding_temperature ? log.winding_temperature.toFixed(1) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.frequency?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_ry?.toFixed(1) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_yb?.toFixed(1) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_rb?.toFixed(1) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_r?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_y?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_b?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.active_power?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.reactive_power?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.kva?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.cos_phi?.toFixed(3) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.oil_temperature?.toFixed(1) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.winding_temperature?.toFixed(1) || '0'}</td>
                   </tr>
                 );
               })}
@@ -197,12 +228,63 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
           </table>
         </div>
 
-        <div style={{ pageBreakBefore: 'always' }} />
+        {/* PAGE 3: PTR Feeder Data (Hours 12-23) */}
+        <div className="page-break p-8">
+          <h3 className="font-bold text-xl mb-4 border-b-2 border-gray-400 pb-2">
+            PTR Feeder (3.2 MVA, 33 KV / 3.3 KV) - Hours 12:00 to 23:00
+          </h3>
+          <table className="w-full text-[9px] border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-400 p-1">Hr</th>
+                <th className="border border-gray-400 p-1">Freq</th>
+                <th className="border border-gray-400 p-1">V-RY</th>
+                <th className="border border-gray-400 p-1">V-YB</th>
+                <th className="border border-gray-400 p-1">V-RB</th>
+                <th className="border border-gray-400 p-1">I-R</th>
+                <th className="border border-gray-400 p-1">I-Y</th>
+                <th className="border border-gray-400 p-1">I-B</th>
+                <th className="border border-gray-400 p-1">kW</th>
+                <th className="border border-gray-400 p-1">kVAR</th>
+                <th className="border border-gray-400 p-1">kVA</th>
+                <th className="border border-gray-400 p-1">Cos φ</th>
+                <th className="border border-gray-400 p-1">Oil°C</th>
+                <th className="border border-gray-400 p-1">Wind°C</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ptrHoursChunk2.map(hour => {
+                const log = logsByHour.get(hour);
+                const issue = getIssue(hour);
+                return (
+                  <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ''}>
+                    <td className="border border-gray-400 p-1 text-center font-medium">{hour.toString().padStart(2, '0')}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.frequency?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_ry?.toFixed(1) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_yb?.toFixed(1) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_rb?.toFixed(1) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_r?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_y?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_b?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.active_power?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.reactive_power?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.kva?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.cos_phi?.toFixed(3) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.oil_temperature?.toFixed(1) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.winding_temperature?.toFixed(1) || '0'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
 
-        {/* LTAC Feeder Data */}
-        <div className="mb-6">
-          <h3 className="font-bold text-lg mb-2 border-b border-gray-400">LTAC Feeder (100 KVA, 33 KV / 0.433 KV)</h3>
-          <table className="w-full text-xs border-collapse">
+        {/* PAGE 4: LTAC Feeder Data */}
+        <div className="page-break p-8">
+          <h3 className="font-bold text-xl mb-4 border-b-2 border-gray-400 pb-2">
+            LTAC Feeder (100 KVA, 33 KV / 0.433 KV)
+          </h3>
+          <table className="w-full text-[9px] border-collapse">
             <thead>
               <tr className="bg-gray-200">
                 <th className="border border-gray-400 p-1">Hr</th>
@@ -224,16 +306,16 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                 return (
                   <tr key={hour}>
                     <td className="border border-gray-400 p-1 text-center font-medium">{hour.toString().padStart(2, '0')}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_r ? log.ltac_current_r.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_y ? log.ltac_current_y.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_b ? log.ltac_current_b.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_ry ? log.ltac_voltage_ry.toFixed(1) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_yb ? log.ltac_voltage_yb.toFixed(1) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_rb ? log.ltac_voltage_rb.toFixed(1) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kw ? log.ltac_kw.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kva ? log.ltac_kva.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kvar ? log.ltac_kvar.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_oil_temperature ? log.ltac_oil_temperature.toFixed(1) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_r?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_y?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_b?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_ry?.toFixed(1) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_yb?.toFixed(1) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_rb?.toFixed(1) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kw?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kva?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kvar?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_oil_temperature?.toFixed(1) || '0'}</td>
                   </tr>
                 );
               })}
@@ -241,10 +323,10 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
           </table>
         </div>
 
-        {/* Generation Details */}
-        <div className="mb-6">
-          <h3 className="font-bold text-lg mb-2 border-b border-gray-400">Generation Details</h3>
-          <table className="w-full text-xs border-collapse">
+        {/* PAGE 5: Generation Details */}
+        <div className="page-break p-8">
+          <h3 className="font-bold text-xl mb-4 border-b-2 border-gray-400 pb-2">Generation Details</h3>
+          <table className="w-full text-[9px] border-collapse">
             <thead>
               <tr className="bg-gray-200">
                 <th className="border border-gray-400 p-1">Hr</th>
@@ -252,9 +334,9 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                 <th className="border border-gray-400 p-1">X'MER Exp</th>
                 <th className="border border-gray-400 p-1">AUX Cons</th>
                 <th className="border border-gray-400 p-1">Main Exp</th>
-                <th className="border border-gray-400 p-1">Check Exp</th>
+                <th className="border border-gray-400 p-1">Chk Exp</th>
                 <th className="border border-gray-400 p-1">Main Imp</th>
-                <th className="border border-gray-400 p-1">Check Imp</th>
+                <th className="border border-gray-400 p-1">Chk Imp</th>
                 <th className="border border-gray-400 p-1">Stby Exp</th>
                 <th className="border border-gray-400 p-1">Stby Imp</th>
               </tr>
@@ -265,15 +347,15 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                 return (
                   <tr key={hour}>
                     <td className="border border-gray-400 p-1 text-center font-medium">{hour.toString().padStart(2, '0')}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_total_generation ? log.gen_total_generation.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_xmer_export ? log.gen_xmer_export.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_aux_consumption ? log.gen_aux_consumption.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_main_export ? log.gen_main_export.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_check_export ? log.gen_check_export.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_main_import ? log.gen_main_import.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_check_import ? log.gen_check_import.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_standby_export ? log.gen_standby_export.toFixed(2) : '0'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_standby_import ? log.gen_standby_import.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_total_generation?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_xmer_export?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_aux_consumption?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_main_export?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_check_export?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_main_import?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_check_import?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_standby_export?.toFixed(2) || '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_standby_import?.toFixed(2) || '0'}</td>
                   </tr>
                 );
               })}
@@ -281,13 +363,14 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
           </table>
         </div>
 
-        {/* Remarks Section */}
+        {/* PAGE 6: Remarks (if any) */}
         {logs.some(l => l.remarks) && (
-          <div className="mt-6">
-            <h3 className="font-bold text-lg mb-2 border-b border-gray-400">Remarks</h3>
+          <div className="page-break p-8">
+            <h3 className="font-bold text-xl mb-4 border-b-2 border-gray-400 pb-2">Remarks & Observations</h3>
             {logs.filter(l => l.remarks).map(log => (
-              <div key={log.hour} className="text-xs mb-2">
-                <strong>Hour {log.hour.toString().padStart(2, '0')}:00</strong> - {log.remarks}
+              <div key={log.hour} className="text-sm mb-3 pb-3 border-b">
+                <strong>Hour {log.hour.toString().padStart(2, '0')}:00</strong>
+                <p className="mt-1">{log.remarks}</p>
               </div>
             ))}
           </div>
