@@ -1,6 +1,5 @@
 import { forwardRef } from "react";
 import { format } from "date-fns";
-import { CheckCircle2, X } from "lucide-react";
 
 interface TransformerLog {
   hour: number;
@@ -93,16 +92,12 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
 
     const maxWindingTemp = logs.length > 0 ? Math.max(...logs.map((l) => l.winding_temperature || 0)).toFixed(1) : "0";
 
-    // Split hours into chunks for better pagination
-    const ptrHoursChunk1 = allHours.slice(0, 12); // Hours 0-11
-    const ptrHoursChunk2 = allHours.slice(12, 24); // Hours 12-23
-
     return (
       <div ref={ref} className="bg-white text-black" style={{ width: "210mm" }}>
         <style>{`
           @media print {
             @page {
-              size: A4 landscape;
+              size: A4 portrait;
               margin: 8mm;
             }
             .page-break {
@@ -117,18 +112,21 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
             }
           }
           .compact-table {
-            font-size: 7px;
-            line-height: 1.2;
+            font-size: 8px;
+            line-height: 1.3;
           }
           .compact-table th,
           .compact-table td {
-            padding: 2px 1px;
+            padding: 3px 2px;
+            white-space: nowrap;
+          }
+          .status-icon {
+            font-size: 10px;
           }
         `}</style>
 
         {/* PAGE 1: Cover & Table of Contents */}
-        <div className="p-8 min-h-[210mm]">
-          {/* Header */}
+        <div className="p-8">
           <div className="text-center mb-8 border-b-2 border-black pb-4">
             <h1 className="text-3xl font-bold">GAYATRI POWER PRIVATE LIMITED</h1>
             <h2 className="text-2xl mt-3">UNIFIED TRANSFORMER LOG SHEET</h2>
@@ -136,8 +134,7 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
             <p className="text-sm mt-1">Generated: {format(new Date(), "PPP HH:mm")}</p>
           </div>
 
-          {/* Summary Info */}
-          <div className="grid grid-cols-2 gap-6 mb-8 text-sm avoid-break">
+          <div className="grid grid-cols-2 gap-6 mb-8 text-sm">
             <div className="space-y-2">
               <p>
                 <strong>Report Date:</strong> {format(new Date(date), "PPP")}
@@ -160,8 +157,7 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
             </div>
           </div>
 
-          {/* Summary Statistics */}
-          <div className="mb-8 p-6 border-2 border-gray-300 avoid-break">
+          <div className="mb-8 p-6 border-2 border-gray-300">
             <h3 className="font-bold text-xl mb-4">Summary Statistics</h3>
             <div className="grid grid-cols-2 gap-4 text-base">
               <div>
@@ -179,33 +175,45 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
             </div>
           </div>
 
-          {/* Table of Contents */}
-          <div className="mb-8 avoid-break">
+          <div className="mb-8">
             <h3 className="font-bold text-xl mb-4 border-b border-gray-400 pb-2">📑 Table of Contents</h3>
-            <div className="space-y-2 text-base pl-4">
+            <div className="space-y-2 text-sm pl-4">
               <p>
-                📄 <strong>Page 1:</strong> Cover & Summary
+                <strong>Page 1:</strong> Cover & Summary
               </p>
               <p>
-                📄 <strong>Page 2-3:</strong> PTR Feeder Data (All Fields - Hours 0-23)
+                <strong>Pages 2-5:</strong> PTR Feeder Data (Complete - 4 sections)
+              </p>
+              <p className="pl-4 text-xs text-gray-600">
+                • Page 2: Electrical Parameters (Voltage, Current, Power)
+                <br />
+                • Page 3: Energy & Power Factor (MWH, MVARH, MVAH, Cos φ)
+                <br />
+                • Page 4: Temperature & Status (Oil, Winding, Level, Tap)
+                <br />• Page 5: Additional Parameters (Tap Counter, Silica Gel)
               </p>
               <p>
-                📄 <strong>Page 4:</strong> LTAC Feeder Data (All Fields - Hours 0-23)
+                <strong>Pages 6-8:</strong> LTAC Feeder Data (Complete - 3 sections)
+              </p>
+              <p className="pl-4 text-xs text-gray-600">
+                • Page 6: Electrical Parameters (Voltage, Current, Power)
+                <br />
+                • Page 7: Energy Readings (KWH, KVAH, KVARH)
+                <br />• Page 8: Grid Status (Temp, Fail Time, Resume, Interruption)
               </p>
               <p>
-                📄 <strong>Page 5:</strong> Generation Details (All Fields - Hours 0-23)
+                <strong>Pages 9-10:</strong> Generation Details (Complete)
               </p>
               {logs.some((l) => l.remarks) && (
                 <p>
-                  📄 <strong>Page 6:</strong> Remarks & Observations
+                  <strong>Page 11:</strong> Detailed Remarks
                 </p>
               )}
             </div>
           </div>
 
-          {/* Severity Legend */}
           {flaggedIssues.length > 0 && (
-            <div className="p-4 border border-gray-300 text-sm avoid-break">
+            <div className="p-4 border border-gray-300 text-sm">
               <strong className="block mb-2">⚠️ Severity Legend:</strong>
               <div className="flex gap-4">
                 <span className="bg-red-100 px-3 py-1 border border-red-300">🔴 Critical</span>
@@ -215,307 +223,37 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
             </div>
           )}
 
-          {/* Navigation Instructions for Mobile */}
-          <div className="mt-8 p-4 bg-blue-50 border border-blue-300 rounded text-sm">
-            <h4 className="font-bold mb-2">📱 Mobile Navigation Guide:</h4>
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-300 rounded text-xs">
+            <h4 className="font-bold mb-2">📱 Mobile Viewing Guide:</h4>
             <ul className="list-disc list-inside space-y-1">
-              <li>Swipe left/right to navigate between pages</li>
-              <li>Pinch to zoom for detailed view</li>
-              <li>Use the page numbers at bottom to jump to sections</li>
-              <li>All data fields from the web viewer are included</li>
+              <li>Swipe left/right to navigate pages</li>
+              <li>Each section split for easy viewing</li>
+              <li>All fields from web viewer included</li>
+              <li>Total {logs.some((l) => l.remarks) ? "11" : "10"} pages</li>
             </ul>
           </div>
         </div>
 
-        {/* PAGE 2: PTR Feeder Data (Hours 0-11) - COMPLETE */}
-        <div className="page-break p-4">
-          <h3 className="font-bold text-base mb-2 border-b-2 border-gray-400 pb-1">
-            PTR Feeder (3.2 MVA, 33 KV / 3.3 KV) - Hours 00:00 to 11:00 - COMPLETE DATA
+        {/* PAGE 2: PTR - Electrical Parameters Part 1 */}
+        <div className="page-break p-6">
+          <h3 className="font-bold text-base mb-3 border-b-2 border-gray-400 pb-2">
+            PTR Feeder - Part 1: Electrical Parameters (All 24 Hours)
           </h3>
           <table className="w-full compact-table border-collapse">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border border-gray-400 p-1">Hr</th>
+                <th className="border border-gray-400 p-1">Hour</th>
                 <th className="border border-gray-400 p-1">✓</th>
-                <th className="border border-gray-400 p-1">
-                  Freq
-                  <br />
-                  (Hz)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  V-RY
-                  <br />
-                  (V)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  V-YB
-                  <br />
-                  (V)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  V-RB
-                  <br />
-                  (V)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  I-R
-                  <br />
-                  (A)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  I-Y
-                  <br />
-                  (A)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  I-B
-                  <br />
-                  (A)
-                </th>
+                <th className="border border-gray-400 p-1">Freq (Hz)</th>
+                <th className="border border-gray-400 p-1">V-RY (V)</th>
+                <th className="border border-gray-400 p-1">V-YB (V)</th>
+                <th className="border border-gray-400 p-1">V-RB (V)</th>
+                <th className="border border-gray-400 p-1">I-R (A)</th>
+                <th className="border border-gray-400 p-1">I-Y (A)</th>
+                <th className="border border-gray-400 p-1">I-B (A)</th>
                 <th className="border border-gray-400 p-1">kW</th>
                 <th className="border border-gray-400 p-1">kVAR</th>
                 <th className="border border-gray-400 p-1">kVA</th>
-                <th className="border border-gray-400 p-1">MWH</th>
-                <th className="border border-gray-400 p-1">MVARH</th>
-                <th className="border border-gray-400 p-1">MVAH</th>
-                <th className="border border-gray-400 p-1">Cos φ</th>
-                <th className="border border-gray-400 p-1">
-                  Oil
-                  <br />
-                  (°C)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Wind
-                  <br />
-                  (°C)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Oil
-                  <br />
-                  Lvl
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Tap
-                  <br />
-                  Pos
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {ptrHoursChunk1.map((hour) => {
-                const log = logsByHour.get(hour);
-                const issue = getIssue(hour);
-                return (
-                  <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ""}>
-                    <td className="border border-gray-400 p-1 text-center font-bold">
-                      {hour.toString().padStart(2, "0")}
-                    </td>
-                    <td className="border border-gray-400 p-1 text-center">{log ? "✓" : "✗"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.frequency?.toFixed(2) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_ry?.toFixed(0) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_yb?.toFixed(0) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_rb?.toFixed(0) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.current_r?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.current_y?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.current_b?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.active_power?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.reactive_power?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.kva?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.mwh?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.mvarh?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.mvah?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.cos_phi?.toFixed(2) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">
-                      {log?.oil_temperature?.toFixed(0) || "0"}
-                    </td>
-                    <td className="border border-gray-400 p-1 text-center">
-                      {log?.winding_temperature?.toFixed(0) || "0"}
-                    </td>
-                    <td className="border border-gray-400 p-1 text-center text-[6px]">{log?.oil_level || "-"}</td>
-                    <td className="border border-gray-400 p-1 text-center text-[6px]">{log?.tap_position || "-"}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          <p className="text-xs text-center mt-2 text-gray-600">Page 2 of 6 | Swipe right for Hours 12-23 →</p>
-        </div>
-
-        {/* PAGE 3: PTR Feeder Data (Hours 12-23) - COMPLETE */}
-        <div className="page-break p-4">
-          <h3 className="font-bold text-base mb-2 border-b-2 border-gray-400 pb-1">
-            PTR Feeder (3.2 MVA, 33 KV / 3.3 KV) - Hours 12:00 to 23:00 - COMPLETE DATA
-          </h3>
-          <table className="w-full compact-table border-collapse">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="border border-gray-400 p-1">Hr</th>
-                <th className="border border-gray-400 p-1">✓</th>
-                <th className="border border-gray-400 p-1">
-                  Freq
-                  <br />
-                  (Hz)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  V-RY
-                  <br />
-                  (V)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  V-YB
-                  <br />
-                  (V)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  V-RB
-                  <br />
-                  (V)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  I-R
-                  <br />
-                  (A)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  I-Y
-                  <br />
-                  (A)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  I-B
-                  <br />
-                  (A)
-                </th>
-                <th className="border border-gray-400 p-1">kW</th>
-                <th className="border border-gray-400 p-1">kVAR</th>
-                <th className="border border-gray-400 p-1">kVA</th>
-                <th className="border border-gray-400 p-1">MWH</th>
-                <th className="border border-gray-400 p-1">MVARH</th>
-                <th className="border border-gray-400 p-1">MVAH</th>
-                <th className="border border-gray-400 p-1">Cos φ</th>
-                <th className="border border-gray-400 p-1">
-                  Oil
-                  <br />
-                  (°C)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Wind
-                  <br />
-                  (°C)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Oil
-                  <br />
-                  Lvl
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Tap
-                  <br />
-                  Pos
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {ptrHoursChunk2.map((hour) => {
-                const log = logsByHour.get(hour);
-                const issue = getIssue(hour);
-                return (
-                  <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ""}>
-                    <td className="border border-gray-400 p-1 text-center font-bold">
-                      {hour.toString().padStart(2, "0")}
-                    </td>
-                    <td className="border border-gray-400 p-1 text-center">{log ? "✓" : "✗"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.frequency?.toFixed(2) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_ry?.toFixed(0) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_yb?.toFixed(0) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_rb?.toFixed(0) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.current_r?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.current_y?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.current_b?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.active_power?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.reactive_power?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.kva?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.mwh?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.mvarh?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.mvah?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.cos_phi?.toFixed(2) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">
-                      {log?.oil_temperature?.toFixed(0) || "0"}
-                    </td>
-                    <td className="border border-gray-400 p-1 text-center">
-                      {log?.winding_temperature?.toFixed(0) || "0"}
-                    </td>
-                    <td className="border border-gray-400 p-1 text-center text-[6px]">{log?.oil_level || "-"}</td>
-                    <td className="border border-gray-400 p-1 text-center text-[6px]">{log?.tap_position || "-"}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          <p className="text-xs text-center mt-2 text-gray-600">Page 3 of 6 | Swipe right for LTAC Data →</p>
-        </div>
-
-        {/* PAGE 4: LTAC Feeder Data - COMPLETE */}
-        <div className="page-break p-4">
-          <h3 className="font-bold text-base mb-2 border-b-2 border-gray-400 pb-1">
-            LTAC Feeder (100 KVA, 33 KV / 0.433 KV) - Hours 00:00 to 23:00 - COMPLETE DATA
-          </h3>
-          <table className="w-full compact-table border-collapse">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="border border-gray-400 p-1">Hr</th>
-                <th className="border border-gray-400 p-1">✓</th>
-                <th className="border border-gray-400 p-1">
-                  I-R
-                  <br />
-                  (A)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  I-Y
-                  <br />
-                  (A)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  I-B
-                  <br />
-                  (A)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  V-RY
-                  <br />
-                  (V)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  V-YB
-                  <br />
-                  (V)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  V-RB
-                  <br />
-                  (V)
-                </th>
-                <th className="border border-gray-400 p-1">kW</th>
-                <th className="border border-gray-400 p-1">kVA</th>
-                <th className="border border-gray-400 p-1">kVAR</th>
-                <th className="border border-gray-400 p-1">KWH</th>
-                <th className="border border-gray-400 p-1">KVAH</th>
-                <th className="border border-gray-400 p-1">KVARH</th>
-                <th className="border border-gray-400 p-1">
-                  Oil
-                  <br />
-                  (°C)
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Fail
-                  <br />
-                  Time
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Resume
-                  <br />
-                  Time
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -525,9 +263,180 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                 return (
                   <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ""}>
                     <td className="border border-gray-400 p-1 text-center font-bold">
-                      {hour.toString().padStart(2, "0")}
+                      {hour.toString().padStart(2, "0")}:00
                     </td>
-                    <td className="border border-gray-400 p-1 text-center">{log ? "✓" : "✗"}</td>
+                    <td className="border border-gray-400 p-1 text-center status-icon">{log ? "✓" : "✗"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.frequency?.toFixed(2) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_ry?.toFixed(0) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_yb?.toFixed(0) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_rb?.toFixed(0) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_r?.toFixed(1) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_y?.toFixed(1) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_b?.toFixed(1) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.active_power?.toFixed(1) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.reactive_power?.toFixed(1) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.kva?.toFixed(1) || "0"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <p className="text-xs text-center mt-3 text-gray-600">
+            Page 2 of {logs.some((l) => l.remarks) ? "11" : "10"} | PTR Part 1/4
+          </p>
+        </div>
+
+        {/* PAGE 3: PTR - Energy & Power Factor */}
+        <div className="page-break p-6">
+          <h3 className="font-bold text-base mb-3 border-b-2 border-gray-400 pb-2">
+            PTR Feeder - Part 2: Energy & Power Factor (All 24 Hours)
+          </h3>
+          <table className="w-full compact-table border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-400 p-1">Hour</th>
+                <th className="border border-gray-400 p-1">✓</th>
+                <th className="border border-gray-400 p-1">MWH</th>
+                <th className="border border-gray-400 p-1">MVARH</th>
+                <th className="border border-gray-400 p-1">MVAH</th>
+                <th className="border border-gray-400 p-1">Cos φ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allHours.map((hour) => {
+                const log = logsByHour.get(hour);
+                const issue = getIssue(hour);
+                return (
+                  <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ""}>
+                    <td className="border border-gray-400 p-1 text-center font-bold">
+                      {hour.toString().padStart(2, "0")}:00
+                    </td>
+                    <td className="border border-gray-400 p-1 text-center status-icon">{log ? "✓" : "✗"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.mwh?.toFixed(2) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.mvarh?.toFixed(2) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.mvah?.toFixed(2) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.cos_phi?.toFixed(3) || "0"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <p className="text-xs text-center mt-3 text-gray-600">
+            Page 3 of {logs.some((l) => l.remarks) ? "11" : "10"} | PTR Part 2/4
+          </p>
+        </div>
+
+        {/* PAGE 4: PTR - Temperature & Status */}
+        <div className="page-break p-6">
+          <h3 className="font-bold text-base mb-3 border-b-2 border-gray-400 pb-2">
+            PTR Feeder - Part 3: Temperature & Status (All 24 Hours)
+          </h3>
+          <table className="w-full compact-table border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-400 p-1">Hour</th>
+                <th className="border border-gray-400 p-1">✓</th>
+                <th className="border border-gray-400 p-1">Oil Temp (°C)</th>
+                <th className="border border-gray-400 p-1">Winding Temp (°C)</th>
+                <th className="border border-gray-400 p-1">Oil Level</th>
+                <th className="border border-gray-400 p-1">Tap Position</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allHours.map((hour) => {
+                const log = logsByHour.get(hour);
+                const issue = getIssue(hour);
+                return (
+                  <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ""}>
+                    <td className="border border-gray-400 p-1 text-center font-bold">
+                      {hour.toString().padStart(2, "0")}:00
+                    </td>
+                    <td className="border border-gray-400 p-1 text-center status-icon">{log ? "✓" : "✗"}</td>
+                    <td className="border border-gray-400 p-1 text-center">
+                      {log?.oil_temperature?.toFixed(1) || "0"}
+                    </td>
+                    <td className="border border-gray-400 p-1 text-center">
+                      {log?.winding_temperature?.toFixed(1) || "0"}
+                    </td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.oil_level || "-"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.tap_position || "-"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <p className="text-xs text-center mt-3 text-gray-600">
+            Page 4 of {logs.some((l) => l.remarks) ? "11" : "10"} | PTR Part 3/4
+          </p>
+        </div>
+
+        {/* PAGE 5: PTR - Tap Counter & Silica Gel */}
+        <div className="page-break p-6">
+          <h3 className="font-bold text-base mb-3 border-b-2 border-gray-400 pb-2">
+            PTR Feeder - Part 4: Tap Counter & Silica Gel Color (All 24 Hours)
+          </h3>
+          <table className="w-full compact-table border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-400 p-1">Hour</th>
+                <th className="border border-gray-400 p-1">✓</th>
+                <th className="border border-gray-400 p-1">Tap Counter</th>
+                <th className="border border-gray-400 p-1">Silica Gel Colour</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allHours.map((hour) => {
+                const log = logsByHour.get(hour);
+                const issue = getIssue(hour);
+                return (
+                  <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ""}>
+                    <td className="border border-gray-400 p-1 text-center font-bold">
+                      {hour.toString().padStart(2, "0")}:00
+                    </td>
+                    <td className="border border-gray-400 p-1 text-center status-icon">{log ? "✓" : "✗"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.tap_counter || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.silica_gel_colour || "-"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <p className="text-xs text-center mt-3 text-gray-600">
+            Page 5 of {logs.some((l) => l.remarks) ? "11" : "10"} | PTR Part 4/4 Complete ✓
+          </p>
+        </div>
+
+        {/* PAGE 6: LTAC - Electrical Parameters */}
+        <div className="page-break p-6">
+          <h3 className="font-bold text-base mb-3 border-b-2 border-gray-400 pb-2">
+            LTAC Feeder - Part 1: Electrical Parameters (All 24 Hours)
+          </h3>
+          <table className="w-full compact-table border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-400 p-1">Hour</th>
+                <th className="border border-gray-400 p-1">✓</th>
+                <th className="border border-gray-400 p-1">I-R (A)</th>
+                <th className="border border-gray-400 p-1">I-Y (A)</th>
+                <th className="border border-gray-400 p-1">I-B (A)</th>
+                <th className="border border-gray-400 p-1">V-RY (V)</th>
+                <th className="border border-gray-400 p-1">V-YB (V)</th>
+                <th className="border border-gray-400 p-1">V-RB (V)</th>
+                <th className="border border-gray-400 p-1">kW</th>
+                <th className="border border-gray-400 p-1">kVA</th>
+                <th className="border border-gray-400 p-1">kVAR</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allHours.map((hour) => {
+                const log = logsByHour.get(hour);
+                const issue = getIssue(hour);
+                return (
+                  <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ""}>
+                    <td className="border border-gray-400 p-1 text-center font-bold">
+                      {hour.toString().padStart(2, "0")}:00
+                    </td>
+                    <td className="border border-gray-400 p-1 text-center status-icon">{log ? "✓" : "✗"}</td>
                     <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_r?.toFixed(1) || "0"}</td>
                     <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_y?.toFixed(1) || "0"}</td>
                     <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_b?.toFixed(1) || "0"}</td>
@@ -543,84 +452,29 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                     <td className="border border-gray-400 p-1 text-center">{log?.ltac_kw?.toFixed(1) || "0"}</td>
                     <td className="border border-gray-400 p-1 text-center">{log?.ltac_kva?.toFixed(1) || "0"}</td>
                     <td className="border border-gray-400 p-1 text-center">{log?.ltac_kvar?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kwh?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kvah?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kvarh?.toFixed(1) || "0"}</td>
-                    <td className="border border-gray-400 p-1 text-center">
-                      {log?.ltac_oil_temperature?.toFixed(0) || "0"}
-                    </td>
-                    <td className="border border-gray-400 p-1 text-center text-[6px]">
-                      {log?.ltac_grid_fail_time || "-"}
-                    </td>
-                    <td className="border border-gray-400 p-1 text-center text-[6px]">
-                      {log?.ltac_grid_resume_time || "-"}
-                    </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-          <p className="text-xs text-center mt-2 text-gray-600">Page 4 of 6 | Swipe right for Generation Data →</p>
+          <p className="text-xs text-center mt-3 text-gray-600">
+            Page 6 of {logs.some((l) => l.remarks) ? "11" : "10"} | LTAC Part 1/3
+          </p>
         </div>
 
-        {/* PAGE 5: Generation Details - COMPLETE */}
-        <div className="page-break p-4">
-          <h3 className="font-bold text-base mb-2 border-b-2 border-gray-400 pb-1">
-            Generation Details - Hours 00:00 to 23:00 - COMPLETE DATA
+        {/* PAGE 7: LTAC - Energy Readings */}
+        <div className="page-break p-6">
+          <h3 className="font-bold text-base mb-3 border-b-2 border-gray-400 pb-2">
+            LTAC Feeder - Part 2: Energy Readings (All 24 Hours)
           </h3>
           <table className="w-full compact-table border-collapse">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border border-gray-400 p-1">Hr</th>
+                <th className="border border-gray-400 p-1">Hour</th>
                 <th className="border border-gray-400 p-1">✓</th>
-                <th className="border border-gray-400 p-1">
-                  Total
-                  <br />
-                  Gen
-                </th>
-                <th className="border border-gray-400 p-1">
-                  X'MER
-                  <br />
-                  Exp
-                </th>
-                <th className="border border-gray-400 p-1">
-                  AUX
-                  <br />
-                  Cons
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Main
-                  <br />
-                  Exp
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Chk
-                  <br />
-                  Exp
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Main
-                  <br />
-                  Imp
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Chk
-                  <br />
-                  Imp
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Stby
-                  <br />
-                  Exp
-                </th>
-                <th className="border border-gray-400 p-1">
-                  Stby
-                  <br />
-                  Imp
-                </th>
-                <th className="border border-gray-400 p-1" style={{ minWidth: "80px" }}>
-                  Remarks
-                </th>
+                <th className="border border-gray-400 p-1">KWH</th>
+                <th className="border border-gray-400 p-1">KVAH</th>
+                <th className="border border-gray-400 p-1">KVARH</th>
               </tr>
             </thead>
             <tbody>
@@ -630,9 +484,91 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                 return (
                   <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ""}>
                     <td className="border border-gray-400 p-1 text-center font-bold">
-                      {hour.toString().padStart(2, "0")}
+                      {hour.toString().padStart(2, "0")}:00
                     </td>
-                    <td className="border border-gray-400 p-1 text-center">{log ? "✓" : "✗"}</td>
+                    <td className="border border-gray-400 p-1 text-center status-icon">{log ? "✓" : "✗"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kwh?.toFixed(2) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kvah?.toFixed(2) || "0"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kvarh?.toFixed(2) || "0"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <p className="text-xs text-center mt-3 text-gray-600">
+            Page 7 of {logs.some((l) => l.remarks) ? "11" : "10"} | LTAC Part 2/3
+          </p>
+        </div>
+
+        {/* PAGE 8: LTAC - Grid Status & Temperature */}
+        <div className="page-break p-6">
+          <h3 className="font-bold text-base mb-3 border-b-2 border-gray-400 pb-2">
+            LTAC Feeder - Part 3: Grid Status & Temperature (All 24 Hours)
+          </h3>
+          <table className="w-full compact-table border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-400 p-1">Hour</th>
+                <th className="border border-gray-400 p-1">✓</th>
+                <th className="border border-gray-400 p-1">Oil Temp (°C)</th>
+                <th className="border border-gray-400 p-1">Grid Fail Time</th>
+                <th className="border border-gray-400 p-1">Grid Resume Time</th>
+                <th className="border border-gray-400 p-1">Supply Interruption</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allHours.map((hour) => {
+                const log = logsByHour.get(hour);
+                const issue = getIssue(hour);
+                return (
+                  <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ""}>
+                    <td className="border border-gray-400 p-1 text-center font-bold">
+                      {hour.toString().padStart(2, "0")}:00
+                    </td>
+                    <td className="border border-gray-400 p-1 text-center status-icon">{log ? "✓" : "✗"}</td>
+                    <td className="border border-gray-400 p-1 text-center">
+                      {log?.ltac_oil_temperature?.toFixed(1) || "0"}
+                    </td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_grid_fail_time || "-"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_grid_resume_time || "-"}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_supply_interruption || "-"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <p className="text-xs text-center mt-3 text-gray-600">
+            Page 8 of {logs.some((l) => l.remarks) ? "11" : "10"} | LTAC Part 3/3 Complete ✓
+          </p>
+        </div>
+
+        {/* PAGE 9: Generation - Part 1 */}
+        <div className="page-break p-6">
+          <h3 className="font-bold text-base mb-3 border-b-2 border-gray-400 pb-2">
+            Generation Details - Part 1: Generation & Export (All 24 Hours)
+          </h3>
+          <table className="w-full compact-table border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-400 p-1">Hour</th>
+                <th className="border border-gray-400 p-1">✓</th>
+                <th className="border border-gray-400 p-1">Total Generation</th>
+                <th className="border border-gray-400 p-1">X'MER Export</th>
+                <th className="border border-gray-400 p-1">AUX Consumption</th>
+                <th className="border border-gray-400 p-1">Main Export</th>
+                <th className="border border-gray-400 p-1">Check Export</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allHours.map((hour) => {
+                const log = logsByHour.get(hour);
+                const issue = getIssue(hour);
+                return (
+                  <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ""}>
+                    <td className="border border-gray-400 p-1 text-center font-bold">
+                      {hour.toString().padStart(2, "0")}:00
+                    </td>
+                    <td className="border border-gray-400 p-1 text-center status-icon">{log ? "✓" : "✗"}</td>
                     <td className="border border-gray-400 p-1 text-center">
                       {log?.gen_total_generation?.toFixed(1) || "0"}
                     </td>
@@ -648,6 +584,45 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                     <td className="border border-gray-400 p-1 text-center">
                       {log?.gen_check_export?.toFixed(1) || "0"}
                     </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <p className="text-xs text-center mt-3 text-gray-600">
+            Page 9 of {logs.some((l) => l.remarks) ? "11" : "10"} | Generation Part 1/2
+          </p>
+        </div>
+
+        {/* PAGE 10: Generation - Part 2 & Remarks */}
+        <div className="page-break p-6">
+          <h3 className="font-bold text-base mb-3 border-b-2 border-gray-400 pb-2">
+            Generation Details - Part 2: Import, Standby & Remarks (All 24 Hours)
+          </h3>
+          <table className="w-full compact-table border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-400 p-1">Hour</th>
+                <th className="border border-gray-400 p-1">✓</th>
+                <th className="border border-gray-400 p-1">Main Import</th>
+                <th className="border border-gray-400 p-1">Check Import</th>
+                <th className="border border-gray-400 p-1">Standby Export</th>
+                <th className="border border-gray-400 p-1">Standby Import</th>
+                <th className="border border-gray-400 p-1" style={{ minWidth: "100px" }}>
+                  Remarks
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {allHours.map((hour) => {
+                const log = logsByHour.get(hour);
+                const issue = getIssue(hour);
+                return (
+                  <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ""}>
+                    <td className="border border-gray-400 p-1 text-center font-bold">
+                      {hour.toString().padStart(2, "0")}:00
+                    </td>
+                    <td className="border border-gray-400 p-1 text-center status-icon">{log ? "✓" : "✗"}</td>
                     <td className="border border-gray-400 p-1 text-center">
                       {log?.gen_main_import?.toFixed(1) || "0"}
                     </td>
@@ -661,27 +636,32 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                       {log?.gen_standby_import?.toFixed(1) || "0"}
                     </td>
                     <td
-                      className="border border-gray-400 p-1 text-left text-[6px]"
-                      style={{ maxWidth: "80px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                      className="border border-gray-400 p-1 text-left"
+                      style={{ fontSize: "7px", maxWidth: "100px", wordWrap: "break-word" }}
                     >
-                      {log?.remarks || "-"}
+                      {log?.remarks
+                        ? log.remarks.length > 30
+                          ? log.remarks.substring(0, 30) + "..."
+                          : log.remarks
+                        : "-"}
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-          <p className="text-xs text-center mt-2 text-gray-600">
-            Page 5 of {logs.some((l) => l.remarks) ? "6" : "5"} |{" "}
-            {logs.some((l) => l.remarks) ? "Swipe right for Detailed Remarks →" : "End of Report"}
+          <p className="text-xs text-center mt-3 text-gray-600">
+            Page 10 of {logs.some((l) => l.remarks) ? "11" : "10"} | Generation Part 2/2 Complete ✓
           </p>
         </div>
 
-        {/* PAGE 6: Remarks (if any) - EXPANDED */}
+        {/* PAGE 11: Detailed Remarks (if any) */}
         {logs.some((l) => l.remarks) && (
           <div className="page-break p-8">
-            <h3 className="font-bold text-xl mb-4 border-b-2 border-gray-400 pb-2">📝 Remarks & Observations</h3>
-            <p className="text-sm text-gray-600 mb-4">Detailed remarks for each logged hour</p>
+            <h3 className="font-bold text-xl mb-4 border-b-2 border-gray-400 pb-2">
+              📝 Detailed Remarks & Observations
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">Complete remarks for each logged hour</p>
             <div className="space-y-3">
               {logs
                 .filter((l) => l.remarks)
@@ -690,22 +670,22 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                     <div className="flex items-center justify-between mb-2">
                       <strong className="text-base">Hour {log.hour.toString().padStart(2, "0")}:00</strong>
                       <span className="text-xs text-gray-500">
-                        Logged: {log.logged_at ? format(new Date(log.logged_at), "HH:mm") : "N/A"}
+                        {log.logged_at ? format(new Date(log.logged_at), "HH:mm") : "N/A"}
                       </span>
                     </div>
                     <p className="text-sm text-gray-800">{log.remarks}</p>
                   </div>
                 ))}
             </div>
-            <p className="text-xs text-center mt-4 text-gray-600">Page 6 of 6 | End of Report</p>
+            <p className="text-xs text-center mt-4 text-gray-600">Page 11 of 11 | End of Report</p>
           </div>
         )}
 
-        {/* Footer on last page */}
-        <div className="text-center text-xs text-gray-500 mt-8 border-t pt-4">
-          <p>Generated by Gayatri Power Transformer Logging System</p>
+        {/* Footer */}
+        <div className="text-center text-xs text-gray-500 mt-4 pt-4 border-t">
+          <p>Gayatri Power Transformer Logging System</p>
           <p>
-            Report Date: {format(new Date(date), "PPP")} | Generated: {format(new Date(), "PPP HH:mm")}
+            Report: {format(new Date(date), "PPP")} | Generated: {format(new Date(), "PPP HH:mm")}
           </p>
           {userName && employeeId && (
             <p>
