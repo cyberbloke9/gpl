@@ -1,5 +1,6 @@
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { NumericInput } from "../NumericInput";
 import { PhotoUpload } from "../PhotoUpload";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -7,23 +8,14 @@ import { IssueFlagger } from "../IssueFlagger";
 
 interface ODYardSectionProps {
   data: any;
-  onChange: (section: string, field: string, value: any) => void;
+  onChange: (field: string, value: any) => void;
   checklistId: string | null;
   userId: string;
 }
 
 export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSectionProps) => {
-  // CRITICAL: Pass 'section1_od_yard' as the section name
   const updateNested = (parent: string, field: string, value: any) => {
-    onChange("section1_od_yard", parent, (prevParentData: any) => ({
-      ...(prevParentData || {}),
-      [field]: value,
-    }));
-  };
-
-  // For top-level fields (like landscape_photo)
-  const updateTopLevel = (field: string, value: any) => {
-    onChange("section1_od_yard", field, value);
+    onChange(parent, { ...data[parent], [field]: value });
   };
 
   return (
@@ -211,7 +203,7 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
             <PhotoUpload
               label="Grass Growth Check"
               value={data.landscape_photo}
-              onChange={(url) => updateTopLevel("landscape_photo", url)}
+              onChange={(url) => onChange("landscape_photo", url)}
               required
               userId={userId}
               checklistId={checklistId || ""}
