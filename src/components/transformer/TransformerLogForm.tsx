@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -124,7 +124,7 @@ const getTransformerName = (number: number): string => {
 export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }: TransformerLogFormProps) {
   const { user } = useAuth();
   const [transformerNumber] = useState<number>(1); // Fixed to Power Transformer
-  const selectedDate = new Date(); // Always current date
+  const selectedDate = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []); // Memoized to prevent infinite re-renders
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
   const [formData, setFormData] = useState<TransformerData>(initialFormState);
   const [loggedHours, setLoggedHours] = useState<number[]>([]);
@@ -176,13 +176,11 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     
     // Clear form data immediately to prevent flash of wrong data
     setFormData(initialFormState);
-    
-    const dateString = format(selectedDate, 'yyyy-MM-dd');
 
     const { data: logs } = await supabase
       .from('transformer_logs')
       .select('hour')
-      .eq('date', dateString)
+      .eq('date', selectedDate)
       .eq('transformer_number', transformerNumber)
       .eq('user_id', user.id);
 
@@ -191,7 +189,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     const { data: hourData } = await supabase
       .from('transformer_logs')
       .select('*')
-      .eq('date', dateString)
+      .eq('date', selectedDate)
       .eq('hour', selectedHour)
       .eq('transformer_number', transformerNumber)
       .eq('user_id', user.id)
@@ -258,12 +256,11 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     }
 
     setIsSaving(true);
-    const dateString = format(selectedDate, 'yyyy-MM-dd');
 
     const payload = {
       user_id: user.id,
       transformer_number: transformerNumber,
-      date: dateString,
+      date: selectedDate,
       hour: selectedHour,
       frequency: formData.frequency ? parseFloat(formData.frequency) : null,
       voltage_ry: formData.voltage_ry ? parseFloat(formData.voltage_ry) : null,
