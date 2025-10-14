@@ -29,7 +29,7 @@ export const ChecklistModule4 = ({ checklistId, userId, data, onSave }: Module4P
       setFormData((prev: any) => {
         const merged = { ...prev };
 
-        // Merge section1_od_yard
+        // Merge section1_od_yard photos
         if (data.section1_od_yard) {
           Object.keys(data.section1_od_yard || {}).forEach((field) => {
             if (field.includes("photo") && data.section1_od_yard[field]) {
@@ -37,7 +37,7 @@ export const ChecklistModule4 = ({ checklistId, userId, data, onSave }: Module4P
               merged.section1_od_yard[field] = data.section1_od_yard[field];
             }
             // Also merge nested objects with photos
-            if (typeof data.section1_od_yard[field] === "object") {
+            if (typeof data.section1_od_yard[field] === "object" && data.section1_od_yard[field]) {
               Object.keys(data.section1_od_yard[field] || {}).forEach((subfield) => {
                 if (subfield.includes("photo") && data.section1_od_yard[field][subfield]) {
                   if (!merged.section1_od_yard) merged.section1_od_yard = {};
