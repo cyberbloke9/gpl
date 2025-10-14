@@ -94,7 +94,7 @@ export const ChecklistPrintView = forwardRef<HTMLDivElement, ChecklistPrintViewP
         {/* Module 1 - CORRECTED TITLE */}
         <div className="mb-8 page-break-inside-avoid">
           <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">
-            Module 1: Turbine, OPU & Cooling System
+            Module 1: Turbine, OPU and Cooling System
           </h2>
           <Module1DataDisplay data={checklist.module1_data || {}} flaggedIssues={flaggedIssues} />
         </div>
@@ -111,7 +111,7 @@ export const ChecklistPrintView = forwardRef<HTMLDivElement, ChecklistPrintViewP
           <Module3DataDisplay data={checklist.module3_data || {}} flaggedIssues={flaggedIssues} />
         </div>
 
-        {/* Module 4 - Already Correct */}
+        {/* Module 4 - ALREADY CORRECT */}
         <div className="mb-8 page-break-before">
           <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">Module 4: Electrical Systems</h2>
           <Module4DataDisplay data={checklist.module4_data || {}} flaggedIssues={flaggedIssues} />
