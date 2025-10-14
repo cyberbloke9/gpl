@@ -1,9 +1,9 @@
-import { forwardRef } from 'react';
-import { Module1DataDisplay } from '@/components/checklist/reports/Module1DataDisplay';
-import { Module2DataDisplay } from '@/components/checklist/reports/Module2DataDisplay';
-import { Module3DataDisplay } from '@/components/checklist/reports/Module3DataDisplay';
-import { Module4DataDisplay } from '@/components/checklist/reports/Module4DataDisplay';
-import { format } from 'date-fns';
+import { forwardRef } from "react";
+import { Module1DataDisplay } from "@/components/checklist/reports/Module1DataDisplay";
+import { Module2DataDisplay } from "@/components/checklist/reports/Module2DataDisplay";
+import { Module3DataDisplay } from "@/components/checklist/reports/Module3DataDisplay";
+import { Module4DataDisplay } from "@/components/checklist/reports/Module4DataDisplay";
+import { format } from "date-fns";
 
 interface ChecklistPrintViewProps {
   checklist: any;
@@ -21,20 +21,18 @@ export const ChecklistPrintView = forwardRef<HTMLDivElement, ChecklistPrintViewP
         {/* Header */}
         <div className="border-b-2 border-gray-800 pb-4 mb-6">
           <h1 className="text-3xl font-bold text-center mb-2">Daily Checklist Inspection Report</h1>
-          <p className="text-center text-sm text-gray-600">
-            Generated on {format(new Date(), 'PPpp')}
-          </p>
+          <p className="text-center text-sm text-gray-600">Generated on {format(new Date(), "PPpp")}</p>
         </div>
 
         {/* Summary Section */}
         <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-100 rounded">
           <div>
             <p className="text-sm font-semibold text-gray-600">Date</p>
-            <p className="text-lg">{format(new Date(checklist.date), 'MMMM d, yyyy')}</p>
+            <p className="text-lg">{format(new Date(checklist.date), "MMMM d, yyyy")}</p>
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-600">Shift</p>
-            <p className="text-lg">{checklist.shift || 'Not specified'}</p>
+            <p className="text-lg">{checklist.shift || "Not specified"}</p>
           </div>
           {userName && (
             <div>
@@ -50,25 +48,23 @@ export const ChecklistPrintView = forwardRef<HTMLDivElement, ChecklistPrintViewP
           )}
           <div>
             <p className="text-sm font-semibold text-gray-600">Start Time</p>
-            <p className="text-lg">
-              {checklist.start_time ? format(new Date(checklist.start_time), 'p') : 'N/A'}
-            </p>
+            <p className="text-lg">{checklist.start_time ? format(new Date(checklist.start_time), "p") : "N/A"}</p>
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-600">Completion Time</p>
             <p className="text-lg">
-              {checklist.completion_time ? format(new Date(checklist.completion_time), 'p') : 'N/A'}
+              {checklist.completion_time ? format(new Date(checklist.completion_time), "p") : "N/A"}
             </p>
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-600">Status</p>
             <p className="text-lg font-semibold text-green-600">
-              {checklist.submitted ? 'Submitted' : checklist.status || 'In Progress'}
+              {checklist.submitted ? "Submitted" : checklist.status || "In Progress"}
             </p>
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-600">Problems Detected</p>
-            <p className={`text-lg font-semibold ${checklist.problem_count > 0 ? 'text-red-600' : 'text-green-600'}`}>
+            <p className={`text-lg font-semibold ${checklist.problem_count > 0 ? "text-red-600" : "text-green-600"}`}>
               {checklist.problem_count || 0}
             </p>
           </div>
@@ -95,25 +91,27 @@ export const ChecklistPrintView = forwardRef<HTMLDivElement, ChecklistPrintViewP
           </div>
         )}
 
-        {/* Module 1 */}
+        {/* Module 1 - CORRECTED TITLE */}
         <div className="mb-8 page-break-inside-avoid">
-          <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">Module 1: Fire Protection</h2>
+          <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">
+            Module 1: Turbine, OPU & Cooling System
+          </h2>
           <Module1DataDisplay data={checklist.module1_data || {}} flaggedIssues={flaggedIssues} />
         </div>
 
-        {/* Module 2 */}
+        {/* Module 2 - CORRECTED TITLE */}
         <div className="mb-8 page-break-before">
-          <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">Module 2: Equipment Inspection</h2>
+          <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">Module 2: Generator</h2>
           <Module2DataDisplay data={checklist.module2_data || {}} flaggedIssues={flaggedIssues} />
         </div>
 
-        {/* Module 3 */}
+        {/* Module 3 - CORRECTED TITLE */}
         <div className="mb-8 page-break-before">
-          <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">Module 3: Safety & Operations</h2>
+          <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">Module 3: De-watering Sump</h2>
           <Module3DataDisplay data={checklist.module3_data || {}} flaggedIssues={flaggedIssues} />
         </div>
 
-        {/* Module 4 */}
+        {/* Module 4 - Already Correct */}
         <div className="mb-8 page-break-before">
           <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">Module 4: Electrical Systems</h2>
           <Module4DataDisplay data={checklist.module4_data || {}} flaggedIssues={flaggedIssues} />
@@ -186,7 +184,7 @@ export const ChecklistPrintView = forwardRef<HTMLDivElement, ChecklistPrintViewP
         </style>
       </div>
     );
-  }
+  },
 );
 
-ChecklistPrintView.displayName = 'ChecklistPrintView';
+ChecklistPrintView.displayName = "ChecklistPrintView";
