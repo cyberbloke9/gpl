@@ -150,6 +150,16 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   }, [selectedHour, isDirty, isFieldDisabled, isSaving, isFinalized]);
 
   useEffect(() => {
+    console.log('[Field Status]:', {
+      selectedHour,
+      currentHour,
+      isFinalized,
+      isFieldDisabled,
+      comparison: `${selectedHour} < ${currentHour} = ${selectedHour < currentHour}`,
+    });
+  }, [selectedHour, currentHour, isFinalized, isFieldDisabled]);
+
+  useEffect(() => {
     if (!user?.id) return;
     
     // Always load fresh data when hour changes
@@ -242,7 +252,10 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   };
 
   const saveLogEntry = async (showToast: boolean = true): Promise<boolean> => {
-    if (!user || isFieldDisabled) return;
+    if (!user || isFieldDisabled) {
+      console.log('[saveLogEntry] Blocked:', { user: !!user, isFieldDisabled });
+      return false;
+    }
 
     setIsSaving(true);
     const dateString = format(selectedDate, 'yyyy-MM-dd');
