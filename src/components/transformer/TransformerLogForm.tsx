@@ -7,6 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Textarea } from '@/components/ui/textarea';
 import { InputRow } from './InputRow';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -245,6 +246,47 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     }
   };
 
+  // === Validation Function ===
+  const validateForm = (): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+    
+    // Validate cos_phi (power factor must be 0-1)
+    if (formData.cos_phi) {
+      const cosPhi = parseFloat(formData.cos_phi);
+      if (isNaN(cosPhi) || cosPhi < 0 || cosPhi > 1) {
+        errors.push('Power Factor (COS Phi) must be between 0 and 1');
+      }
+    }
+    
+    // Validate frequency (should be around 50 Hz)
+    if (formData.frequency) {
+      const freq = parseFloat(formData.frequency);
+      if (isNaN(freq) || freq < 45 || freq > 55) {
+        errors.push('Frequency should be between 45-55 Hz');
+      }
+    }
+    
+    // Validate temperatures (reasonable ranges)
+    if (formData.oil_temperature) {
+      const temp = parseFloat(formData.oil_temperature);
+      if (isNaN(temp) || temp < 0 || temp > 150) {
+        errors.push('Oil temperature must be between 0-150°C');
+      }
+    }
+    
+    if (formData.winding_temperature) {
+      const temp = parseFloat(formData.winding_temperature);
+      if (isNaN(temp) || temp < 0 || temp > 200) {
+        errors.push('Winding temperature must be between 0-200°C');
+      }
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  };
+
   const saveLogEntry = async (showToast: boolean = true): Promise<boolean> => {
     if (!user) {
       console.error('[saveLogEntry] No user');
@@ -257,6 +299,20 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
         toast({
           title: 'Cannot Save',
           description: selectedHour < currentHour ? 'This hour has passed' : 'Logs are finalized',
+          variant: 'destructive',
+        });
+      }
+      return false;
+    }
+
+    // Validate before saving
+    const validation = validateForm();
+    if (!validation.isValid) {
+      console.error('[saveLogEntry] Validation failed:', validation.errors);
+      if (showToast) {
+        toast({
+          title: 'Validation Error',
+          description: validation.errors.join('. '),
           variant: 'destructive',
         });
       }
@@ -330,17 +386,32 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     setIsSaving(false);
 
     if (error) {
-      // ✅ LOG THE FULL ERROR DETAILS
       console.error('🔴 FULL SUPABASE ERROR:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
-      console.error('Error details:', error.details);
-      console.error('Error hint:', error.hint);
+      
+      let errorMessage = error.message || 'Failed to save log entry';
+      
+      // Parse check constraint violations (23514)
+      if (error.code === '23514') {
+        if (error.message.includes('cos_phi')) {
+          errorMessage = 'Power Factor (COS Phi) must be between 0 and 1';
+        } else if (error.message.includes('frequency')) {
+          errorMessage = 'Frequency must be within valid range';
+        } else if (error.message.includes('temperature')) {
+          errorMessage = 'Temperature value is out of valid range';
+        } else {
+          errorMessage = 'Invalid value detected. Please check all fields.';
+        }
+      }
+      
+      // Parse unique constraint violations (23505)
+      if (error.code === '23505') {
+        errorMessage = 'An entry for this hour already exists';
+      }
       
       if (showToast) {
         toast({
-          title: 'Database Error',
-          description: error.message || 'Failed to save log entry',
+          title: 'Cannot Save',
+          description: errorMessage,
           variant: 'destructive',
         });
       }
@@ -484,7 +555,37 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                 <InputRow label="MWH" value={formData.mwh} onChange={(v) => updateField('mwh', v)} disabled={isFieldDisabled} />
                 <InputRow label="MVARH" value={formData.mvarh} onChange={(v) => updateField('mvarh', v)} disabled={isFieldDisabled} />
                 <InputRow label="MVAH" value={formData.mvah} onChange={(v) => updateField('mvah', v)} disabled={isFieldDisabled} />
-                <InputRow label="COS Phi" value={formData.cos_phi} onChange={(v) => updateField('cos_phi', v)} disabled={isFieldDisabled} />
+                <div className="grid grid-cols-3 items-center gap-4 py-2 border-b">
+                  <label className="text-sm font-medium">COS Phi</label>
+                  <div className="col-span-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="1"
+                        inputMode="decimal"
+                        value={formData.cos_phi}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === '' || (parseFloat(value) >= 0 && parseFloat(value) <= 1)) {
+                            updateField('cos_phi', value);
+                          }
+                        }}
+                        disabled={isFieldDisabled}
+                        placeholder="0.00 - 1.00"
+                        className={`flex-1 text-sm h-9 sm:h-10 transition-all ${
+                          formData.cos_phi && (parseFloat(formData.cos_phi) < 0 || parseFloat(formData.cos_phi) > 1)
+                            ? 'bg-red-50 border-red-500 dark:bg-red-950'
+                            : ''
+                        }`}
+                      />
+                      {formData.cos_phi && (parseFloat(formData.cos_phi) < 0 || parseFloat(formData.cos_phi) > 1) && (
+                        <span className="text-xs text-red-600 whitespace-nowrap">0.00-1.00</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <InputRow label="Frequency" value={formData.frequency} onChange={(v) => updateField('frequency', v)} disabled={isFieldDisabled} unit="Hz" />
                 
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Temperature & Status</div>
