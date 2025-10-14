@@ -12,13 +12,19 @@ interface Module4Props {
 }
 
 export const ChecklistModule4 = ({ checklistId, userId, data, onSave }: Module4Props) => {
-  const [formData, setFormData] = useState(data);
+  const [formData, setFormData] = useState(data || {});
   const isInitialized = useRef(false);
+
+  // Debug: Log when data changes
+  useEffect(() => {
+    console.log("Module4 - Received data:", data);
+  }, [data]);
 
   // Only initialize once when component mounts
   useEffect(() => {
     if (!isInitialized.current) {
-      setFormData(data);
+      console.log("Module4 - Initializing with:", data);
+      setFormData(data || {});
       isInitialized.current = true;
     }
   }, []);
@@ -31,16 +37,17 @@ export const ChecklistModule4 = ({ checklistId, userId, data, onSave }: Module4P
 
         // Merge section1_od_yard photos
         if (data.section1_od_yard) {
+          if (!merged.section1_od_yard) merged.section1_od_yard = {};
+
           Object.keys(data.section1_od_yard || {}).forEach((field) => {
+            // Direct photo fields
             if (field.includes("photo") && data.section1_od_yard[field]) {
-              if (!merged.section1_od_yard) merged.section1_od_yard = {};
               merged.section1_od_yard[field] = data.section1_od_yard[field];
             }
-            // Also merge nested objects with photos
+            // Nested objects with photos
             if (typeof data.section1_od_yard[field] === "object" && data.section1_od_yard[field]) {
               Object.keys(data.section1_od_yard[field] || {}).forEach((subfield) => {
                 if (subfield.includes("photo") && data.section1_od_yard[field][subfield]) {
-                  if (!merged.section1_od_yard) merged.section1_od_yard = {};
                   if (!merged.section1_od_yard[field]) merged.section1_od_yard[field] = {};
                   merged.section1_od_yard[field][subfield] = data.section1_od_yard[field][subfield];
                 }
@@ -49,26 +56,44 @@ export const ChecklistModule4 = ({ checklistId, userId, data, onSave }: Module4P
           });
         }
 
+        console.log("Module4 - Merged state:", merged);
         return merged;
       });
     }
   }, [data]);
 
+  // Enhanced updateSection that handles both direct values and callback functions
   const updateSection = (section: string, field: string, value: any) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value,
-      },
-    }));
+    console.log("Module4 - updateSection:", { section, field, value });
+
+    setFormData((prev: any) => {
+      // If value is a function, call it with the current field data
+      const newFieldValue = typeof value === "function" ? value(prev[section]?.[field]) : value;
+
+      const updated = {
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: newFieldValue,
+        },
+      };
+
+      console.log("Module4 - Updated state:", updated);
+      return updated;
+    });
   };
 
   const isModule4Complete = () => {
     const odYardHasData = formData.section1_od_yard && Object.keys(formData.section1_od_yard).length > 0;
     const controlRoomHasData = formData.section2_control_room && Object.keys(formData.section2_control_room).length > 0;
 
+    console.log("Module4 - Completion check:", { odYardHasData, controlRoomHasData, formData });
     return odYardHasData && controlRoomHasData;
+  };
+
+  const handleSave = () => {
+    console.log("Module4 - Saving data:", formData);
+    onSave(formData);
   };
 
   return (
@@ -84,25 +109,38 @@ export const ChecklistModule4 = ({ checklistId, userId, data, onSave }: Module4P
             Control Room
           </TabsTrigger>
         </TabsList>
+
         <TabsContent value="od-yard">
           <ODYardSection
             data={formData.section1_od_yard || {}}
-            onChange={(field, value) => updateSection("section1_od_yard", field, value)}
+            onChange={updateSection}
             checklistId={checklistId}
             userId={userId}
           />
         </TabsContent>
+
         <TabsContent value="control-room">
           <ControlRoomSection
             data={formData.section2_control_room || {}}
-            onChange={(field, value) => updateSection("section2_control_room", field, value)}
+            onChange={updateSection}
             checklistId={checklistId}
           />
         </TabsContent>
       </Tabs>
-      <Button onClick={() => onSave(formData)} size="lg" className="w-full" disabled={!isModule4Complete()}>
+
+      <Button onClick={handleSave} size="lg" className="w-full" disabled={!isModule4Complete()}>
         Save Module 4
       </Button>
+
+      {/* Debug info - remove in production */}
+      {process.env.NODE_ENV === "development" && (
+        <div className="mt-4 p-4 bg-gray-100 rounded text-xs">
+          <p className="font-bold">Debug Info:</p>
+          <p>OD Yard data keys: {Object.keys(formData.section1_od_yard || {}).join(", ") || "none"}</p>
+          <p>Control Room data keys: {Object.keys(formData.section2_control_room || {}).join(", ") || "none"}</p>
+          <p>Complete: {isModule4Complete() ? "Yes" : "No"}</p>
+        </div>
+      )}
     </div>
   );
 };
