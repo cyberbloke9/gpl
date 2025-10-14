@@ -1,18 +1,18 @@
-import { useState, useEffect, useMemo } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Textarea } from '@/components/ui/textarea';
-import { InputRow } from './InputRow';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Save, Trash2 } from 'lucide-react';
-import { TimePicker } from '@/components/ui/time-picker';
+import { useState, useEffect, useMemo } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Textarea } from "@/components/ui/textarea";
+import { InputRow } from "./InputRow";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, Save, Trash2 } from "lucide-react";
+import { TimePicker } from "@/components/ui/time-picker";
 
 interface TransformerLogFormProps {
   isFinalized: boolean;
@@ -70,58 +70,58 @@ interface TransformerData {
 }
 
 const initialFormState: TransformerData = {
-  frequency: '',
-  voltage_ry: '',
-  voltage_yb: '',
-  voltage_rb: '',
-  current_r: '',
-  current_y: '',
-  current_b: '',
-  active_power: '',
-  reactive_power: '',
-  kva: '',
-  mwh: '',
-  mvarh: '',
-  mvah: '',
-  cos_phi: '',
-  oil_temperature: '',
-  winding_temperature: '',
-  oil_level: '',
-  tap_position: '',
-  tap_counter: '',
-  silica_gel_colour: '',
-  ltac_current_r: '',
-  ltac_current_y: '',
-  ltac_current_b: '',
-  ltac_voltage_ry: '',
-  ltac_voltage_yb: '',
-  ltac_voltage_rb: '',
-  ltac_kw: '',
-  ltac_kva: '',
-  ltac_kvar: '',
-  ltac_kwh: '',
-  ltac_kvah: '',
-  ltac_kvarh: '',
-  ltac_oil_temperature: '',
-  ltac_grid_fail_time: '',
-  ltac_grid_resume_time: '',
-  ltac_supply_interruption: '',
-  gen_total_generation: '',
-  gen_xmer_export: '',
-  gen_aux_consumption: '',
-  gen_main_export: '',
-  gen_check_export: '',
-  gen_main_import: '',
-  gen_check_import: '',
-  gen_standby_export: '',
-  gen_standby_import: '',
-  remarks: '',
+  frequency: "",
+  voltage_ry: "",
+  voltage_yb: "",
+  voltage_rb: "",
+  current_r: "",
+  current_y: "",
+  current_b: "",
+  active_power: "",
+  reactive_power: "",
+  kva: "",
+  mwh: "",
+  mvarh: "",
+  mvah: "",
+  cos_phi: "",
+  oil_temperature: "",
+  winding_temperature: "",
+  oil_level: "",
+  tap_position: "",
+  tap_counter: "",
+  silica_gel_colour: "",
+  ltac_current_r: "",
+  ltac_current_y: "",
+  ltac_current_b: "",
+  ltac_voltage_ry: "",
+  ltac_voltage_yb: "",
+  ltac_voltage_rb: "",
+  ltac_kw: "",
+  ltac_kva: "",
+  ltac_kvar: "",
+  ltac_kwh: "",
+  ltac_kvah: "",
+  ltac_kvarh: "",
+  ltac_oil_temperature: "",
+  ltac_grid_fail_time: "",
+  ltac_grid_resume_time: "",
+  ltac_supply_interruption: "",
+  gen_total_generation: "",
+  gen_xmer_export: "",
+  gen_aux_consumption: "",
+  gen_main_export: "",
+  gen_check_export: "",
+  gen_main_import: "",
+  gen_check_import: "",
+  gen_standby_export: "",
+  gen_standby_import: "",
+  remarks: "",
 };
 
 export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }: TransformerLogFormProps) {
   const { user } = useAuth();
   const transformerNumber = 1; // Unified transformer constant
-  const selectedDate = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []); // Memoized to prevent infinite re-renders
+  const selectedDate = useMemo(() => format(new Date(), "yyyy-MM-dd"), []); // Memoized to prevent infinite re-renders
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
   const [formData, setFormData] = useState<TransformerData>(initialFormState);
   const [loggedHours, setLoggedHours] = useState<number[]>([]);
@@ -130,13 +130,13 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
 
   const currentHour = new Date().getHours();
   const isToday = true; // Always today
-  
+
   // Calculate if fields should be disabled
   const isFieldDisabled = isFinalized || selectedHour < currentHour;
-  
+
   // Debug logging
   useEffect(() => {
-    console.log('[TransformerLog] State:', {
+    console.log("[TransformerLog] State:", {
       selectedHour,
       currentHour,
       isDirty,
@@ -147,7 +147,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   }, [selectedHour, isDirty, isFieldDisabled, isSaving, isFinalized]);
 
   useEffect(() => {
-    console.log('[Field Status]:', {
+    console.log("[Field Status]:", {
       selectedHour,
       currentHour,
       isFinalized,
@@ -158,10 +158,10 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
 
   useEffect(() => {
     if (!user?.id) return;
-    
+
     // Always load fresh data when hour changes
     loadHourData();
-    
+
     // Reset dirty flag when loading new hour
     setIsDirty(false);
   }, [selectedDate, selectedHour, transformerNumber, user?.id]);
@@ -170,76 +170,76 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     if (!user) return;
 
     setIsDirty(false); // Reset when loading new hour data
-    
+
     // Clear form data immediately to prevent flash of wrong data
     setFormData(initialFormState);
 
     const { data: logs } = await supabase
-      .from('transformer_logs')
-      .select('hour')
-      .eq('date', selectedDate)
-      .eq('transformer_number', transformerNumber)
-      .eq('user_id', user.id);
+      .from("transformer_logs")
+      .select("hour")
+      .eq("date", selectedDate)
+      .eq("transformer_number", transformerNumber)
+      .eq("user_id", user.id);
 
-    setLoggedHours(logs?.map(l => l.hour) || []);
+    setLoggedHours(logs?.map((l) => l.hour) || []);
 
     const { data: hourData } = await supabase
-      .from('transformer_logs')
-      .select('*')
-      .eq('date', selectedDate)
-      .eq('hour', selectedHour)
-      .eq('transformer_number', transformerNumber)
-      .eq('user_id', user.id)
+      .from("transformer_logs")
+      .select("*")
+      .eq("date", selectedDate)
+      .eq("hour", selectedHour)
+      .eq("transformer_number", transformerNumber)
+      .eq("user_id", user.id)
       .maybeSingle();
 
     if (hourData) {
       setFormData({
-        frequency: hourData.frequency?.toString() || '',
-        voltage_ry: hourData.voltage_ry?.toString() || '',
-        voltage_yb: hourData.voltage_yb?.toString() || '',
-        voltage_rb: hourData.voltage_rb?.toString() || '',
-        current_r: hourData.current_r?.toString() || '',
-        current_y: hourData.current_y?.toString() || '',
-        current_b: hourData.current_b?.toString() || '',
-        active_power: hourData.active_power?.toString() || '',
-        reactive_power: hourData.reactive_power?.toString() || '',
-        kva: hourData.kva?.toString() || '',
-        mwh: hourData.mwh?.toString() || '',
-        mvarh: hourData.mvarh?.toString() || '',
-        mvah: hourData.mvah?.toString() || '',
-        cos_phi: hourData.cos_phi?.toString() || '',
-        oil_temperature: hourData.oil_temperature?.toString() || '',
-        winding_temperature: hourData.winding_temperature?.toString() || '',
-        oil_level: hourData.oil_level || '',
-        tap_position: hourData.tap_position || '',
-        tap_counter: hourData.tap_counter?.toString() || '',
-        silica_gel_colour: hourData.silica_gel_colour || '',
-        ltac_current_r: hourData.ltac_current_r?.toString() || '',
-        ltac_current_y: hourData.ltac_current_y?.toString() || '',
-        ltac_current_b: hourData.ltac_current_b?.toString() || '',
-        ltac_voltage_ry: hourData.ltac_voltage_ry?.toString() || '',
-        ltac_voltage_yb: hourData.ltac_voltage_yb?.toString() || '',
-        ltac_voltage_rb: hourData.ltac_voltage_rb?.toString() || '',
-        ltac_kw: hourData.ltac_kw?.toString() || '',
-        ltac_kva: hourData.ltac_kva?.toString() || '',
-        ltac_kvar: hourData.ltac_kvar?.toString() || '',
-        ltac_kwh: hourData.ltac_kwh?.toString() || '',
-        ltac_kvah: hourData.ltac_kvah?.toString() || '',
-        ltac_kvarh: hourData.ltac_kvarh?.toString() || '',
-        ltac_oil_temperature: hourData.ltac_oil_temperature?.toString() || '',
-        ltac_grid_fail_time: hourData.ltac_grid_fail_time || '',
-        ltac_grid_resume_time: hourData.ltac_grid_resume_time || '',
-        ltac_supply_interruption: hourData.ltac_supply_interruption || '',
-        gen_total_generation: hourData.gen_total_generation?.toString() || '',
-        gen_xmer_export: hourData.gen_xmer_export?.toString() || '',
-        gen_aux_consumption: hourData.gen_aux_consumption?.toString() || '',
-        gen_main_export: hourData.gen_main_export?.toString() || '',
-        gen_check_export: hourData.gen_check_export?.toString() || '',
-        gen_main_import: hourData.gen_main_import?.toString() || '',
-        gen_check_import: hourData.gen_check_import?.toString() || '',
-        gen_standby_export: hourData.gen_standby_export?.toString() || '',
-        gen_standby_import: hourData.gen_standby_import?.toString() || '',
-        remarks: hourData.remarks || '',
+        frequency: hourData.frequency?.toString() || "",
+        voltage_ry: hourData.voltage_ry?.toString() || "",
+        voltage_yb: hourData.voltage_yb?.toString() || "",
+        voltage_rb: hourData.voltage_rb?.toString() || "",
+        current_r: hourData.current_r?.toString() || "",
+        current_y: hourData.current_y?.toString() || "",
+        current_b: hourData.current_b?.toString() || "",
+        active_power: hourData.active_power?.toString() || "",
+        reactive_power: hourData.reactive_power?.toString() || "",
+        kva: hourData.kva?.toString() || "",
+        mwh: hourData.mwh?.toString() || "",
+        mvarh: hourData.mvarh?.toString() || "",
+        mvah: hourData.mvah?.toString() || "",
+        cos_phi: hourData.cos_phi?.toString() || "",
+        oil_temperature: hourData.oil_temperature?.toString() || "",
+        winding_temperature: hourData.winding_temperature?.toString() || "",
+        oil_level: hourData.oil_level || "",
+        tap_position: hourData.tap_position || "",
+        tap_counter: hourData.tap_counter?.toString() || "",
+        silica_gel_colour: hourData.silica_gel_colour || "",
+        ltac_current_r: hourData.ltac_current_r?.toString() || "",
+        ltac_current_y: hourData.ltac_current_y?.toString() || "",
+        ltac_current_b: hourData.ltac_current_b?.toString() || "",
+        ltac_voltage_ry: hourData.ltac_voltage_ry?.toString() || "",
+        ltac_voltage_yb: hourData.ltac_voltage_yb?.toString() || "",
+        ltac_voltage_rb: hourData.ltac_voltage_rb?.toString() || "",
+        ltac_kw: hourData.ltac_kw?.toString() || "",
+        ltac_kva: hourData.ltac_kva?.toString() || "",
+        ltac_kvar: hourData.ltac_kvar?.toString() || "",
+        ltac_kwh: hourData.ltac_kwh?.toString() || "",
+        ltac_kvah: hourData.ltac_kvah?.toString() || "",
+        ltac_kvarh: hourData.ltac_kvarh?.toString() || "",
+        ltac_oil_temperature: hourData.ltac_oil_temperature?.toString() || "",
+        ltac_grid_fail_time: hourData.ltac_grid_fail_time || "",
+        ltac_grid_resume_time: hourData.ltac_grid_resume_time || "",
+        ltac_supply_interruption: hourData.ltac_supply_interruption || "",
+        gen_total_generation: hourData.gen_total_generation?.toString() || "",
+        gen_xmer_export: hourData.gen_xmer_export?.toString() || "",
+        gen_aux_consumption: hourData.gen_aux_consumption?.toString() || "",
+        gen_main_export: hourData.gen_main_export?.toString() || "",
+        gen_check_export: hourData.gen_check_export?.toString() || "",
+        gen_main_import: hourData.gen_main_import?.toString() || "",
+        gen_check_import: hourData.gen_check_import?.toString() || "",
+        gen_standby_export: hourData.gen_standby_export?.toString() || "",
+        gen_standby_import: hourData.gen_standby_import?.toString() || "",
+        remarks: hourData.remarks || "",
       });
     } else {
       setFormData(initialFormState);
@@ -249,57 +249,57 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   // === Validation Function ===
   const validateForm = (): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
-    
+
     // Validate cos_phi (power factor must be 0-1)
     if (formData.cos_phi) {
       const cosPhi = parseFloat(formData.cos_phi);
       if (isNaN(cosPhi) || cosPhi < 0 || cosPhi > 1) {
-        errors.push('Power Factor (COS Phi) must be between 0 and 1');
+        errors.push("Power Factor (COS Phi) must be between 0 and 1");
       }
     }
-    
+
     // Validate frequency (should be around 50 Hz)
     if (formData.frequency) {
       const freq = parseFloat(formData.frequency);
       if (isNaN(freq) || freq < 45 || freq > 55) {
-        errors.push('Frequency should be between 45-55 Hz');
+        errors.push("Frequency should be between 45-55 Hz");
       }
     }
-    
+
     // Validate temperatures (reasonable ranges)
     if (formData.oil_temperature) {
       const temp = parseFloat(formData.oil_temperature);
       if (isNaN(temp) || temp < 0 || temp > 150) {
-        errors.push('Oil temperature must be between 0-150°C');
+        errors.push("Oil temperature must be between 0-150°C");
       }
     }
-    
+
     if (formData.winding_temperature) {
       const temp = parseFloat(formData.winding_temperature);
       if (isNaN(temp) || temp < 0 || temp > 200) {
-        errors.push('Winding temperature must be between 0-200°C');
+        errors.push("Winding temperature must be between 0-200°C");
       }
     }
-    
+
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   };
 
   const saveLogEntry = async (showToast: boolean = true): Promise<boolean> => {
     if (!user) {
-      console.error('[saveLogEntry] No user');
+      console.error("[saveLogEntry] No user");
       return false;
     }
-    
+
     if (isFieldDisabled) {
-      console.error('[saveLogEntry] Fields are disabled');
+      console.error("[saveLogEntry] Fields are disabled");
       if (showToast) {
         toast({
-          title: 'Cannot Save',
-          description: selectedHour < currentHour ? 'This hour has passed' : 'Logs are finalized',
-          variant: 'destructive',
+          title: "Cannot Save",
+          description: selectedHour < currentHour ? "This hour has passed" : "Logs are finalized",
+          variant: "destructive",
         });
       }
       return false;
@@ -308,12 +308,12 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     // Validate before saving
     const validation = validateForm();
     if (!validation.isValid) {
-      console.error('[saveLogEntry] Validation failed:', validation.errors);
+      console.error("[saveLogEntry] Validation failed:", validation.errors);
       if (showToast) {
         toast({
-          title: 'Validation Error',
-          description: validation.errors.join('. '),
-          variant: 'destructive',
+          title: "Validation Error",
+          description: validation.errors.join(". "),
+          variant: "destructive",
         });
       }
       return false;
@@ -375,53 +375,51 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
       logged_at: new Date().toISOString(),
     };
 
-    console.log('📤 Sending payload:', payload);
+    console.log("📤 Sending payload:", payload);
 
-    const { data, error } = await supabase
-      .from('transformer_logs')
-      .upsert(payload, {
-        onConflict: 'date,hour,transformer_number,user_id',
-      });
+    const { data, error } = await supabase.from("transformer_logs").upsert(payload, {
+      onConflict: "date,hour,transformer_number,user_id",
+    });
 
     setIsSaving(false);
 
     if (error) {
-      console.error('🔴 FULL SUPABASE ERROR:', error);
-      
-      let errorMessage = error.message || 'Failed to save log entry';
-      
+      console.error("🔴 FULL SUPABASE ERROR:", error);
+
+      let errorMessage = error.message || "Failed to save log entry";
+
       // Parse check constraint violations (23514)
-      if (error.code === '23514') {
-        if (error.message.includes('cos_phi')) {
-          errorMessage = 'Power Factor (COS Phi) must be between 0 and 1';
-        } else if (error.message.includes('frequency')) {
-          errorMessage = 'Frequency must be within valid range';
-        } else if (error.message.includes('temperature')) {
-          errorMessage = 'Temperature value is out of valid range';
+      if (error.code === "23514") {
+        if (error.message.includes("cos_phi")) {
+          errorMessage = "Power Factor (COS Phi) must be between 0 and 1";
+        } else if (error.message.includes("frequency")) {
+          errorMessage = "Frequency must be within valid range";
+        } else if (error.message.includes("temperature")) {
+          errorMessage = "Temperature value is out of valid range";
         } else {
-          errorMessage = 'Invalid value detected. Please check all fields.';
+          errorMessage = "Invalid value detected. Please check all fields.";
         }
       }
-      
+
       // Parse unique constraint violations (23505)
-      if (error.code === '23505') {
-        errorMessage = 'An entry for this hour already exists';
+      if (error.code === "23505") {
+        errorMessage = "An entry for this hour already exists";
       }
-      
+
       if (showToast) {
         toast({
-          title: 'Cannot Save',
+          title: "Cannot Save",
           description: errorMessage,
-          variant: 'destructive',
+          variant: "destructive",
         });
       }
       return false;
     } else {
-      console.log('✅ Save successful!', data);
+      console.log("✅ Save successful!", data);
       setIsDirty(false);
       if (showToast) {
         toast({
-          title: 'Success',
+          title: "Success",
           description: `Hour ${selectedHour}:00 saved successfully`,
         });
       }
@@ -441,20 +439,20 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
       if (!saved) {
         // Save failed - show error and don't switch hours
         toast({
-          title: 'Save Failed',
-          description: 'Please fix any errors before switching hours',
-          variant: 'destructive',
+          title: "Save Failed",
+          description: "Please fix any errors before switching hours",
+          variant: "destructive",
         });
         return; // Don't switch hours
       }
     }
-    
+
     setIsDirty(false); // Reset dirty flag before switching hours
     setSelectedHour(hour); // This will trigger useEffect to load new hour data
   };
 
   const updateField = (field: keyof TransformerData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     setIsDirty(true); // Mark form as dirty when user types
   };
 
@@ -468,7 +466,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
           <div className="flex flex-col space-y-2">
             <CardTitle className="text-lg sm:text-xl">Unified Transformer Log Sheet</CardTitle>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Gayatri Power Private Limited • {format(selectedDate, 'PPP')}
+              Gayatri Power Private Limited • {format(selectedDate, "PPP")}
             </p>
           </div>
         </CardHeader>
@@ -486,10 +484,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
 
           <div className="space-y-2">
             <label className="text-xs sm:text-sm font-medium">Select Hour</label>
-            <Select
-              value={selectedHour.toString()}
-              onValueChange={(value) => handleHourChange(parseInt(value))}
-            >
+            <Select value={selectedHour.toString()} onValueChange={(value) => handleHourChange(parseInt(value))}>
               <SelectTrigger className="w-full h-9 sm:h-10 text-sm">
                 <SelectValue placeholder="Select hour" />
               </SelectTrigger>
@@ -498,25 +493,24 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                   const isFuture = isToday && hour > currentHour;
                   const isLogged = loggedHours.includes(hour);
                   const isCurrent = hour === currentHour && isToday;
-                  
+
                   return (
-                    <SelectItem 
-                      key={hour} 
-                      value={hour.toString()}
-                      disabled={isFuture}
-                      className="text-sm"
-                    >
+                    <SelectItem key={hour} value={hour.toString()} disabled={isFuture} className="text-sm">
                       <div className="flex items-center gap-2">
-                        <span>{hour.toString().padStart(2, '0')}:00</span>
+                        <span>{hour.toString().padStart(2, "0")}:00</span>
                         {isLogged && <CheckCircle2 className="h-3 w-3 text-green-600" />}
-                        {isCurrent && <Badge variant="outline" className="text-xs ml-2">Current</Badge>}
+                        {isCurrent && (
+                          <Badge variant="outline" className="text-xs ml-2">
+                            Current
+                          </Badge>
+                        )}
                       </div>
                     </SelectItem>
                   );
                 })}
               </SelectContent>
             </Select>
-            
+
             {/* Status indicator */}
             {selectedHour < currentHour && (
               <p className="text-xs text-muted-foreground">⏱ This hour has passed - viewing only</p>
@@ -530,31 +524,98 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
 
       <Card>
         <CardContent className="pt-4 sm:pt-6">
-          <Accordion type="multiple" defaultValue={['ptr', 'ltac', 'generation']} className="space-y-3 sm:space-y-4">
+          <Accordion type="multiple" defaultValue={["ptr", "ltac", "generation"]} className="space-y-3 sm:space-y-4">
             <AccordionItem value="ptr" className="border rounded-lg">
               <AccordionTrigger className="px-3 sm:px-4 py-2 sm:py-3 hover:no-underline">
-                <h3 className="text-sm sm:text-base font-semibold">
-                  PTR Feeder (3.2 MVA, 33 KV / 3.3 KV)
-                </h3>
+                <h3 className="text-sm sm:text-base font-semibold">PTR Feeder (3.2 MVA, 33 KV / 3.3 KV)</h3>
               </AccordionTrigger>
               <AccordionContent className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2 sm:space-y-3">
                 <div className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Current Readings</div>
-                <InputRow label="R Phase Current" value={formData.current_r} onChange={(v) => updateField('current_r', v)} disabled={isFieldDisabled} unit="A" />
-                <InputRow label="Y Phase Current" value={formData.current_y} onChange={(v) => updateField('current_y', v)} disabled={isFieldDisabled} unit="A" />
-                <InputRow label="B Phase Current" value={formData.current_b} onChange={(v) => updateField('current_b', v)} disabled={isFieldDisabled} unit="A" />
-                
+                <InputRow
+                  label="R Phase Current"
+                  value={formData.current_r}
+                  onChange={(v) => updateField("current_r", v)}
+                  disabled={isFieldDisabled}
+                  unit="A"
+                />
+                <InputRow
+                  label="Y Phase Current"
+                  value={formData.current_y}
+                  onChange={(v) => updateField("current_y", v)}
+                  disabled={isFieldDisabled}
+                  unit="A"
+                />
+                <InputRow
+                  label="B Phase Current"
+                  value={formData.current_b}
+                  onChange={(v) => updateField("current_b", v)}
+                  disabled={isFieldDisabled}
+                  unit="A"
+                />
+
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Voltage Readings</div>
-                <InputRow label="RY Phase Voltage" value={formData.voltage_ry} onChange={(v) => updateField('voltage_ry', v)} disabled={isFieldDisabled} unit="V" />
-                <InputRow label="YB Phase Voltage" value={formData.voltage_yb} onChange={(v) => updateField('voltage_yb', v)} disabled={isFieldDisabled} unit="V" />
-                <InputRow label="RB Phase Voltage" value={formData.voltage_rb} onChange={(v) => updateField('voltage_rb', v)} disabled={isFieldDisabled} unit="V" />
-                
+                <InputRow
+                  label="RY Phase Voltage"
+                  value={formData.voltage_ry}
+                  onChange={(v) => updateField("voltage_ry", v)}
+                  disabled={isFieldDisabled}
+                  unit="V"
+                />
+                <InputRow
+                  label="YB Phase Voltage"
+                  value={formData.voltage_yb}
+                  onChange={(v) => updateField("voltage_yb", v)}
+                  disabled={isFieldDisabled}
+                  unit="V"
+                />
+                <InputRow
+                  label="RB Phase Voltage"
+                  value={formData.voltage_rb}
+                  onChange={(v) => updateField("voltage_rb", v)}
+                  disabled={isFieldDisabled}
+                  unit="V"
+                />
+
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Power Measurements</div>
-                <InputRow label="Active Power" value={formData.active_power} onChange={(v) => updateField('active_power', v)} disabled={isFieldDisabled} unit="kW" />
-                <InputRow label="Reactive Power" value={formData.reactive_power} onChange={(v) => updateField('reactive_power', v)} disabled={isFieldDisabled} unit="kVAR" />
-                <InputRow label="Apparent Power" value={formData.kva} onChange={(v) => updateField('kva', v)} disabled={isFieldDisabled} unit="kVA" />
-                <InputRow label="MWH" value={formData.mwh} onChange={(v) => updateField('mwh', v)} disabled={isFieldDisabled} />
-                <InputRow label="MVARH" value={formData.mvarh} onChange={(v) => updateField('mvarh', v)} disabled={isFieldDisabled} />
-                <InputRow label="MVAH" value={formData.mvah} onChange={(v) => updateField('mvah', v)} disabled={isFieldDisabled} />
+                <InputRow
+                  label="Active Power"
+                  value={formData.active_power}
+                  onChange={(v) => updateField("active_power", v)}
+                  disabled={isFieldDisabled}
+                  unit="kW"
+                />
+                <InputRow
+                  label="Reactive Power"
+                  value={formData.reactive_power}
+                  onChange={(v) => updateField("reactive_power", v)}
+                  disabled={isFieldDisabled}
+                  unit="kVAR"
+                />
+                <InputRow
+                  label="Apparent Power"
+                  value={formData.kva}
+                  onChange={(v) => updateField("kva", v)}
+                  disabled={isFieldDisabled}
+                  unit="kVA"
+                />
+                <InputRow
+                  label="MWH"
+                  value={formData.mwh}
+                  onChange={(v) => updateField("mwh", v)}
+                  disabled={isFieldDisabled}
+                />
+                <InputRow
+                  label="MVARH"
+                  value={formData.mvarh}
+                  onChange={(v) => updateField("mvarh", v)}
+                  disabled={isFieldDisabled}
+                />
+                <InputRow
+                  label="MVAH"
+                  value={formData.mvah}
+                  onChange={(v) => updateField("mvah", v)}
+                  disabled={isFieldDisabled}
+                />
                 <div className="grid grid-cols-3 items-center gap-4 py-2 border-b">
                   <label className="text-sm font-medium">COS Phi</label>
                   <div className="col-span-2">
@@ -568,16 +629,16 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                         value={formData.cos_phi}
                         onChange={(e) => {
                           const value = e.target.value;
-                          if (value === '' || (parseFloat(value) >= 0 && parseFloat(value) <= 1)) {
-                            updateField('cos_phi', value);
+                          if (value === "" || (parseFloat(value) >= 0 && parseFloat(value) <= 1)) {
+                            updateField("cos_phi", value);
                           }
                         }}
                         disabled={isFieldDisabled}
                         placeholder="0.00 - 1.00"
                         className={`flex-1 text-sm h-9 sm:h-10 transition-all ${
                           formData.cos_phi && (parseFloat(formData.cos_phi) < 0 || parseFloat(formData.cos_phi) > 1)
-                            ? 'bg-red-50 border-red-500 dark:bg-red-950'
-                            : ''
+                            ? "bg-red-50 border-red-500 dark:bg-red-950"
+                            : ""
                         }`}
                       />
                       {formData.cos_phi && (parseFloat(formData.cos_phi) < 0 || parseFloat(formData.cos_phi) > 1) && (
@@ -586,20 +647,55 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                     </div>
                   </div>
                 </div>
-                <InputRow label="Frequency" value={formData.frequency} onChange={(v) => updateField('frequency', v)} disabled={isFieldDisabled} unit="Hz" />
-                
+                <InputRow
+                  label="Frequency"
+                  value={formData.frequency}
+                  onChange={(v) => updateField("frequency", v)}
+                  disabled={isFieldDisabled}
+                  unit="Hz"
+                />
+
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Temperature & Status</div>
-                <InputRow label="Winding Temperature" value={formData.winding_temperature} onChange={(v) => updateField('winding_temperature', v)} disabled={isFieldDisabled} unit="°C" />
-                <InputRow label="Oil Temperature" value={formData.oil_temperature} onChange={(v) => updateField('oil_temperature', v)} disabled={isFieldDisabled} unit="°C" />
-                <InputRow label="Oil Level" value={formData.oil_level} onChange={(v) => updateField('oil_level', v)} disabled={isFieldDisabled} type="text" />
-                <InputRow label="Tap Position" value={formData.tap_position} onChange={(v) => updateField('tap_position', v)} disabled={isFieldDisabled} type="text" />
-                <InputRow label="Tap Counter" value={formData.tap_counter} onChange={(v) => updateField('tap_counter', v)} disabled={isFieldDisabled} />
+                <InputRow
+                  label="Winding Temperature"
+                  value={formData.winding_temperature}
+                  onChange={(v) => updateField("winding_temperature", v)}
+                  disabled={isFieldDisabled}
+                  unit="°C"
+                />
+                <InputRow
+                  label="Oil Temperature"
+                  value={formData.oil_temperature}
+                  onChange={(v) => updateField("oil_temperature", v)}
+                  disabled={isFieldDisabled}
+                  unit="°C"
+                />
+                <InputRow
+                  label="Oil Level"
+                  value={formData.oil_level}
+                  onChange={(v) => updateField("oil_level", v)}
+                  disabled={isFieldDisabled}
+                  type="text"
+                />
+                <InputRow
+                  label="Tap Position"
+                  value={formData.tap_position}
+                  onChange={(v) => updateField("tap_position", v)}
+                  disabled={isFieldDisabled}
+                  type="text"
+                />
+                <InputRow
+                  label="Tap Counter"
+                  value={formData.tap_counter}
+                  onChange={(v) => updateField("tap_counter", v)}
+                  disabled={isFieldDisabled}
+                />
                 <div className="grid grid-cols-3 items-center gap-4 py-2 border-b">
                   <label className="text-sm font-medium">Silica Gel Colour</label>
                   <div className="col-span-2">
                     <Select
                       value={formData.silica_gel_colour}
-                      onValueChange={(value) => updateField('silica_gel_colour', value)}
+                      onValueChange={(value) => updateField("silica_gel_colour", value)}
                       disabled={isFieldDisabled}
                     >
                       <SelectTrigger className="w-full">
@@ -618,32 +714,106 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
 
             <AccordionItem value="ltac" className="border rounded-lg">
               <AccordionTrigger className="px-3 sm:px-4 py-2 sm:py-3 hover:no-underline">
-                <h3 className="text-sm sm:text-base font-semibold">
-                  LTAC Feeder (100 KVA, 33 KV / 0.433 KV)
-                </h3>
+                <h3 className="text-sm sm:text-base font-semibold">LTAC Feeder (100 KVA, 33 KV / 0.433 KV)</h3>
               </AccordionTrigger>
               <AccordionContent className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2 sm:space-y-3">
                 <div className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Current Readings</div>
-                <InputRow label="R Phase Current" value={formData.ltac_current_r} onChange={(v) => updateField('ltac_current_r', v)} disabled={isFieldDisabled} unit="A" />
-                <InputRow label="Y Phase Current" value={formData.ltac_current_y} onChange={(v) => updateField('ltac_current_y', v)} disabled={isFieldDisabled} unit="A" />
-                <InputRow label="B Phase Current" value={formData.ltac_current_b} onChange={(v) => updateField('ltac_current_b', v)} disabled={isFieldDisabled} unit="A" />
-                
+                <InputRow
+                  label="R Phase Current"
+                  value={formData.ltac_current_r}
+                  onChange={(v) => updateField("ltac_current_r", v)}
+                  disabled={isFieldDisabled}
+                  unit="A"
+                />
+                <InputRow
+                  label="Y Phase Current"
+                  value={formData.ltac_current_y}
+                  onChange={(v) => updateField("ltac_current_y", v)}
+                  disabled={isFieldDisabled}
+                  unit="A"
+                />
+                <InputRow
+                  label="B Phase Current"
+                  value={formData.ltac_current_b}
+                  onChange={(v) => updateField("ltac_current_b", v)}
+                  disabled={isFieldDisabled}
+                  unit="A"
+                />
+
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Voltage Readings</div>
-                <InputRow label="RY Phase Voltage" value={formData.ltac_voltage_ry} onChange={(v) => updateField('ltac_voltage_ry', v)} disabled={isFieldDisabled} unit="V" />
-                <InputRow label="YB Phase Voltage" value={formData.ltac_voltage_yb} onChange={(v) => updateField('ltac_voltage_yb', v)} disabled={isFieldDisabled} unit="V" />
-                <InputRow label="RB Phase Voltage" value={formData.ltac_voltage_rb} onChange={(v) => updateField('ltac_voltage_rb', v)} disabled={isFieldDisabled} unit="V" />
-                
+                <InputRow
+                  label="RY Phase Voltage"
+                  value={formData.ltac_voltage_ry}
+                  onChange={(v) => updateField("ltac_voltage_ry", v)}
+                  disabled={isFieldDisabled}
+                  unit="V"
+                />
+                <InputRow
+                  label="YB Phase Voltage"
+                  value={formData.ltac_voltage_yb}
+                  onChange={(v) => updateField("ltac_voltage_yb", v)}
+                  disabled={isFieldDisabled}
+                  unit="V"
+                />
+                <InputRow
+                  label="RB Phase Voltage"
+                  value={formData.ltac_voltage_rb}
+                  onChange={(v) => updateField("ltac_voltage_rb", v)}
+                  disabled={isFieldDisabled}
+                  unit="V"
+                />
+
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Power Measurements</div>
-                <InputRow label="Active Power" value={formData.ltac_kw} onChange={(v) => updateField('ltac_kw', v)} disabled={isFieldDisabled} unit="kW" />
-                <InputRow label="Apparent Power" value={formData.ltac_kva} onChange={(v) => updateField('ltac_kva', v)} disabled={isFieldDisabled} unit="kVA" />
-                <InputRow label="Reactive Power" value={formData.ltac_kvar} onChange={(v) => updateField('ltac_kvar', v)} disabled={isFieldDisabled} unit="kVAR" />
-                <InputRow label="KWH" value={formData.ltac_kwh} onChange={(v) => updateField('ltac_kwh', v)} disabled={isFieldDisabled} />
-                <InputRow label="KVAH" value={formData.ltac_kvah} onChange={(v) => updateField('ltac_kvah', v)} disabled={isFieldDisabled} />
-                <InputRow label="KVARH" value={formData.ltac_kvarh} onChange={(v) => updateField('ltac_kvarh', v)} disabled={isFieldDisabled} type="number" />
-                
+                <InputRow
+                  label="Active Power"
+                  value={formData.ltac_kw}
+                  onChange={(v) => updateField("ltac_kw", v)}
+                  disabled={isFieldDisabled}
+                  unit="kW"
+                />
+                <InputRow
+                  label="Apparent Power"
+                  value={formData.ltac_kva}
+                  onChange={(v) => updateField("ltac_kva", v)}
+                  disabled={isFieldDisabled}
+                  unit="kVA"
+                />
+                <InputRow
+                  label="Reactive Power"
+                  value={formData.ltac_kvar}
+                  onChange={(v) => updateField("ltac_kvar", v)}
+                  disabled={isFieldDisabled}
+                  unit="kVAR"
+                />
+                <InputRow
+                  label="KWH"
+                  value={formData.ltac_kwh}
+                  onChange={(v) => updateField("ltac_kwh", v)}
+                  disabled={isFieldDisabled}
+                />
+                <InputRow
+                  label="KVAH"
+                  value={formData.ltac_kvah}
+                  onChange={(v) => updateField("ltac_kvah", v)}
+                  disabled={isFieldDisabled}
+                />
+                <InputRow
+                  label="KVARH"
+                  value={formData.ltac_kvarh}
+                  onChange={(v) => updateField("ltac_kvarh", v)}
+                  disabled={isFieldDisabled}
+                  type="number"
+                />
+
                 <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">Temperature & Grid Status</div>
-                <InputRow label="Oil Temperature" value={formData.ltac_oil_temperature} onChange={(v) => updateField('ltac_oil_temperature', v)} disabled={isFieldDisabled} unit="°C" />
-                
+                <InputRow
+                  label="Oil Temperature"
+                  value={formData.ltac_oil_temperature}
+                  onChange={(v) => updateField("ltac_oil_temperature", v)}
+                  disabled={isFieldDisabled}
+                  unit="°C"
+                />
+
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                   <label className="text-xs sm:text-sm font-medium text-foreground sm:w-36 md:w-40 flex-shrink-0">
                     Grid Fail Time
@@ -651,13 +821,13 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                   <div className="flex-1">
                     <TimePicker
                       value={formData.ltac_grid_fail_time}
-                      onChange={(v) => updateField('ltac_grid_fail_time', v)}
+                      onChange={(v) => updateField("ltac_grid_fail_time", v)}
                       disabled={isFieldDisabled}
                       placeholder="Select fail time"
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                   <label className="text-xs sm:text-sm font-medium text-foreground sm:w-36 md:w-40 flex-shrink-0">
                     Grid Resume Time
@@ -665,33 +835,84 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                   <div className="flex-1">
                     <TimePicker
                       value={formData.ltac_grid_resume_time}
-                      onChange={(v) => updateField('ltac_grid_resume_time', v)}
+                      onChange={(v) => updateField("ltac_grid_resume_time", v)}
                       disabled={isFieldDisabled}
                       placeholder="Select resume time"
                     />
                   </div>
                 </div>
-                
-                <InputRow label="Supply Interruption" value={formData.ltac_supply_interruption} onChange={(v) => updateField('ltac_supply_interruption', v)} disabled={isFieldDisabled} type="text" />
+
+                <InputRow
+                  label="Supply Interruption"
+                  value={formData.ltac_supply_interruption}
+                  onChange={(v) => updateField("ltac_supply_interruption", v)}
+                  disabled={isFieldDisabled}
+                  type="text"
+                />
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="generation" className="border rounded-lg">
               <AccordionTrigger className="px-3 sm:px-4 py-2 sm:py-3 hover:no-underline">
-                <h3 className="text-sm sm:text-base font-semibold">
-                  Generation Details
-                </h3>
+                <h3 className="text-sm sm:text-base font-semibold">Generation Details</h3>
               </AccordionTrigger>
               <AccordionContent className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2 sm:space-y-3">
-                <InputRow label="Total Generation" value={formData.gen_total_generation} onChange={(v) => updateField('gen_total_generation', v)} disabled={isFieldDisabled} />
-                <InputRow label="X'MER Export" value={formData.gen_xmer_export} onChange={(v) => updateField('gen_xmer_export', v)} disabled={isFieldDisabled} />
-                <InputRow label="AUX Consumption" value={formData.gen_aux_consumption} onChange={(v) => updateField('gen_aux_consumption', v)} disabled={isFieldDisabled} />
-                <InputRow label="GPL Main Export" value={formData.gen_main_export} onChange={(v) => updateField('gen_main_export', v)} disabled={isFieldDisabled} />
-                <InputRow label="GPL Check Export" value={formData.gen_check_export} onChange={(v) => updateField('gen_check_export', v)} disabled={isFieldDisabled} type="number" />
-                <InputRow label="GPL Main Import" value={formData.gen_main_import} onChange={(v) => updateField('gen_main_import', v)} disabled={isFieldDisabled} />
-                <InputRow label="GPL Check Import" value={formData.gen_check_import} onChange={(v) => updateField('gen_check_import', v)} disabled={isFieldDisabled} />
-                <InputRow label="GPL Standby Export" value={formData.gen_standby_export} onChange={(v) => updateField('gen_standby_export', v)} disabled={isFieldDisabled} />
-                <InputRow label="GPL Standby Import" value={formData.gen_standby_import} onChange={(v) => updateField('gen_standby_import', v)} disabled={isFieldDisabled} type="number" />
+                <InputRow
+                  label="Total Generation"
+                  value={formData.gen_total_generation}
+                  onChange={(v) => updateField("gen_total_generation", v)}
+                  disabled={isFieldDisabled}
+                />
+                <InputRow
+                  label="X'MER Export"
+                  value={formData.gen_xmer_export}
+                  onChange={(v) => updateField("gen_xmer_export", v)}
+                  disabled={isFieldDisabled}
+                />
+                <InputRow
+                  label="AUX Consumption"
+                  value={formData.gen_aux_consumption}
+                  onChange={(v) => updateField("gen_aux_consumption", v)}
+                  disabled={isFieldDisabled}
+                />
+                <InputRow
+                  label="GPL Main Export"
+                  value={formData.gen_main_export}
+                  onChange={(v) => updateField("gen_main_export", v)}
+                  disabled={isFieldDisabled}
+                />
+                <InputRow
+                  label="GPL Check Export"
+                  value={formData.gen_check_export}
+                  onChange={(v) => updateField("gen_check_export", v)}
+                  disabled={isFieldDisabled}
+                  type="number"
+                />
+                <InputRow
+                  label="GPL Main Import"
+                  value={formData.gen_main_import}
+                  onChange={(v) => updateField("gen_main_import", v)}
+                  disabled={isFieldDisabled}
+                />
+                <InputRow
+                  label="GPL Check Import"
+                  value={formData.gen_check_import}
+                  onChange={(v) => updateField("gen_check_import", v)}
+                  disabled={isFieldDisabled}
+                />
+                <InputRow
+                  label="GPL Standby Export"
+                  value={formData.gen_standby_export}
+                  onChange={(v) => updateField("gen_standby_export", v)}
+                  disabled={isFieldDisabled}
+                />
+                <InputRow
+                  label="GPL Standby Import"
+                  value={formData.gen_standby_import}
+                  onChange={(v) => updateField("gen_standby_import", v)}
+                  disabled={isFieldDisabled}
+                  type="number"
+                />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -700,7 +921,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
             <label className="text-xs sm:text-sm font-medium">Remarks</label>
             <Textarea
               value={formData.remarks}
-              onChange={(e) => updateField('remarks', e.target.value)}
+              onChange={(e) => updateField("remarks", e.target.value)}
               disabled={isFieldDisabled}
               placeholder="Add any observations or notes..."
               className="min-h-[60px] sm:min-h-[80px] text-sm"
@@ -722,7 +943,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
               <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Clear Data
             </Button>
-            
+
             <Button
               size="sm"
               onClick={() => saveLogEntry(true)}
@@ -730,7 +951,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
               className="flex-1 sm:flex-none sm:min-w-[140px] h-9 sm:h-10 text-xs sm:text-sm bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50"
             >
               <Save className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-              {isSaving ? 'Saving...' : 'Save Log Entry'}
+              {isSaving ? "Saving..." : "Save Log Entry"}
             </Button>
           </div>
         </div>
