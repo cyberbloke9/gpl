@@ -16,7 +16,7 @@ import { TimePicker } from '@/components/ui/time-picker';
 interface TransformerLogFormProps {
   isFinalized: boolean;
   onDateChange: (date: string) => void;
-  onFinalizeDay: (transformerNumber: number) => void;
+  onFinalizeDay: () => void;
 }
 
 interface TransformerData {
@@ -117,13 +117,9 @@ const initialFormState: TransformerData = {
   remarks: '',
 };
 
-const getTransformerName = (number: number): string => {
-  return number === 1 ? 'Power Transformer' : 'Auxiliary Transformer';
-};
-
 export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }: TransformerLogFormProps) {
   const { user } = useAuth();
-  const [transformerNumber] = useState<number>(1); // Fixed to Power Transformer
+  const transformerNumber = 1; // Unified transformer constant
   const selectedDate = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []); // Memoized to prevent infinite re-renders
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
   const [formData, setFormData] = useState<TransformerData>(initialFormState);
@@ -250,8 +246,28 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   };
 
   const saveLogEntry = async (showToast: boolean = true): Promise<boolean> => {
-    if (!user || isFieldDisabled) {
-      console.log('[saveLogEntry] Blocked:', { user: !!user, isFieldDisabled });
+    if (!user) {
+      console.error('[saveLogEntry] No authenticated user');
+      return false;
+    }
+    
+    if (isFieldDisabled) {
+      console.log('[saveLogEntry] Fields disabled:', { 
+        isFinalized, 
+        selectedHour, 
+        currentHour,
+        reason: isFinalized ? 'Day finalized' : 'Hour has passed'
+      });
+      
+      if (showToast) {
+        toast({
+          title: 'Cannot Save',
+          description: isFinalized 
+            ? 'This day has been finalized and cannot be edited' 
+            : `Hour ${selectedHour}:00 has passed. You can only edit the current hour (${currentHour}:00).`,
+          variant: 'destructive',
+        });
+      }
       return false;
     }
 
@@ -427,7 +443,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
       <Card>
         <CardHeader className="pb-3 sm:pb-4">
           <div className="flex flex-col space-y-2">
-            <CardTitle className="text-lg sm:text-xl">Transformer Log Sheet - Power Transformer</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Unified Transformer Log Sheet</CardTitle>
             <p className="text-xs sm:text-sm text-muted-foreground">
               Gayatri Power Private Limited • {format(selectedDate, 'PPP')}
             </p>
@@ -477,6 +493,14 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                 })}
               </SelectContent>
             </Select>
+            
+            {/* Status indicator */}
+            {selectedHour < currentHour && (
+              <p className="text-xs text-muted-foreground">⏱ This hour has passed - viewing only</p>
+            )}
+            {selectedHour === currentHour && !isFinalized && (
+              <p className="text-xs text-green-600">✓ Current hour - editable until {currentHour}:59</p>
+            )}
           </div>
         </CardContent>
       </Card>
