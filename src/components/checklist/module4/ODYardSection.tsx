@@ -1,6 +1,5 @@
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { NumericInput } from "../NumericInput";
 import { PhotoUpload } from "../PhotoUpload";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -14,8 +13,12 @@ interface ODYardSectionProps {
 }
 
 export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSectionProps) => {
+  // Use callback to get fresh state
   const updateNested = (parent: string, field: string, value: any) => {
-    onChange(parent, { ...data[parent], [field]: value });
+    onChange(parent, (prevParentData: any) => ({
+      ...(prevParentData || {}),
+      [field]: value,
+    }));
   };
 
   return (
