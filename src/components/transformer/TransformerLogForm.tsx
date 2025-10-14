@@ -640,6 +640,57 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
 
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-40 px-3 sm:px-4 py-2 sm:py-3">
         <div className="container mx-auto max-w-7xl">
+          {/* DEBUG PANEL */}
+          <div className="mb-3 p-3 bg-yellow-50 dark:bg-yellow-950 rounded border text-xs space-y-1">
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <strong>isSaving:</strong> <span className={isSaving ? 'text-red-600' : 'text-green-600'}>{isSaving.toString()}</span>
+              </div>
+              <div>
+                <strong>isFieldDisabled:</strong> <span className={isFieldDisabled ? 'text-red-600' : 'text-green-600'}>{isFieldDisabled.toString()}</span>
+              </div>
+              <div>
+                <strong>isFormComplete:</strong> <span className={isFormComplete() ? 'text-green-600' : 'text-red-600'}>{isFormComplete().toString()}</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div><strong>selectedHour:</strong> {selectedHour}</div>
+              <div><strong>currentHour:</strong> {currentHour}</div>
+              <div><strong>Filled:</strong> {Object.values(formData).filter(v => v !== '').length}/45</div>
+            </div>
+            
+            {/* Show empty fields if form is incomplete */}
+            {!isFormComplete() && (
+              <details className="mt-2">
+                <summary className="cursor-pointer font-bold text-red-600">
+                  ⚠️ Empty Fields ({Object.values(formData).filter(v => v === '').length})
+                </summary>
+                <div className="mt-1 p-2 bg-white dark:bg-gray-800 rounded max-h-32 overflow-y-auto">
+                  {Object.entries(formData)
+                    .filter(([key, value]) => value === '')
+                    .map(([key]) => (
+                      <div key={key} className="text-red-600">• {key}</div>
+                    ))}
+                </div>
+              </details>
+            )}
+            
+            {/* Show WHY button is disabled */}
+            <div className="mt-2 font-bold">
+              {(isSaving || isFieldDisabled || !isFormComplete()) ? (
+                <span className="text-red-600">
+                  ❌ Button Disabled Because: 
+                  {isSaving && ' SAVING'}
+                  {isFieldDisabled && ' FIELD_DISABLED'}
+                  {!isFormComplete() && ' FORM_INCOMPLETE'}
+                </span>
+              ) : (
+                <span className="text-green-600">✅ Button Should Be Enabled!</span>
+              )}
+            </div>
+          </div>
+
+          {/* BUTTONS */}
           <div className="flex items-center justify-between gap-2 sm:gap-3">
             <Button
               size="sm"
@@ -649,17 +700,29 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
               className="flex-1 sm:flex-none sm:min-w-[140px] h-9 sm:h-10 text-xs sm:text-sm"
             >
               <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-              Delete Data
+              Clear Data
             </Button>
             
             <Button
               size="sm"
-              onClick={() => saveLogEntry(true)}
+              onClick={() => {
+                console.log('🔴 BUTTON CLICKED');
+                console.log('Debug State:', {
+                  isSaving,
+                  isFieldDisabled,
+                  isFormComplete: isFormComplete(),
+                  user: user?.id,
+                  selectedHour,
+                  currentHour,
+                  formData,
+                });
+                saveLogEntry(true);
+              }}
               disabled={isSaving || isFieldDisabled || !isFormComplete()}
               className="flex-1 sm:flex-none sm:min-w-[140px] h-9 sm:h-10 text-xs sm:text-sm bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50"
             >
               <Save className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-              {isSaving ? 'Logging...' : 'Log Entry'}
+              {isSaving ? 'Saving...' : 'Save Log Entry'}
             </Button>
           </div>
         </div>
