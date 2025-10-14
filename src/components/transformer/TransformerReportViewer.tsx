@@ -78,6 +78,15 @@ export function TransformerReportViewer({ isOpen, onClose, report, userName, emp
   const printRef = useRef<HTMLDivElement>(null);
   const [flaggedIssues, setFlaggedIssues] = useState<any[]>([]);
 
+  // Helper functions for default values
+  const displayValue = (value: number | null | undefined): string => {
+    return value !== null && value !== undefined ? value.toString() : '0';
+  };
+
+  const displayText = (value: string | null | undefined): string => {
+    return value || '-';
+  };
+
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: report ? `Unified_Transformer_Report_${report.date}` : 'Unified_Transformer_Report',
@@ -197,24 +206,24 @@ export function TransformerReportViewer({ isOpen, onClose, report, userName, emp
                           <TableCell>
                             {log ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <span className="text-xs text-muted-foreground">Not logged</span>}
                           </TableCell>
-                          <TableCell>{log?.frequency?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.voltage_ry?.toFixed(1) || '-'}</TableCell>
-                          <TableCell>{log?.voltage_yb?.toFixed(1) || '-'}</TableCell>
-                          <TableCell>{log?.voltage_rb?.toFixed(1) || '-'}</TableCell>
-                          <TableCell>{log?.current_r?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.current_y?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.current_b?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.active_power?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.reactive_power?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.kva?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.mwh?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.mvarh?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.mvah?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.cos_phi?.toFixed(3) || '-'}</TableCell>
-                          <TableCell>{log?.oil_temperature?.toFixed(1) || '-'}</TableCell>
-                          <TableCell>{log?.winding_temperature?.toFixed(1) || '-'}</TableCell>
-                          <TableCell>{log?.oil_level || '-'}</TableCell>
-                          <TableCell>{log?.tap_position || '-'}</TableCell>
+                          <TableCell>{log?.frequency ? log.frequency.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.voltage_ry ? log.voltage_ry.toFixed(1) : '0'}</TableCell>
+                          <TableCell>{log?.voltage_yb ? log.voltage_yb.toFixed(1) : '0'}</TableCell>
+                          <TableCell>{log?.voltage_rb ? log.voltage_rb.toFixed(1) : '0'}</TableCell>
+                          <TableCell>{log?.current_r ? log.current_r.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.current_y ? log.current_y.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.current_b ? log.current_b.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.active_power ? log.active_power.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.reactive_power ? log.reactive_power.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.kva ? log.kva.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.mwh ? log.mwh.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.mvarh ? log.mvarh.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.mvah ? log.mvah.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.cos_phi ? log.cos_phi.toFixed(3) : '0'}</TableCell>
+                          <TableCell>{log?.oil_temperature ? log.oil_temperature.toFixed(1) : '0'}</TableCell>
+                          <TableCell>{log?.winding_temperature ? log.winding_temperature.toFixed(1) : '0'}</TableCell>
+                          <TableCell>{displayText(log?.oil_level)}</TableCell>
+                          <TableCell>{displayText(log?.tap_position)}</TableCell>
                         </TableRow>
                       );
                     })}
@@ -258,21 +267,21 @@ export function TransformerReportViewer({ isOpen, onClose, report, userName, emp
                           <TableCell>
                             {log ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <span className="text-xs text-muted-foreground">Not logged</span>}
                           </TableCell>
-                          <TableCell>{log?.ltac_current_r?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.ltac_current_y?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.ltac_current_b?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.ltac_voltage_ry?.toFixed(1) || '-'}</TableCell>
-                          <TableCell>{log?.ltac_voltage_yb?.toFixed(1) || '-'}</TableCell>
-                          <TableCell>{log?.ltac_voltage_rb?.toFixed(1) || '-'}</TableCell>
-                          <TableCell>{log?.ltac_kw?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.ltac_kva?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.ltac_kvar?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.ltac_kwh?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.ltac_kvah?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.ltac_kvarh?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.ltac_oil_temperature?.toFixed(1) || '-'}</TableCell>
-                          <TableCell>{log?.ltac_grid_fail_time || '-'}</TableCell>
-                          <TableCell>{log?.ltac_grid_resume_time || '-'}</TableCell>
+                          <TableCell>{log?.ltac_current_r ? log.ltac_current_r.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.ltac_current_y ? log.ltac_current_y.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.ltac_current_b ? log.ltac_current_b.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.ltac_voltage_ry ? log.ltac_voltage_ry.toFixed(1) : '0'}</TableCell>
+                          <TableCell>{log?.ltac_voltage_yb ? log.ltac_voltage_yb.toFixed(1) : '0'}</TableCell>
+                          <TableCell>{log?.ltac_voltage_rb ? log.ltac_voltage_rb.toFixed(1) : '0'}</TableCell>
+                          <TableCell>{log?.ltac_kw ? log.ltac_kw.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.ltac_kva ? log.ltac_kva.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.ltac_kvar ? log.ltac_kvar.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.ltac_kwh ? log.ltac_kwh.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.ltac_kvah ? log.ltac_kvah.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.ltac_kvarh ? log.ltac_kvarh.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.ltac_oil_temperature ? log.ltac_oil_temperature.toFixed(1) : '0'}</TableCell>
+                          <TableCell>{displayText(log?.ltac_grid_fail_time)}</TableCell>
+                          <TableCell>{displayText(log?.ltac_grid_resume_time)}</TableCell>
                         </TableRow>
                       );
                     })}
@@ -311,16 +320,16 @@ export function TransformerReportViewer({ isOpen, onClose, report, userName, emp
                           <TableCell>
                             {log ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <span className="text-xs text-muted-foreground">Not logged</span>}
                           </TableCell>
-                          <TableCell>{log?.gen_total_generation?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.gen_xmer_export?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.gen_aux_consumption?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.gen_main_export?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.gen_check_export?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.gen_main_import?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.gen_check_import?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.gen_standby_export?.toFixed(2) || '-'}</TableCell>
-                          <TableCell>{log?.gen_standby_import?.toFixed(2) || '-'}</TableCell>
-                          <TableCell className="max-w-xs truncate">{log?.remarks || '-'}</TableCell>
+                          <TableCell>{log?.gen_total_generation ? log.gen_total_generation.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.gen_xmer_export ? log.gen_xmer_export.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.gen_aux_consumption ? log.gen_aux_consumption.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.gen_main_export ? log.gen_main_export.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.gen_check_export ? log.gen_check_export.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.gen_main_import ? log.gen_main_import.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.gen_check_import ? log.gen_check_import.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.gen_standby_export ? log.gen_standby_export.toFixed(2) : '0'}</TableCell>
+                          <TableCell>{log?.gen_standby_import ? log.gen_standby_import.toFixed(2) : '0'}</TableCell>
+                          <TableCell className="max-w-xs truncate">{displayText(log?.remarks)}</TableCell>
                         </TableRow>
                       );
                     })}

@@ -65,6 +65,15 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
     const allHours = Array.from({ length: 24 }, (_, i) => i);
     const logsByHour = new Map(logs.map(log => [log.hour, log]));
 
+    // Helper functions for default values
+    const displayValue = (value: number | null | undefined): string => {
+      return value !== null && value !== undefined ? value.toString() : '0';
+    };
+
+    const displayText = (value: string | null | undefined): string => {
+      return value || '-';
+    };
+
     const getIssue = (hour: number, field: string) => {
       return flaggedIssues.find(issue => 
         issue.item?.includes(`Hour ${hour}`) &&
@@ -169,18 +178,18 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                 return (
                   <tr key={hour} className={issue ? getSeverityColor(issue.severity) : ''}>
                     <td className="border border-gray-400 p-1 text-center font-medium">{hour.toString().padStart(2, '0')}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.frequency?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_ry?.toFixed(1) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_yb?.toFixed(1) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_rb?.toFixed(1) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.current_r?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.current_y?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.current_b?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.active_power?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.reactive_power?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.kva?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.oil_temperature?.toFixed(1) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.winding_temperature?.toFixed(1) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.frequency ? log.frequency.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_ry ? log.voltage_ry.toFixed(1) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_yb ? log.voltage_yb.toFixed(1) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.voltage_rb ? log.voltage_rb.toFixed(1) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_r ? log.current_r.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_y ? log.current_y.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.current_b ? log.current_b.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.active_power ? log.active_power.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.reactive_power ? log.reactive_power.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.kva ? log.kva.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.oil_temperature ? log.oil_temperature.toFixed(1) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.winding_temperature ? log.winding_temperature.toFixed(1) : '0'}</td>
                   </tr>
                 );
               })}
@@ -215,16 +224,16 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                 return (
                   <tr key={hour}>
                     <td className="border border-gray-400 p-1 text-center font-medium">{hour.toString().padStart(2, '0')}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_r?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_y?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_b?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_ry?.toFixed(1) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_yb?.toFixed(1) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_rb?.toFixed(1) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kw?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kva?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kvar?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_oil_temperature?.toFixed(1) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_r ? log.ltac_current_r.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_y ? log.ltac_current_y.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_current_b ? log.ltac_current_b.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_ry ? log.ltac_voltage_ry.toFixed(1) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_yb ? log.ltac_voltage_yb.toFixed(1) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_voltage_rb ? log.ltac_voltage_rb.toFixed(1) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kw ? log.ltac_kw.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kva ? log.ltac_kva.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_kvar ? log.ltac_kvar.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.ltac_oil_temperature ? log.ltac_oil_temperature.toFixed(1) : '0'}</td>
                   </tr>
                 );
               })}
@@ -256,15 +265,15 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
                 return (
                   <tr key={hour}>
                     <td className="border border-gray-400 p-1 text-center font-medium">{hour.toString().padStart(2, '0')}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_total_generation?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_xmer_export?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_aux_consumption?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_main_export?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_check_export?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_main_import?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_check_import?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_standby_export?.toFixed(2) || '-'}</td>
-                    <td className="border border-gray-400 p-1 text-center">{log?.gen_standby_import?.toFixed(2) || '-'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_total_generation ? log.gen_total_generation.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_xmer_export ? log.gen_xmer_export.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_aux_consumption ? log.gen_aux_consumption.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_main_export ? log.gen_main_export.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_check_export ? log.gen_check_export.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_main_import ? log.gen_main_import.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_check_import ? log.gen_check_import.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_standby_export ? log.gen_standby_export.toFixed(2) : '0'}</td>
+                    <td className="border border-gray-400 p-1 text-center">{log?.gen_standby_import ? log.gen_standby_import.toFixed(2) : '0'}</td>
                   </tr>
                 );
               })}

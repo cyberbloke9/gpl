@@ -388,56 +388,6 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   };
 
   // Check if all required fields are filled
-  const isFormComplete = () => {
-    return (
-      formData.frequency !== '' &&
-      formData.voltage_ry !== '' &&
-      formData.voltage_yb !== '' &&
-      formData.voltage_rb !== '' &&
-      formData.current_r !== '' &&
-      formData.current_y !== '' &&
-      formData.current_b !== '' &&
-      formData.active_power !== '' &&
-      formData.reactive_power !== '' &&
-      formData.kva !== '' &&
-      formData.mwh !== '' &&
-      formData.mvarh !== '' &&
-      formData.mvah !== '' &&
-      formData.cos_phi !== '' &&
-      formData.oil_temperature !== '' &&
-      formData.winding_temperature !== '' &&
-      formData.oil_level !== '' &&
-      formData.tap_position !== '' &&
-      formData.tap_counter !== '' &&
-      formData.silica_gel_colour !== '' &&
-      formData.ltac_current_r !== '' &&
-      formData.ltac_current_y !== '' &&
-      formData.ltac_current_b !== '' &&
-      formData.ltac_voltage_ry !== '' &&
-      formData.ltac_voltage_yb !== '' &&
-      formData.ltac_voltage_rb !== '' &&
-      formData.ltac_kw !== '' &&
-      formData.ltac_kva !== '' &&
-      formData.ltac_kvar !== '' &&
-      formData.ltac_kwh !== '' &&
-      formData.ltac_kvah !== '' &&
-      formData.ltac_kvarh !== '' &&
-      formData.ltac_oil_temperature !== '' &&
-      formData.ltac_grid_fail_time !== '' &&
-      formData.ltac_grid_resume_time !== '' &&
-      formData.ltac_supply_interruption !== '' &&
-      formData.gen_total_generation !== '' &&
-      formData.gen_xmer_export !== '' &&
-      formData.gen_aux_consumption !== '' &&
-      formData.gen_main_export !== '' &&
-      formData.gen_check_export !== '' &&
-      formData.gen_main_import !== '' &&
-      formData.gen_check_import !== '' &&
-      formData.gen_standby_export !== '' &&
-      formData.gen_standby_import !== ''
-    );
-  };
-
   const progressText = `${loggedHours.length}/24 hours logged`;
 
   return (
@@ -543,7 +493,25 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                 <InputRow label="Oil Level" value={formData.oil_level} onChange={(v) => updateField('oil_level', v)} disabled={isFieldDisabled} type="text" />
                 <InputRow label="Tap Position" value={formData.tap_position} onChange={(v) => updateField('tap_position', v)} disabled={isFieldDisabled} type="text" />
                 <InputRow label="Tap Counter" value={formData.tap_counter} onChange={(v) => updateField('tap_counter', v)} disabled={isFieldDisabled} />
-                <InputRow label="Silica Gel Colour" value={formData.silica_gel_colour} onChange={(v) => updateField('silica_gel_colour', v)} disabled={isFieldDisabled} type="text" placeholder="Color" />
+                <div className="grid grid-cols-3 items-center gap-4 py-2 border-b">
+                  <label className="text-sm font-medium">Silica Gel Colour</label>
+                  <div className="col-span-2">
+                    <Select
+                      value={formData.silica_gel_colour}
+                      onValueChange={(value) => updateField('silica_gel_colour', value)}
+                      disabled={isFieldDisabled}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select colour" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Pink">Pink</SelectItem>
+                        <SelectItem value="Brown">Brown</SelectItem>
+                        <SelectItem value="Blue">Blue</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </AccordionContent>
             </AccordionItem>
 
@@ -642,57 +610,6 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
 
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-40 px-3 sm:px-4 py-2 sm:py-3">
         <div className="container mx-auto max-w-7xl">
-          {/* DEBUG PANEL */}
-          <div className="mb-3 p-3 bg-yellow-50 dark:bg-yellow-950 rounded border text-xs space-y-1">
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <strong>isSaving:</strong> <span className={isSaving ? 'text-red-600' : 'text-green-600'}>{isSaving.toString()}</span>
-              </div>
-              <div>
-                <strong>isFieldDisabled:</strong> <span className={isFieldDisabled ? 'text-red-600' : 'text-green-600'}>{isFieldDisabled.toString()}</span>
-              </div>
-              <div>
-                <strong>isFormComplete:</strong> <span className={isFormComplete() ? 'text-green-600' : 'text-red-600'}>{isFormComplete().toString()}</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <div><strong>selectedHour:</strong> {selectedHour}</div>
-              <div><strong>currentHour:</strong> {currentHour}</div>
-              <div><strong>Filled:</strong> {Object.values(formData).filter(v => v !== '').length}/45</div>
-            </div>
-            
-            {/* Show empty fields if form is incomplete */}
-            {!isFormComplete() && (
-              <details className="mt-2">
-                <summary className="cursor-pointer font-bold text-red-600">
-                  ⚠️ Empty Fields ({Object.values(formData).filter(v => v === '').length})
-                </summary>
-                <div className="mt-1 p-2 bg-white dark:bg-gray-800 rounded max-h-32 overflow-y-auto">
-                  {Object.entries(formData)
-                    .filter(([key, value]) => value === '')
-                    .map(([key]) => (
-                      <div key={key} className="text-red-600">• {key}</div>
-                    ))}
-                </div>
-              </details>
-            )}
-            
-            {/* Show WHY button is disabled */}
-            <div className="mt-2 font-bold">
-              {(isSaving || isFieldDisabled || !isFormComplete()) ? (
-                <span className="text-red-600">
-                  ❌ Button Disabled Because: 
-                  {isSaving && ' SAVING'}
-                  {isFieldDisabled && ' FIELD_DISABLED'}
-                  {!isFormComplete() && ' FORM_INCOMPLETE'}
-                </span>
-              ) : (
-                <span className="text-green-600">✅ Button Should Be Enabled!</span>
-              )}
-            </div>
-          </div>
-
-          {/* BUTTONS */}
           <div className="flex items-center justify-between gap-2 sm:gap-3">
             <Button
               size="sm"
@@ -707,20 +624,8 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
             
             <Button
               size="sm"
-              onClick={() => {
-                console.log('🔴 BUTTON CLICKED');
-                console.log('Debug State:', {
-                  isSaving,
-                  isFieldDisabled,
-                  isFormComplete: isFormComplete(),
-                  user: user?.id,
-                  selectedHour,
-                  currentHour,
-                  formData,
-                });
-                saveLogEntry(true);
-              }}
-              disabled={isSaving || isFieldDisabled || !isFormComplete()}
+              onClick={() => saveLogEntry(true)}
+              disabled={isSaving || isFieldDisabled}
               className="flex-1 sm:flex-none sm:min-w-[140px] h-9 sm:h-10 text-xs sm:text-sm bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50"
             >
               <Save className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
