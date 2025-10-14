@@ -7,17 +7,23 @@ import { IssueFlagger } from "../IssueFlagger";
 
 interface ODYardSectionProps {
   data: any;
-  onChange: (field: string, value: any) => void;
+  onChange: (section: string, field: string, value: any) => void;
   checklistId: string | null;
   userId: string;
 }
 
 export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSectionProps) => {
+  // CRITICAL: Pass 'section1_od_yard' as the section name
   const updateNested = (parent: string, field: string, value: any) => {
-    onChange(parent, {
-      ...(data[parent] || {}),
+    onChange("section1_od_yard", parent, (prevParentData: any) => ({
+      ...(prevParentData || {}),
       [field]: value,
-    });
+    }));
+  };
+
+  // For top-level fields (like landscape_photo)
+  const updateTopLevel = (field: string, value: any) => {
+    onChange("section1_od_yard", field, value);
   };
 
   return (
@@ -205,7 +211,7 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
             <PhotoUpload
               label="Grass Growth Check"
               value={data.landscape_photo}
-              onChange={(url) => onChange("landscape_photo", url)}
+              onChange={(url) => updateTopLevel("landscape_photo", url)}
               required
               userId={userId}
               checklistId={checklistId || ""}
