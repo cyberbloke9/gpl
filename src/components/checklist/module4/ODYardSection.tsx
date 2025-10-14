@@ -13,14 +13,11 @@ interface ODYardSectionProps {
 }
 
 export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSectionProps) => {
-  // Use callback form to ensure we always get the latest data from parent
   const updateNested = (parent: string, field: string, value: any) => {
-    // Instead of spreading data[parent] (which might be stale),
-    // we pass a function that the parent will use with fresh state
-    onChange(parent, (prevParentData: any) => ({
-      ...(prevParentData || {}),
+    onChange(parent, {
+      ...(data[parent] || {}),
       [field]: value,
-    }));
+    });
   };
 
   return (
