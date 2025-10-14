@@ -287,6 +287,32 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     };
   };
 
+  // Auto-calculate supply interruption when grid fail/resume times change
+  useEffect(() => {
+    if (formData.ltac_grid_fail_time && formData.ltac_grid_resume_time) {
+      const [failHours, failMinutes] = formData.ltac_grid_fail_time.split(':').map(Number);
+      const [resumeHours, resumeMinutes] = formData.ltac_grid_resume_time.split(':').map(Number);
+      
+      const failTotalMinutes = failHours * 60 + failMinutes;
+      const resumeTotalMinutes = resumeHours * 60 + resumeMinutes;
+      
+      let diffMinutes = resumeTotalMinutes - failTotalMinutes;
+      
+      // Handle case where resume time is on the next day
+      if (diffMinutes < 0) {
+        diffMinutes += 24 * 60;
+      }
+      
+      const calculatedValue = diffMinutes.toString();
+      if (formData.ltac_supply_interruption !== calculatedValue) {
+        setFormData((prev) => ({ ...prev, ltac_supply_interruption: calculatedValue }));
+      }
+    } else if (formData.ltac_supply_interruption) {
+      // Clear the field if either time is removed
+      setFormData((prev) => ({ ...prev, ltac_supply_interruption: '' }));
+    }
+  }, [formData.ltac_grid_fail_time, formData.ltac_grid_resume_time]);
+
   const saveLogEntry = async (showToast: boolean = true): Promise<boolean> => {
     if (!user) {
       console.error("[saveLogEntry] No user");
@@ -842,13 +868,25 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                   </div>
                 </div>
 
-                <InputRow
-                  label="Supply Interruption"
-                  value={formData.ltac_supply_interruption}
-                  onChange={(v) => updateField("ltac_supply_interruption", v)}
-                  disabled={isFieldDisabled}
-                  type="text"
-                />
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                  <label className="text-xs sm:text-sm font-medium text-foreground sm:w-36 md:w-40 flex-shrink-0">
+                    Supply Interruption
+                  </label>
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Input
+                        value={formData.ltac_supply_interruption}
+                        disabled={true}
+                        readOnly
+                        placeholder="Auto-calculated"
+                        className="bg-muted/50 text-sm h-9 sm:h-10 pr-20"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">
+                        Minutes
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </AccordionContent>
             </AccordionItem>
 
