@@ -150,15 +150,23 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   }, [selectedHour, isDirty, isFieldDisabled, isSaving, isFinalized]);
 
   useEffect(() => {
-    if (user?.id && !isDirty) {
-      loadHourData();
-    }
+    if (!user?.id) return;
+    
+    // Always load fresh data when hour changes
+    loadHourData();
+    
+    // Reset dirty flag when loading new hour
+    setIsDirty(false);
   }, [selectedDate, selectedHour, transformerNumber, user?.id]);
 
   const loadHourData = async () => {
     if (!user) return;
 
     setIsDirty(false); // Reset when loading new hour data
+    
+    // Clear form data immediately to prevent flash of wrong data
+    setFormData(initialFormState);
+    
     const dateString = format(selectedDate, 'yyyy-MM-dd');
 
     const { data: logs } = await supabase
@@ -233,7 +241,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     }
   };
 
-  const saveLogEntry = async (showToast: boolean = true) => {
+  const saveLogEntry = async (showToast: boolean = true): Promise<boolean> => {
     if (!user || isFieldDisabled) return;
 
     setIsSaving(true);
@@ -309,6 +317,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
           variant: 'destructive',
         });
       }
+      return false; // Return failure status
     } else {
       setIsDirty(false); // Reset after successful save
       if (showToast) {
@@ -317,7 +326,8 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
           description: 'Log entry saved successfully',
         });
       }
-      loadHourData();
+      // Let useEffect handle data loading when hour changes
+      return true; // Return success status
     }
   };
 
@@ -328,10 +338,20 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   const handleHourChange = async (hour: number) => {
     // Auto-save current hour data before switching to prevent data loss
     if (isDirty && !isFieldDisabled) {
-      await saveLogEntry(false); // Save without showing toast
+      const saved = await saveLogEntry(false); // Save without showing toast
+      if (!saved) {
+        // Save failed - show error and don't switch hours
+        toast({
+          title: 'Save Failed',
+          description: 'Please fix any errors before switching hours',
+          variant: 'destructive',
+        });
+        return; // Don't switch hours
+      }
     }
+    
     setIsDirty(false); // Reset dirty flag before switching hours
-    setSelectedHour(hour);
+    setSelectedHour(hour); // This will trigger useEffect to load new hour data
   };
 
   const updateField = (field: keyof TransformerData, value: string) => {
