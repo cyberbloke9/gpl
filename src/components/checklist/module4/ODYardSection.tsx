@@ -1,10 +1,9 @@
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { NumericInput } from '../NumericInput';
-import { PhotoUpload } from '../PhotoUpload';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { IssueFlagger } from '../IssueFlagger';
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { NumericInput } from "../NumericInput";
+import { PhotoUpload } from "../PhotoUpload";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { IssueFlagger } from "../IssueFlagger";
 
 interface ODYardSectionProps {
   data: any;
@@ -14,8 +13,14 @@ interface ODYardSectionProps {
 }
 
 export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSectionProps) => {
+  // Use callback form to ensure we always get the latest data from parent
   const updateNested = (parent: string, field: string, value: any) => {
-    onChange(parent, { ...data[parent], [field]: value });
+    // Instead of spreading data[parent] (which might be stale),
+    // we pass a function that the parent will use with fresh state
+    onChange(parent, (prevParentData: any) => ({
+      ...(prevParentData || {}),
+      [field]: value,
+    }));
   };
 
   return (
@@ -28,7 +33,7 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
             <NumericInput
               label="Winding Temperature 1"
               value={data.ptr?.winding_temp1 || 0}
-              onChange={(v) => updateNested('ptr', 'winding_temp1', v)}
+              onChange={(v) => updateNested("ptr", "winding_temp1", v)}
               unit="°C"
               required
               checklistId={checklistId}
@@ -39,7 +44,7 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
             <NumericInput
               label="Winding Temperature 2"
               value={data.ptr?.winding_temp2 || 0}
-              onChange={(v) => updateNested('ptr', 'winding_temp2', v)}
+              onChange={(v) => updateNested("ptr", "winding_temp2", v)}
               unit="°C"
               required
               checklistId={checklistId}
@@ -50,7 +55,7 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
             <NumericInput
               label="Oil Level (PTR)"
               value={data.ptr?.oil_level || 0}
-              onChange={(v) => updateNested('ptr', 'oil_level', v)}
+              onChange={(v) => updateNested("ptr", "oil_level", v)}
               unit="%"
               checklistId={checklistId}
               module="Module 4"
@@ -60,8 +65,8 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
             <div>
               <Label>Breather Silica gel</Label>
               <Select
-                value={data.ptr?.breather_color || ''}
-                onValueChange={(v) => updateNested('ptr', 'breather_color', v)}
+                value={data.ptr?.breather_color || ""}
+                onValueChange={(v) => updateNested("ptr", "breather_color", v)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -88,7 +93,7 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
               <NumericInput
                 label=""
                 value={data.ptr?.tap_position || 0}
-                onChange={(v) => updateNested('ptr', 'tap_position', v)}
+                onChange={(v) => updateNested("ptr", "tap_position", v)}
                 range={{ min: 0, max: 9 }}
                 checklistId={checklistId}
                 module="Module 4"
@@ -99,10 +104,10 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
             <PhotoUpload
               label="RTCC Panel Position"
               value={data.ptr?.rtcc_photo}
-              onChange={(url) => updateNested('ptr', 'rtcc_photo', url)}
+              onChange={(url) => updateNested("ptr", "rtcc_photo", url)}
               required
               userId={userId}
-              checklistId={checklistId || ''}
+              checklistId={checklistId || ""}
               fieldName="ptr_rtcc"
             />
           </AccordionContent>
@@ -115,7 +120,7 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
             <NumericInput
               label="Diesel Level"
               value={data.diesel_gen?.diesel_level || 0}
-              onChange={(v) => updateNested('diesel_gen', 'diesel_level', v)}
+              onChange={(v) => updateNested("diesel_gen", "diesel_level", v)}
               range={{ min: 0, max: 100 }}
               unit="%"
               checklistId={checklistId}
@@ -126,7 +131,7 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
             <NumericInput
               label="Battery Charge Level"
               value={data.diesel_gen?.battery_charge || 0}
-              onChange={(v) => updateNested('diesel_gen', 'battery_charge', v)}
+              onChange={(v) => updateNested("diesel_gen", "battery_charge", v)}
               unit="V"
               checklistId={checklistId}
               module="Module 4"
@@ -136,8 +141,8 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
             <div>
               <Label>Battery Charging Status</Label>
               <Select
-                value={data.diesel_gen?.charging_status || ''}
-                onValueChange={(v) => updateNested('diesel_gen', 'charging_status', v)}
+                value={data.diesel_gen?.charging_status || ""}
+                onValueChange={(v) => updateNested("diesel_gen", "charging_status", v)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -161,8 +166,8 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
             <div>
               <Label>Engine Oil Level</Label>
               <Select
-                value={data.diesel_gen?.oil_level || ''}
-                onValueChange={(v) => updateNested('diesel_gen', 'oil_level', v)}
+                value={data.diesel_gen?.oil_level || ""}
+                onValueChange={(v) => updateNested("diesel_gen", "oil_level", v)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -187,10 +192,10 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
             <PhotoUpload
               label="Battery Water Level"
               value={data.diesel_gen?.battery_water_photo}
-              onChange={(url) => updateNested('diesel_gen', 'battery_water_photo', url)}
+              onChange={(url) => updateNested("diesel_gen", "battery_water_photo", url)}
               required
               userId={userId}
-              checklistId={checklistId || ''}
+              checklistId={checklistId || ""}
               fieldName="diesel_battery_water"
             />
           </AccordionContent>
@@ -203,10 +208,10 @@ export const ODYardSection = ({ data, onChange, checklistId, userId }: ODYardSec
             <PhotoUpload
               label="Grass Growth Check"
               value={data.landscape_photo}
-              onChange={(url) => onChange('landscape_photo', url)}
+              onChange={(url) => onChange("landscape_photo", url)}
               required
               userId={userId}
-              checklistId={checklistId || ''}
+              checklistId={checklistId || ""}
               fieldName="landscape"
             />
           </AccordionContent>
