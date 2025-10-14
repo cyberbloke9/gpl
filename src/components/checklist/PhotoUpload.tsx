@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Camera, X, Loader2 } from "lucide-react";
+import { Camera, X, Loader2, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { uploadMedia } from "@/lib/storage-helpers";
@@ -18,7 +18,8 @@ interface PhotoUploadProps {
 export const PhotoUpload = ({ label, value, onChange, required, userId, checklistId, fieldName }: PhotoUploadProps) => {
   const [preview, setPreview] = useState<string | undefined>(value);
   const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const objectUrlRef = useRef<string | null>(null);
 
   // Sync preview with value prop (but only if it's different)
@@ -96,9 +97,12 @@ export const PhotoUpload = ({ label, value, onChange, required, userId, checklis
     } finally {
       setUploading(false);
 
-      // Reset file input so the same file can be selected again
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+      // Reset file inputs so the same file can be selected again
+      if (cameraInputRef.current) {
+        cameraInputRef.current.value = "";
+      }
+      if (galleryInputRef.current) {
+        galleryInputRef.current.value = "";
       }
     }
   };
@@ -113,9 +117,12 @@ export const PhotoUpload = ({ label, value, onChange, required, userId, checklis
     setPreview(undefined);
     onChange("");
 
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    // Reset file inputs
+    if (cameraInputRef.current) {
+      cameraInputRef.current.value = "";
+    }
+    if (galleryInputRef.current) {
+      galleryInputRef.current.value = "";
     }
   };
 
@@ -133,7 +140,6 @@ export const PhotoUpload = ({ label, value, onChange, required, userId, checklis
             className="w-32 h-32 object-cover rounded border"
             onError={(e) => {
               console.error("Image load error:", e);
-              // If image fails to load, show a placeholder or remove it
               e.currentTarget.src =
                 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect width="128" height="128" fill="%23ddd"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="monospace" font-size="16" fill="%23999"%3EError%3C/text%3E%3C/svg%3E';
             }}
@@ -155,19 +161,33 @@ export const PhotoUpload = ({ label, value, onChange, required, userId, checklis
           )}
         </div>
       ) : (
-        <div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          {/* Camera Input - Direct Camera Capture */}
           <input
-            ref={fileInputRef}
+            ref={cameraInputRef}
             type="file"
             accept="image/*"
             capture="environment"
             onChange={handleFileChange}
             className="hidden"
-            id={`photo-${fieldName}`}
+            id={`camera-${fieldName}`}
             disabled={uploading}
           />
-          <label htmlFor={`photo-${fieldName}`}>
-            <Button type="button" variant="outline" asChild disabled={uploading}>
+
+          {/* Gallery Input - Select from Gallery */}
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+            id={`gallery-${fieldName}`}
+            disabled={uploading}
+          />
+
+          {/* Camera Button */}
+          <label htmlFor={`camera-${fieldName}`} className="flex-1">
+            <Button type="button" variant="default" className="w-full" asChild disabled={uploading}>
               <span className="cursor-pointer">
                 {uploading ? (
                   <>
@@ -177,9 +197,21 @@ export const PhotoUpload = ({ label, value, onChange, required, userId, checklis
                 ) : (
                   <>
                     <Camera className="mr-2 h-4 w-4" />
-                    Capture Photo
+                    <span className="hidden sm:inline">Take Photo</span>
+                    <span className="sm:hidden">Camera</span>
                   </>
                 )}
+              </span>
+            </Button>
+          </label>
+
+          {/* Gallery Button */}
+          <label htmlFor={`gallery-${fieldName}`} className="flex-1">
+            <Button type="button" variant="outline" className="w-full" asChild disabled={uploading}>
+              <span className="cursor-pointer">
+                <ImageIcon className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Choose from Gallery</span>
+                <span className="sm:hidden">Gallery</span>
               </span>
             </Button>
           </label>
