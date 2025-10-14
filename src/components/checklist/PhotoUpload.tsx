@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Camera, X, Loader2, Image as ImageIcon } from "lucide-react";
+import { Camera, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { uploadMedia } from "@/lib/storage-helpers";
@@ -18,8 +18,7 @@ interface PhotoUploadProps {
 export const PhotoUpload = ({ label, value, onChange, required, userId, checklistId, fieldName }: PhotoUploadProps) => {
   const [preview, setPreview] = useState<string | undefined>(value);
   const [uploading, setUploading] = useState(false);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const objectUrlRef = useRef<string | null>(null);
 
   // Sync preview with value prop (but only if it's different)
@@ -97,12 +96,9 @@ export const PhotoUpload = ({ label, value, onChange, required, userId, checklis
     } finally {
       setUploading(false);
 
-      // Reset file inputs so the same file can be selected again
-      if (cameraInputRef.current) {
-        cameraInputRef.current.value = "";
-      }
-      if (galleryInputRef.current) {
-        galleryInputRef.current.value = "";
+      // Reset file input so the same file can be selected again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
     }
   };
@@ -117,12 +113,9 @@ export const PhotoUpload = ({ label, value, onChange, required, userId, checklis
     setPreview(undefined);
     onChange("");
 
-    // Reset file inputs
-    if (cameraInputRef.current) {
-      cameraInputRef.current.value = "";
-    }
-    if (galleryInputRef.current) {
-      galleryInputRef.current.value = "";
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -161,33 +154,19 @@ export const PhotoUpload = ({ label, value, onChange, required, userId, checklis
           )}
         </div>
       ) : (
-        <div className="flex flex-col sm:flex-row gap-2">
-          {/* Camera Input - Direct Camera Capture */}
+        <div>
           <input
-            ref={cameraInputRef}
+            ref={fileInputRef}
             type="file"
             accept="image/*"
-            capture="environment"
+            /* ANDROID FIX: Remove capture attribute for better compatibility */
             onChange={handleFileChange}
             className="hidden"
-            id={`camera-${fieldName}`}
+            id={`photo-${fieldName}`}
             disabled={uploading}
           />
-
-          {/* Gallery Input - Select from Gallery */}
-          <input
-            ref={galleryInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="hidden"
-            id={`gallery-${fieldName}`}
-            disabled={uploading}
-          />
-
-          {/* Camera Button */}
-          <label htmlFor={`camera-${fieldName}`} className="flex-1">
-            <Button type="button" variant="default" className="w-full" asChild disabled={uploading}>
+          <label htmlFor={`photo-${fieldName}`}>
+            <Button type="button" variant="outline" asChild disabled={uploading}>
               <span className="cursor-pointer">
                 {uploading ? (
                   <>
@@ -197,21 +176,9 @@ export const PhotoUpload = ({ label, value, onChange, required, userId, checklis
                 ) : (
                   <>
                     <Camera className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">Take Photo</span>
-                    <span className="sm:hidden">Camera</span>
+                    Capture Photo
                   </>
                 )}
-              </span>
-            </Button>
-          </label>
-
-          {/* Gallery Button */}
-          <label htmlFor={`gallery-${fieldName}`} className="flex-1">
-            <Button type="button" variant="outline" className="w-full" asChild disabled={uploading}>
-              <span className="cursor-pointer">
-                <ImageIcon className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Choose from Gallery</span>
-                <span className="sm:hidden">Gallery</span>
               </span>
             </Button>
           </label>
