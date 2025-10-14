@@ -247,24 +247,16 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
 
   const saveLogEntry = async (showToast: boolean = true): Promise<boolean> => {
     if (!user) {
-      console.error('[saveLogEntry] No authenticated user');
+      console.error('[saveLogEntry] No user');
       return false;
     }
     
     if (isFieldDisabled) {
-      console.log('[saveLogEntry] Fields disabled:', { 
-        isFinalized, 
-        selectedHour, 
-        currentHour,
-        reason: isFinalized ? 'Day finalized' : 'Hour has passed'
-      });
-      
+      console.error('[saveLogEntry] Fields are disabled');
       if (showToast) {
         toast({
           title: 'Cannot Save',
-          description: isFinalized 
-            ? 'This day has been finalized and cannot be edited' 
-            : `Hour ${selectedHour}:00 has passed. You can only edit the current hour (${currentHour}:00).`,
+          description: selectedHour < currentHour ? 'This hour has passed' : 'Logs are finalized',
           variant: 'destructive',
         });
       }
@@ -327,7 +319,9 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
       logged_at: new Date().toISOString(),
     };
 
-    const { error } = await supabase
+    console.log('📤 Sending payload:', payload);
+
+    const { data, error } = await supabase
       .from('transformer_logs')
       .upsert(payload, {
         onConflict: 'date,hour,transformer_number,user_id',
@@ -336,24 +330,32 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     setIsSaving(false);
 
     if (error) {
+      // ✅ LOG THE FULL ERROR DETAILS
+      console.error('🔴 FULL SUPABASE ERROR:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      console.error('Error details:', error.details);
+      console.error('Error hint:', error.hint);
+      
       if (showToast) {
         toast({
-          title: 'Error',
-          description: 'Failed to save log entry',
+          title: 'Database Error',
+          description: error.message || 'Failed to save log entry',
           variant: 'destructive',
         });
       }
-      return false; // Return failure status
+      return false;
     } else {
-      setIsDirty(false); // Reset after successful save
+      console.log('✅ Save successful!', data);
+      setIsDirty(false);
       if (showToast) {
         toast({
           title: 'Success',
-          description: 'Log entry saved successfully',
+          description: `Hour ${selectedHour}:00 saved successfully`,
         });
       }
-      // Let useEffect handle data loading when hour changes
-      return true; // Return success status
+      loadHourData();
+      return true;
     }
   };
 
