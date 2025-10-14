@@ -13,13 +13,11 @@ interface ControlRoomSectionProps {
 }
 
 export const ControlRoomSection = ({ data, onChange, checklistId }: ControlRoomSectionProps) => {
-  // Use callback form to ensure we always get the latest data from parent
   const updateNested = (parent: string, field: string, value: any) => {
-    // Pass a function that will receive the latest parent data
-    onChange(parent, (prevParentData: any) => ({
-      ...(prevParentData || {}),
+    onChange(parent, {
+      ...(data[parent] || {}),
       [field]: value,
-    }));
+    });
   };
 
   return (
