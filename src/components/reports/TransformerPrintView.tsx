@@ -1,10 +1,6 @@
 import { forwardRef } from 'react';
 import { format } from 'date-fns';
 
-const getTransformerName = (number: number): string => {
-  return number === 1 ? 'Power Transformer' : 'Auxiliary Transformer';
-};
-
 interface TransformerLog {
   hour: number;
   frequency: number | null;
@@ -58,7 +54,6 @@ interface TransformerLog {
 
 interface TransformerPrintViewProps {
   date: string;
-  transformerNumber: number;
   logs: TransformerLog[];
   userName?: string;
   employeeId?: string;
@@ -66,13 +61,12 @@ interface TransformerPrintViewProps {
 }
 
 export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintViewProps>(
-  ({ date, transformerNumber, logs, userName, employeeId, flaggedIssues = [] }, ref) => {
+  ({ date, logs, userName, employeeId, flaggedIssues = [] }, ref) => {
     const allHours = Array.from({ length: 24 }, (_, i) => i);
     const logsByHour = new Map(logs.map(log => [log.hour, log]));
 
     const getIssue = (hour: number, field: string) => {
       return flaggedIssues.find(issue => 
-        issue.section === getTransformerName(transformerNumber) &&
         issue.item?.includes(`Hour ${hour}`) &&
         issue.item?.includes(field)
       );
@@ -108,7 +102,8 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
         {/* Header */}
         <div className="text-center mb-6 border-b-2 border-black pb-4">
           <h1 className="text-2xl font-bold">GAYATRI POWER PRIVATE LIMITED</h1>
-          <h2 className="text-xl mt-2">TRANSFORMER LOG SHEET</h2>
+          <h2 className="text-xl mt-2">UNIFIED TRANSFORMER LOG SHEET</h2>
+          <p className="text-sm mt-1">PTR Feeder • LTAC Feeder • Generation Details</p>
           <p className="text-sm mt-1">Generated on: {format(new Date(), 'PPP HH:mm')}</p>
         </div>
 
@@ -116,7 +111,7 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
         <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
           <div>
             <p><strong>Date:</strong> {format(new Date(date), 'PPP')}</p>
-            <p><strong>Transformer:</strong> {getTransformerName(transformerNumber)}</p>
+            <p><strong>Report Type:</strong> Unified Transformer Report</p>
           </div>
           <div>
             {userName && <p><strong>Operator:</strong> {userName}</p>}

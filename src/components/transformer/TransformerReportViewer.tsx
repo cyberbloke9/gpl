@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
+import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -67,16 +68,11 @@ interface TransformerReportViewerProps {
   onClose: () => void;
   report: {
     date: string;
-    transformerNumber: number;
     logs: TransformerLog[];
   } | null;
   userName?: string;
   employeeId?: string;
 }
-
-const getTransformerName = (number: number): string => {
-  return number === 1 ? 'Power Transformer' : 'Auxiliary Transformer';
-};
 
 export function TransformerReportViewer({ isOpen, onClose, report, userName, employeeId }: TransformerReportViewerProps) {
   const printRef = useRef<HTMLDivElement>(null);
@@ -84,7 +80,7 @@ export function TransformerReportViewer({ isOpen, onClose, report, userName, emp
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: report ? `Transformer_Report_${report.date}_T${report.transformerNumber}` : 'Transformer_Report',
+    documentTitle: report ? `Unified_Transformer_Report_${report.date}` : 'Unified_Transformer_Report',
   });
 
   useEffect(() => {
@@ -94,8 +90,7 @@ export function TransformerReportViewer({ isOpen, onClose, report, userName, emp
       const { data } = await supabase
         .from('flagged_issues')
         .select('*')
-        .eq('module', 'transformer')
-        .eq('section', getTransformerName(report.transformerNumber));
+        .eq('module', 'transformer');
       
       setFlaggedIssues(data || []);
     };
@@ -127,7 +122,7 @@ export function TransformerReportViewer({ isOpen, onClose, report, userName, emp
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>
-              Transformer Report - {getTransformerName(report.transformerNumber)}
+              Unified Transformer Report - {format(new Date(report.date), 'PPP')}
             </DialogTitle>
             <Button onClick={handlePrint} size="sm" variant="outline">
               <Download className="h-4 w-4 mr-2" />
@@ -140,7 +135,6 @@ export function TransformerReportViewer({ isOpen, onClose, report, userName, emp
           <TransformerPrintView
             ref={printRef}
             date={report.date}
-            transformerNumber={report.transformerNumber}
             logs={report.logs}
             userName={userName}
             employeeId={employeeId}

@@ -22,6 +22,7 @@ export default function Transformer() {
         .from('transformer_logs')
         .select('finalized')
         .eq('date', selectedDate)
+        .eq('transformer_number', 1)
         .eq('user_id', user.id)
         .limit(1)
         .maybeSingle();
@@ -33,7 +34,7 @@ export default function Transformer() {
   }, [selectedDate, user]);
 
   // Handle finalizing the day's logs
-  const handleFinalizeDay = async (transformerNumber: number) => {
+  const handleFinalizeDay = async () => {
     if (!user) return;
 
     // Check if all 24 hours are logged
@@ -41,7 +42,7 @@ export default function Transformer() {
       .from('transformer_logs')
       .select('hour')
       .eq('date', selectedDate)
-      .eq('transformer_number', transformerNumber)
+      .eq('transformer_number', 1)
       .eq('user_id', user.id);
 
     if (fetchError) {
@@ -62,7 +63,7 @@ export default function Transformer() {
       return;
     }
 
-    // Finalize all logs for this date and transformer
+    // Finalize all logs for this date
     const { error: updateError } = await supabase
       .from('transformer_logs')
       .update({
@@ -71,7 +72,7 @@ export default function Transformer() {
         finalized_by: user.id,
       })
       .eq('date', selectedDate)
-      .eq('transformer_number', transformerNumber)
+      .eq('transformer_number', 1)
       .eq('user_id', user.id);
 
     if (updateError) {
@@ -86,7 +87,7 @@ export default function Transformer() {
     setIsFinalized(true);
     toast({
       title: 'Logs Finalized',
-      description: `${transformerNumber === 1 ? 'Power Transformer' : 'Auxiliary Transformer'} logs for ${format(new Date(selectedDate), 'PP')} are now locked.`,
+      description: `Unified transformer logs for ${format(new Date(selectedDate), 'PP')} are now locked.`,
     });
   };
 

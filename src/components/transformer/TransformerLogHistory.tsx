@@ -7,11 +7,6 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { TransformerReportViewer } from './TransformerReportViewer';
 
-// Helper function to get transformer display name
-const getTransformerName = (number: number): string => {
-  return number === 1 ? 'Power Transformer' : 'Auxiliary Transformer';
-};
-
 interface TransformerLog {
   id: string;
   date: string;
@@ -67,15 +62,11 @@ interface TransformerLog {
 }
 
 interface GroupedLogs {
-  [key: string]: {
-    transformer1: TransformerLog[];
-    transformer2: TransformerLog[];
-  };
+  [key: string]: TransformerLog[];
 }
 
 interface SelectedReport {
   date: string;
-  transformerNumber: number;
   logs: TransformerLog[];
   userName?: string;
   employeeId?: string;
@@ -97,6 +88,7 @@ export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
       .from('transformer_logs')
       .select('*')
       .eq('user_id', userId)
+      .eq('transformer_number', 1)
       .order('date', { ascending: false })
       .order('hour', { ascending: true })
       .limit(500);
@@ -105,22 +97,16 @@ export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
       const grouped: GroupedLogs = {};
       data.forEach((log: TransformerLog) => {
         if (!grouped[log.date]) {
-          grouped[log.date] = { transformer1: [], transformer2: [] };
+          grouped[log.date] = [];
         }
-        if (log.transformer_number === 1) {
-          grouped[log.date].transformer1.push(log);
-        } else {
-          grouped[log.date].transformer2.push(log);
-        }
+        grouped[log.date].push(log);
       });
       setGroupedLogs(grouped);
     }
   };
 
-  const handleViewReport = async (date: string, transformerNumber: number) => {
-    const logs = transformerNumber === 1 
-      ? groupedLogs[date].transformer1 
-      : groupedLogs[date].transformer2;
+  const handleViewReport = async (date: string) => {
+    const logs = groupedLogs[date];
     
     // Fetch user profile data for PDF
     if (logs.length > 0 && userId) {
@@ -132,13 +118,12 @@ export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
 
       setSelectedReport({ 
         date, 
-        transformerNumber, 
         logs,
         userName: profile?.full_name,
         employeeId: profile?.employee_id
       });
     } else {
-      setSelectedReport({ date, transformerNumber, logs });
+      setSelectedReport({ date, logs });
     }
     
     setIsViewerOpen(true);
@@ -166,7 +151,7 @@ export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
   return (
     <>
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold mb-4">Transformer Log History</h2>
+        <h2 className="text-xl font-semibold mb-4">Unified Transformer Log History</h2>
         <Accordion type="single" collapsible className="w-full space-y-2">
           {Object.entries(groupedLogs).map(([date, logs]) => (
             <AccordionItem key={date} value={date} className="border rounded-lg px-4">
@@ -176,54 +161,29 @@ export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
                     <div className="font-semibold">{format(new Date(date), 'EEEE, MMMM d, yyyy')}</div>
                   </div>
                   <div className="flex gap-2">
-                    {logs.transformer1.length > 0 && (
-                      <Badge variant="outline">T1: {logs.transformer1.length}/24</Badge>
-                    )}
-                    {logs.transformer2.length > 0 && (
-                      <Badge variant="outline">T2: {logs.transformer2.length}/24</Badge>
-                    )}
+                    <Badge variant="outline">{logs.length}/24 hours</Badge>
+                    {getProgressBadge(logs.length)}
                   </div>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="pt-4 space-y-4">
-                {logs.transformer1.length > 0 && (
-                  <div className="border rounded-lg p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">{getTransformerName(1)}</h3>
-                      {getProgressBadge(logs.transformer1.length)}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {logs.transformer1.length} out of 24 hours logged
-                    </p>
-                    <Button
-                      onClick={() => handleViewReport(date, 1)}
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                    >
-                      View Report
-                    </Button>
+              <AccordionContent className="pt-4">
+                <div className="border rounded-lg p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">Unified Transformer Report</h3>
+                    {getProgressBadge(logs.length)}
                   </div>
-                )}
-                {logs.transformer2.length > 0 && (
-                  <div className="border rounded-lg p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">{getTransformerName(2)}</h3>
-                      {getProgressBadge(logs.transformer2.length)}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {logs.transformer2.length} out of 24 hours logged
-                    </p>
-                    <Button
-                      onClick={() => handleViewReport(date, 2)}
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                    >
-                      View Report
-                    </Button>
-                  </div>
-                )}
+                  <p className="text-sm text-muted-foreground">
+                    {logs.length} out of 24 hours logged • Includes PTR Feeder, LTAC Feeder & Generation Data
+                  </p>
+                  <Button
+                    onClick={() => handleViewReport(date)}
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                  >
+                    View Report
+                  </Button>
+                </div>
               </AccordionContent>
             </AccordionItem>
           ))}
