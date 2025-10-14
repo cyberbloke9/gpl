@@ -281,6 +281,20 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
       }
     }
 
+    // Validate Grid Fail/Resume times
+    if (formData.ltac_grid_fail_time && formData.ltac_grid_resume_time) {
+      const [failHours, failMinutes] = formData.ltac_grid_fail_time.split(':').map(Number);
+      const [resumeHours, resumeMinutes] = formData.ltac_grid_resume_time.split(':').map(Number);
+      
+      const failTotalMinutes = failHours * 60 + failMinutes;
+      const resumeTotalMinutes = resumeHours * 60 + resumeMinutes;
+      
+      // Grid Resume time must be after Grid Fail time (same day only)
+      if (resumeTotalMinutes <= failTotalMinutes) {
+        errors.push("Grid Resume time must be after Grid Fail time");
+      }
+    }
+
     return {
       isValid: errors.length === 0,
       errors,
@@ -296,16 +310,18 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
       const failTotalMinutes = failHours * 60 + failMinutes;
       const resumeTotalMinutes = resumeHours * 60 + resumeMinutes;
       
-      let diffMinutes = resumeTotalMinutes - failTotalMinutes;
-      
-      // Handle case where resume time is on the next day
-      if (diffMinutes < 0) {
-        diffMinutes += 24 * 60;
-      }
-      
-      const calculatedValue = diffMinutes.toString();
-      if (formData.ltac_supply_interruption !== calculatedValue) {
-        setFormData((prev) => ({ ...prev, ltac_supply_interruption: calculatedValue }));
+      // Only calculate if resume time is after fail time
+      if (resumeTotalMinutes > failTotalMinutes) {
+        const diffMinutes = resumeTotalMinutes - failTotalMinutes;
+        const calculatedValue = diffMinutes.toString();
+        if (formData.ltac_supply_interruption !== calculatedValue) {
+          setFormData((prev) => ({ ...prev, ltac_supply_interruption: calculatedValue }));
+        }
+      } else {
+        // Clear if invalid time range
+        if (formData.ltac_supply_interruption) {
+          setFormData((prev) => ({ ...prev, ltac_supply_interruption: '' }));
+        }
       }
     } else if (formData.ltac_supply_interruption) {
       // Clear the field if either time is removed
@@ -858,13 +874,33 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
                   <label className="text-xs sm:text-sm font-medium text-foreground sm:w-36 md:w-40 flex-shrink-0">
                     Grid Resume Time
                   </label>
-                  <div className="flex-1">
+                  <div className="flex-1 space-y-1">
                     <TimePicker
                       value={formData.ltac_grid_resume_time}
                       onChange={(v) => updateField("ltac_grid_resume_time", v)}
                       disabled={isFieldDisabled}
                       placeholder="Select resume time"
+                      className={
+                        formData.ltac_grid_fail_time && 
+                        formData.ltac_grid_resume_time && 
+                        (() => {
+                          const [failH, failM] = formData.ltac_grid_fail_time.split(':').map(Number);
+                          const [resumeH, resumeM] = formData.ltac_grid_resume_time.split(':').map(Number);
+                          return (resumeH * 60 + resumeM) <= (failH * 60 + failM);
+                        })()
+                          ? 'border-red-500'
+                          : ''
+                      }
                     />
+                    {formData.ltac_grid_fail_time && 
+                     formData.ltac_grid_resume_time && 
+                     (() => {
+                       const [failH, failM] = formData.ltac_grid_fail_time.split(':').map(Number);
+                       const [resumeH, resumeM] = formData.ltac_grid_resume_time.split(':').map(Number);
+                       return (resumeH * 60 + resumeM) <= (failH * 60 + failM);
+                     })() && (
+                      <p className="text-xs text-red-600">Resume time must be after fail time</p>
+                    )}
                   </div>
                 </div>
 
