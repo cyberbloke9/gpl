@@ -2,9 +2,12 @@ import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GeneratorLogForm } from '@/components/generator/GeneratorLogForm';
+import { GeneratorLogHistory } from '@/components/generator/GeneratorLogHistory';
+import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 
 export default function Generator() {
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [isFinalized] = useState(false);
 
@@ -26,9 +29,7 @@ export default function Generator() {
           </TabsContent>
 
           <TabsContent value="history">
-            <div className="p-8 text-center text-muted-foreground">
-              History view coming soon...
-            </div>
+            <GeneratorLogHistory userId={user?.id} />
           </TabsContent>
         </Tabs>
       </div>
