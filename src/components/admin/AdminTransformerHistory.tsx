@@ -26,17 +26,18 @@ export const AdminTransformerHistory = ({ onViewReport }: AdminTransformerHistor
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('7');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'finalized' | 'in_progress'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     loadLogs();
-  }, [dateRange, currentPage]);
+  }, [dateRange, statusFilter, currentPage]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [dateRange]);
+  }, [dateRange, statusFilter]);
 
   const loadLogs = async () => {
     setLoading(true);
@@ -44,7 +45,7 @@ export const AdminTransformerHistory = ({ onViewReport }: AdminTransformerHistor
       const daysAgo = new Date();
       daysAgo.setDate(daysAgo.getDate() - parseInt(dateRange));
 
-      const { data: logsData, error } = await supabase
+      let query = supabase
         .from('transformer_logs')
         .select(`
           *,
@@ -53,10 +54,17 @@ export const AdminTransformerHistory = ({ onViewReport }: AdminTransformerHistor
             employee_id
           )
         `)
-        .eq('finalized', true)
         .gte('date', daysAgo.toISOString().split('T')[0])
         .order('date', { ascending: false })
-        .order('finalized_at', { ascending: false });
+        .order('logged_at', { ascending: false });
+
+      if (statusFilter === 'finalized') {
+        query = query.eq('finalized', true);
+      } else if (statusFilter === 'in_progress') {
+        query = query.eq('finalized', false);
+      }
+
+      const { data: logsData, error } = await query;
 
       if (error) throw error;
 
@@ -71,6 +79,7 @@ export const AdminTransformerHistory = ({ onViewReport }: AdminTransformerHistor
             user_name: log.profiles?.full_name || 'Unknown',
             employee_id: log.profiles?.employee_id || '',
             hours_logged: 0,
+            finalized: log.finalized,
             finalized_at: log.finalized_at,
             logs: []
           };
@@ -119,7 +128,7 @@ export const AdminTransformerHistory = ({ onViewReport }: AdminTransformerHistor
         <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
         <h3 className="text-lg font-semibold mb-2">No Transformer Logs Found</h3>
         <p className="text-muted-foreground">
-          No finalized transformer logs in the last {dateRange} days.
+          No transformer logs found in the last {dateRange} days.
         </p>
       </Card>
     );
@@ -131,20 +140,32 @@ export const AdminTransformerHistory = ({ onViewReport }: AdminTransformerHistor
         <div>
           <h3 className="text-lg font-semibold">Transformer Logs History</h3>
           <p className="text-sm text-muted-foreground">
-            View all finalized transformer logs from all users
+            View all transformer logs from all users
           </p>
         </div>
-        <Select value={dateRange} onValueChange={setDateRange}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Select range" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7">Last 7 days</SelectItem>
-            <SelectItem value="14">Last 14 days</SelectItem>
-            <SelectItem value="30">Last 30 days</SelectItem>
-            <SelectItem value="90">Last 90 days</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'finalized' | 'in_progress')}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="finalized">Finalized Only</SelectItem>
+              <SelectItem value="in_progress">In Progress Only</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={dateRange} onValueChange={setDateRange}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Select range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Last 7 days</SelectItem>
+              <SelectItem value="14">Last 14 days</SelectItem>
+              <SelectItem value="30">Last 30 days</SelectItem>
+              <SelectItem value="90">Last 90 days</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -170,8 +191,8 @@ export const AdminTransformerHistory = ({ onViewReport }: AdminTransformerHistor
                 </div>
                 
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="default" className="text-xs">
-                    Finalized
+                  <Badge variant={log.finalized ? 'default' : 'secondary'} className="text-xs">
+                    {log.finalized ? 'Finalized' : 'In Progress'}
                   </Badge>
                 </div>
 

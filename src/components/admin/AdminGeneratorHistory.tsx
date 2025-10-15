@@ -26,17 +26,18 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('7');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'finalized' | 'in_progress'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     loadLogs();
-  }, [dateRange, currentPage]);
+  }, [dateRange, statusFilter, currentPage]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [dateRange]);
+  }, [dateRange, statusFilter]);
 
   const loadLogs = async () => {
     setLoading(true);
@@ -44,13 +45,20 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
       const daysAgo = new Date();
       daysAgo.setDate(daysAgo.getDate() - parseInt(dateRange));
 
-      const { data: logsData, error } = await supabase
+      let query = supabase
         .from('generator_logs')
         .select('*')
-        .eq('finalized', true)
         .gte('date', daysAgo.toISOString().split('T')[0])
         .order('date', { ascending: false })
-        .order('finalized_at', { ascending: false });
+        .order('logged_at', { ascending: false });
+
+      if (statusFilter === 'finalized') {
+        query = query.eq('finalized', true);
+      } else if (statusFilter === 'in_progress') {
+        query = query.eq('finalized', false);
+      }
+
+      const { data: logsData, error } = await query;
 
       if (error) throw error;
 
@@ -77,6 +85,7 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
             user_name: profile?.full_name || 'Unknown',
             employee_id: profile?.employee_id || '',
             hours_logged: 0,
+            finalized: log.finalized,
             finalized_at: log.finalized_at,
             total_power: 0,
             total_frequency: 0,
@@ -131,7 +140,7 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
         <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
         <h3 className="text-lg font-semibold mb-2">No Generator Logs Found</h3>
         <p className="text-muted-foreground">
-          No finalized generator logs in the last {dateRange} days.
+          No generator logs found in the last {dateRange} days.
         </p>
       </Card>
     );
@@ -143,20 +152,32 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
         <div>
           <h3 className="text-lg font-semibold">Generator Logs History</h3>
           <p className="text-sm text-muted-foreground">
-            View all finalized generator logs from all users
+            View all generator logs from all users
           </p>
         </div>
-        <Select value={dateRange} onValueChange={setDateRange}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Select range" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7">Last 7 days</SelectItem>
-            <SelectItem value="14">Last 14 days</SelectItem>
-            <SelectItem value="30">Last 30 days</SelectItem>
-            <SelectItem value="90">Last 90 days</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'finalized' | 'in_progress')}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="finalized">Finalized Only</SelectItem>
+              <SelectItem value="in_progress">In Progress Only</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={dateRange} onValueChange={setDateRange}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Select range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Last 7 days</SelectItem>
+              <SelectItem value="14">Last 14 days</SelectItem>
+              <SelectItem value="30">Last 30 days</SelectItem>
+              <SelectItem value="90">Last 90 days</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -179,8 +200,8 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
                 </div>
                 
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="default" className="text-xs">
-                    Finalized
+                  <Badge variant={log.finalized ? 'default' : 'secondary'} className="text-xs">
+                    {log.finalized ? 'Finalized' : 'In Progress'}
                   </Badge>
                 </div>
 
