@@ -85,7 +85,7 @@ export function GeneratorLogHistory({ userId }: GeneratorLogHistoryProps) {
   const groupedLogs = groupLogsByDate();
 
   if (selectedDate) {
-    const dateLog = logs.find((log) => log.date === selectedDate);
+    const dateLogs = logs.filter((log) => log.date === selectedDate);
     return (
       <div>
         <Button
@@ -95,7 +95,11 @@ export function GeneratorLogHistory({ userId }: GeneratorLogHistoryProps) {
         >
           ← Back to History
         </Button>
-        {dateLog && <GeneratorReportViewer log={dateLog} />}
+        <GeneratorReportViewer
+          isOpen={true}
+          onClose={() => setSelectedDate(null)}
+          report={dateLogs.length > 0 ? { date: selectedDate, logs: dateLogs } : null}
+        />
       </div>
     );
   }

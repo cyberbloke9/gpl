@@ -311,21 +311,42 @@ export default function Admin() {
   };
 
   const handleViewGeneratorReport = async (date: string, userId: string) => {
-    const { data, error } = await supabase
+    console.log('Fetching generator report for:', { date, userId });
+    
+    // Fetch all logs for this date and user
+    const { data: logs, error: logsError } = await supabase
       .from('generator_logs')
-      .select(`
-        *,
-        profiles:user_id (
-          full_name,
-          employee_id
-        )
-      `)
+      .select('*')
       .eq('date', date)
       .eq('user_id', userId)
       .order('hour', { ascending: true });
 
-    if (!error && data && data.length > 0) {
-      setSelectedGeneratorReport(data[0]); // Pass first log with all data
+    if (logsError) {
+      console.error('Error fetching generator logs:', logsError);
+      return;
+    }
+
+    // Fetch user profile info
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('full_name, employee_id')
+      .eq('id', userId)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching profile:', profileError);
+    }
+
+    console.log('Generator logs fetched:', logs);
+    console.log('Profile fetched:', profile);
+
+    if (logs && logs.length > 0) {
+      setSelectedGeneratorReport({
+        date,
+        logs: logs as any[],
+        userName: profile?.full_name,
+        employeeId: profile?.employee_id,
+      } as any);
       setIsGeneratorViewerOpen(true);
     }
   };
@@ -469,24 +490,13 @@ export default function Admin() {
         employeeId={selectedTransformerReport?.employeeId}
       />
 
-      {isGeneratorViewerOpen && selectedGeneratorReport && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-          <div className="fixed inset-4 z-50 overflow-y-auto bg-background p-6 rounded-lg shadow-lg">
-            <div className="flex justify-end mb-4">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsGeneratorViewerOpen(false);
-                  setSelectedGeneratorReport(null);
-                }}
-              >
-                Close
-              </Button>
-            </div>
-            <GeneratorReportViewer log={selectedGeneratorReport} />
-          </div>
-        </div>
-      )}
+      <GeneratorReportViewer
+        isOpen={isGeneratorViewerOpen}
+        onClose={() => setIsGeneratorViewerOpen(false)}
+        report={selectedGeneratorReport}
+        userName={(selectedGeneratorReport as any)?.userName}
+        employeeId={(selectedGeneratorReport as any)?.employeeId}
+      />
     </div>
   );
 }
