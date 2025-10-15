@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { supabase } from '@/integrations/supabase/client';
+import { getTodayIST } from '@/lib/timezone-utils';
 import { AdminOverviewCards } from '@/components/admin/AdminOverviewCards';
 import { TodaysChecklistsTable } from '@/components/admin/TodaysChecklistsTable';
 import { AdminTransformerLogsTable } from '@/components/admin/AdminTransformerLogsTable';
@@ -120,7 +121,7 @@ export default function Admin() {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayIST();
 
       // Get total users count
       const { count: usersCount } = await supabase
