@@ -232,7 +232,7 @@ export const ActivityLogsPanel = () => {
                   </div>
                   <p className="text-sm text-muted-foreground">{activity.action}</p>
                   <p className="text-xs text-muted-foreground">
-                    {format(new Date(activity.timestamp), 'PPp')}
+                    {formatIST(new Date(activity.timestamp), 'PPp')} IST
                   </p>
                 </div>
               </div>
