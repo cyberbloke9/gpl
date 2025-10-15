@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import React from 'react';
 
 interface FlaggedIssue {
@@ -61,6 +62,7 @@ interface FlaggedIssue {
 
 export default function Issues() {
   const { user, userRole } = useAuth();
+  const navigate = useNavigate();
   const [issues, setIssues] = useState<FlaggedIssue[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('7');
@@ -71,6 +73,31 @@ export default function Issues() {
   const [resolvingIssueId, setResolvingIssueId] = useState<string | null>(null);
   const [isResolving, setIsResolving] = useState(false);
   const ITEMS_PER_PAGE = 10;
+
+  // Server-side role verification for admin features
+  useEffect(() => {
+    const verifyAdminAccess = async () => {
+      if (userRole !== 'admin' || !user) return;
+
+      const { data: roleData, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .single();
+
+      if (error || !roleData) {
+        toast({
+          title: "Access Denied",
+          description: "You don't have admin privileges.",
+          variant: "destructive",
+        });
+        navigate('/');
+      }
+    };
+
+    verifyAdminAccess();
+  }, [userRole, user, navigate]);
 
   useEffect(() => {
     const fetchIssues = async () => {

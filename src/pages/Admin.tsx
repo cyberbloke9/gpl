@@ -47,6 +47,30 @@ export default function Admin() {
   const [selectedGeneratorReport, setSelectedGeneratorReport] = useState<any>(null);
   const [isGeneratorViewerOpen, setIsGeneratorViewerOpen] = useState(false);
 
+  // Server-side role verification
+  useEffect(() => {
+    const verifyAdminAccess = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/auth');
+        return;
+      }
+
+      const { data: roleData, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .single();
+
+      if (error || !roleData) {
+        navigate('/');
+      }
+    };
+
+    verifyAdminAccess();
+  }, [navigate]);
+
   useEffect(() => {
     loadDashboardData();
     
