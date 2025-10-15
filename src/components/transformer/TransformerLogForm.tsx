@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
+import { getTodayIST, getCurrentHourIST, istToUTC, formatIST } from "@/lib/timezone-utils";
 import { format } from "date-fns";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Textarea } from "@/components/ui/textarea";
@@ -121,14 +122,14 @@ const initialFormState: TransformerData = {
 export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }: TransformerLogFormProps) {
   const { user } = useAuth();
   const transformerNumber = 1; // Unified transformer constant
-  const selectedDate = useMemo(() => format(new Date(), "yyyy-MM-dd"), []); // Memoized to prevent infinite re-renders
-  const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
+  const selectedDate = useMemo(() => getTodayIST(), []); // Memoized to prevent infinite re-renders
+  const [selectedHour, setSelectedHour] = useState<number>(getCurrentHourIST());
   const [formData, setFormData] = useState<TransformerData>(initialFormState);
   const [loggedHours, setLoggedHours] = useState<number[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
-  const currentHour = new Date().getHours();
+  const currentHour = getCurrentHourIST();
   const isToday = true; // Always today
 
   // Calculate if fields should be disabled
@@ -392,7 +393,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
       gen_standby_export: formData.gen_standby_export ? parseFloat(formData.gen_standby_export) : null,
       gen_standby_import: formData.gen_standby_import ? parseFloat(formData.gen_standby_import) : null,
       remarks: formData.remarks || null,
-      logged_at: new Date().toISOString(),
+      logged_at: istToUTC(new Date()),
     };
 
     const { data, error } = await supabase.from("transformer_logs").upsert(payload, {
@@ -483,7 +484,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
           <div className="flex flex-col space-y-2">
             <CardTitle className="text-lg sm:text-xl">Unified Transformer Log Sheet</CardTitle>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Gayatri Power Private Limited • {format(selectedDate, "PPP")}
+              Gayatri Power Private Limited • {formatIST(selectedDate, "PPP")} IST
             </p>
           </div>
         </CardHeader>

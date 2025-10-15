@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Database, TrendingUp, Activity } from 'lucide-react';
 import { DatabaseStats, DailySubmission } from '@/types/admin';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { format, subDays } from 'date-fns';
+import { getTodayIST, getFirstDayOfMonthIST, getDateDaysAgoIST, formatIST } from '@/lib/timezone-utils';
+import { format } from 'date-fns';
 
 // Deep, high-contrast colors for better visualization
 const CHART_COLORS = {
@@ -27,8 +28,8 @@ export const DatabaseMonitoring = () => {
 
   const loadDatabaseStats = async () => {
     try {
-      const today = format(new Date(), 'yyyy-MM-dd');
-      const firstDayOfMonth = format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd');
+      const today = getTodayIST();
+      const firstDayOfMonth = getFirstDayOfMonthIST();
 
       // Checklists
       const { count: totalChecklists } = await supabase
@@ -113,8 +114,7 @@ export const DatabaseMonitoring = () => {
 
   const loadDailySubmissions = async () => {
     try {
-      const last30Days = subDays(new Date(), 30);
-      const dateStr = format(last30Days, 'yyyy-MM-dd');
+      const dateStr = getDateDaysAgoIST(30);
 
       const { data: checklists } = await supabase
         .from('checklists')

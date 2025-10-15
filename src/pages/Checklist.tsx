@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getTodayIST, istToUTC, formatIST } from '@/lib/timezone-utils';
 import { ChecklistModule1 } from '@/components/checklist/Module1';
 import { ChecklistModule2 } from '@/components/checklist/Module2';
 import { ChecklistModule3 } from '@/components/checklist/Module3';
@@ -48,7 +49,7 @@ export default function Checklist() {
   const loadOrCreateTodayChecklist = async () => {
     if (!user) return;
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayIST();
     
     const { data, error } = await supabase
       .from('checklists')
@@ -82,7 +83,7 @@ export default function Checklist() {
         .insert({
           user_id: user.id,
           date: today,
-          start_time: new Date().toISOString()
+          start_time: istToUTC(new Date())
         })
         .select()
         .single();
@@ -155,7 +156,7 @@ export default function Checklist() {
     if (!currentChecklistId) return;
 
     try {
-      const submissionTime = new Date().toISOString();
+      const submissionTime = istToUTC(new Date());
       const { error } = await supabase
         .from('checklists')
         .update({
@@ -200,7 +201,7 @@ export default function Checklist() {
           <Alert className="mb-4 border-green-500 bg-green-50 dark:bg-green-950">
             <Lock className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-xs sm:text-sm text-green-800 dark:text-green-200">
-              This checklist was submitted on {new Date(submittedAt).toLocaleString()} - View only mode
+              This checklist was submitted on {formatIST(submittedAt, 'PPpp')} IST - View only mode
             </AlertDescription>
           </Alert>
         )}

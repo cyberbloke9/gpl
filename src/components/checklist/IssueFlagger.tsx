@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { getTodayIST } from '@/lib/timezone-utils';
 
 interface IssueFlaggerProps {
   checklistId?: string;
@@ -112,7 +113,7 @@ export const IssueFlagger = ({ checklistId, transformerLogId, module, section, i
     setLoading(true);
     try {
       const prefix = hasTransformerLogId ? 'TRF' : 'CHK';
-      const issueCode = `${prefix}-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Date.now().toString().slice(-4)}`;
+      const issueCode = `${prefix}-${getTodayIST().replace(/-/g, '')}-${Date.now().toString().slice(-4)}`;
       
       const { error } = await supabase.from('flagged_issues').insert({
         checklist_id: hasChecklistId ? checklistId : null,

@@ -17,7 +17,7 @@ import {
   validateFrequency,
   validatePowerFactor
 } from '@/lib/generatorValidation';
-import { format } from 'date-fns';
+import { getTodayIST, getCurrentHourIST, istToUTC, formatIST } from '@/lib/timezone-utils';
 import { Badge } from '@/components/ui/badge';
 import { Save, Trash2, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { Accordion } from '@/components/ui/accordion';
@@ -31,13 +31,13 @@ interface GeneratorLogFormProps {
 export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [selectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [selectedHour, setSelectedHour] = useState(new Date().getHours());
+  const [selectedDate] = useState(getTodayIST());
+  const [selectedHour, setSelectedHour] = useState(getCurrentHourIST());
   const [formData, setFormData] = useState<Partial<GeneratorLog>>({});
   const [loggedHours, setLoggedHours] = useState<number[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
-  const currentHour = new Date().getHours();
+  const currentHour = getCurrentHourIST();
   const isCurrentHour = selectedHour === currentHour;
   const isEditable = isCurrentHour && !isFinalized;
   const isToday = true; // Always today
@@ -81,12 +81,12 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
   // Auto-lock when hour changes
   useEffect(() => {
     const interval = setInterval(() => {
-      const newHour = new Date().getHours();
+      const newHour = getCurrentHourIST();
       if (newHour !== currentHour) {
         setSelectedHour(newHour);
         toast({
           title: 'Hour Changed',
-          description: `Hour ${newHour}:00 is now active. Previous hour is locked.`,
+          description: `Hour ${newHour}:00 IST is now active. Previous hour is locked.`,
         });
       }
     }, 60000); // Check every minute
@@ -266,7 +266,7 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
       cooling_los_flow: formData.cooling_los_flow ?? null,
       cooling_bearing_flow: formData.cooling_bearing_flow ?? null,
       remarks: formData.remarks ?? null,
-      logged_at: new Date().toISOString(),
+      logged_at: istToUTC(new Date()),
     };
 
     const { error } = await supabase.from('generator_logs').upsert(payload, {
@@ -364,7 +364,7 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
           <div className="flex flex-col space-y-1 sm:space-y-2">
             <CardTitle className="text-base sm:text-lg md:text-xl">Generator Log Sheet</CardTitle>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Gayatri Power Private Limited • {format(new Date(selectedDate), "PPP")}
+              Gayatri Power Private Limited • {formatIST(new Date(selectedDate), "PPP")} IST
             </p>
           </div>
         </CardHeader>

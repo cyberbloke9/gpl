@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Clock, User, CheckCircle2 } from 'lucide-react';
+import { istToUTC, formatIST } from '@/lib/timezone-utils';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -224,7 +225,7 @@ export default function Issues() {
         .from('flagged_issues')
         .update({
           status: 'resolved',
-          resolved_at: new Date().toISOString(),
+          resolved_at: istToUTC(new Date()),
           resolution_notes: 'Resolved by admin',
         })
         .eq('id', issueId);

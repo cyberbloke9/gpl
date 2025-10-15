@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, Download, FileSpreadsheet } from 'lucide-react';
+import { getCurrentISTDate, formatIST } from '@/lib/timezone-utils';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,9 +12,10 @@ import { toast } from 'sonner';
 import { exportChecklistsToExcel, exportTransformerLogsToExcel, exportGeneratorLogsToExcel, exportIssuesToExcel } from '@/lib/excelExport';
 
 export const ExportPanel = () => {
+  const today = getCurrentISTDate();
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
-    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-    to: new Date(),
+    from: new Date(today.getFullYear(), today.getMonth(), 1),
+    to: today,
   });
   const [loading, setLoading] = useState<string | null>(null);
 

@@ -4,11 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GeneratorLogForm } from '@/components/generator/GeneratorLogForm';
 import { GeneratorLogHistory } from '@/components/generator/GeneratorLogHistory';
 import { useAuth } from '@/contexts/AuthContext';
-import { format } from 'date-fns';
+import { getTodayIST } from '@/lib/timezone-utils';
 
 export default function Generator() {
   const { user } = useAuth();
-  const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [selectedDate, setSelectedDate] = useState(getTodayIST());
   const [isFinalized] = useState(false);
 
   return (

@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import { formatIST } from '@/lib/timezone-utils';
 import { format } from 'date-fns';
 
 export const exportChecklistsToExcel = (data: any[], startDate: string, endDate: string) => {

@@ -7,6 +7,7 @@ import { ProblemBadge } from '@/components/ui/status-badge';
 import { Progress } from '@/components/ui/progress';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ChecklistReportViewer } from './ChecklistReportViewer';
+import { formatIST } from '@/lib/timezone-utils';
 import { format } from 'date-fns';
 import { Eye } from 'lucide-react';
 
@@ -119,13 +120,13 @@ export const ChecklistHistory = ({ userId }: { userId?: string }) => {
                   <div>
                     <p className="text-sm text-muted-foreground">Start Time</p>
                     <p className="font-medium">
-                      {checklist.start_time ? format(new Date(checklist.start_time), 'hh:mm a') : 'N/A'}
+                      {checklist.start_time ? formatIST(new Date(checklist.start_time), 'hh:mm a') : 'N/A'}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Completion Time</p>
                     <p className="font-medium">
-                      {checklist.completion_time ? format(new Date(checklist.completion_time), 'hh:mm a') : 'N/A'}
+                      {checklist.completion_time ? formatIST(new Date(checklist.completion_time), 'hh:mm a') : 'N/A'}
                     </p>
                   </div>
                   <div>

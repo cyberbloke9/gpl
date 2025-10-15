@@ -5,12 +5,12 @@ import { TransformerLogHistory } from '@/components/transformer/TransformerLogHi
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { getTodayIST, istToUTC, formatIST } from '@/lib/timezone-utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function Transformer() {
   const { user } = useAuth();
-  const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
+  const [selectedDate, setSelectedDate] = useState<string>(getTodayIST());
   const [isFinalized, setIsFinalized] = useState<boolean>(false);
 
   // Check if logs for selected date are finalized
@@ -68,7 +68,7 @@ export default function Transformer() {
       .from('transformer_logs')
       .update({
         finalized: true,
-        finalized_at: new Date().toISOString(),
+        finalized_at: istToUTC(new Date()),
         finalized_by: user.id,
       })
       .eq('date', selectedDate)
@@ -87,7 +87,7 @@ export default function Transformer() {
     setIsFinalized(true);
     toast({
       title: 'Logs Finalized',
-      description: `Unified transformer logs for ${format(new Date(selectedDate), 'PP')} are now locked.`,
+      description: `Unified transformer logs for ${formatIST(new Date(selectedDate), 'PP')} IST are now locked.`,
     });
   };
 
