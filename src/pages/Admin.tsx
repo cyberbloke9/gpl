@@ -10,6 +10,10 @@ import { AdminChecklistHistory } from '@/components/admin/AdminChecklistHistory'
 import { ChecklistReportViewer } from '@/components/checklist/ChecklistReportViewer';
 import { TransformerReportViewer } from '@/components/transformer/TransformerReportViewer';
 import { GeneratorReportViewer } from '@/components/generator/GeneratorReportViewer';
+import { ExportPanel } from '@/components/admin/ExportPanel';
+import { UserManagementPanel } from '@/components/admin/UserManagementPanel';
+import { DatabaseMonitoring } from '@/components/admin/DatabaseMonitoring';
+import { ActivityLogsPanel } from '@/components/admin/ActivityLogsPanel';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -338,13 +342,17 @@ export default function Admin() {
         )}
 
         <Tabs defaultValue="today" className="space-y-4">
-          <TabsList className="w-full grid grid-cols-3 sm:grid-cols-6 h-auto">
+          <TabsList className="w-full grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 h-auto gap-1">
             <TabsTrigger value="today" className="text-xs sm:text-sm">Checklists</TabsTrigger>
             <TabsTrigger value="transformer" className="text-xs sm:text-sm">Transformer</TabsTrigger>
             <TabsTrigger value="generator" className="text-xs sm:text-sm">Generator</TabsTrigger>
             <TabsTrigger value="problems" className="text-xs sm:text-sm">Problems</TabsTrigger>
             <TabsTrigger value="issues" className="text-xs sm:text-sm">Issues</TabsTrigger>
             <TabsTrigger value="history" className="text-xs sm:text-sm">History</TabsTrigger>
+            <TabsTrigger value="users" className="text-xs sm:text-sm">Users</TabsTrigger>
+            <TabsTrigger value="database" className="text-xs sm:text-sm">Database</TabsTrigger>
+            <TabsTrigger value="activity" className="text-xs sm:text-sm">Activity</TabsTrigger>
+            <TabsTrigger value="export" className="text-xs sm:text-sm">Export</TabsTrigger>
           </TabsList>
 
           <TabsContent value="today">
@@ -407,6 +415,22 @@ export default function Admin() {
 
           <TabsContent value="history">
             <AdminChecklistHistory onViewReport={handleViewReport} />
+          </TabsContent>
+
+          <TabsContent value="users">
+            <UserManagementPanel />
+          </TabsContent>
+
+          <TabsContent value="database">
+            <DatabaseMonitoring />
+          </TabsContent>
+
+          <TabsContent value="activity">
+            <ActivityLogsPanel />
+          </TabsContent>
+
+          <TabsContent value="export">
+            <ExportPanel />
           </TabsContent>
         </Tabs>
       </main>
