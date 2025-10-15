@@ -360,17 +360,17 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
   };
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-4 sm:space-y-6 pb-24 sm:pb-28">
       <Card>
-        <CardHeader className="pb-3 sm:pb-4">
-          <div className="flex flex-col space-y-2">
-            <CardTitle className="text-lg sm:text-xl">Generator Log Sheet</CardTitle>
+        <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-6">
+          <div className="flex flex-col space-y-1 sm:space-y-2">
+            <CardTitle className="text-base sm:text-lg md:text-xl">Generator Log Sheet</CardTitle>
             <p className="text-xs sm:text-sm text-muted-foreground">
               Gayatri Power Private Limited • {format(new Date(selectedDate), "PPP")}
             </p>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3 sm:space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
             <Badge variant="secondary" className="text-xs sm:text-sm">
               {loggedHours.length}/24 hours logged
@@ -382,10 +382,10 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             )}
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1 sm:space-y-2">
             <label className="text-xs sm:text-sm font-medium">Select Hour</label>
             <Select value={selectedHour.toString()} onValueChange={(value) => handleHourChange(parseInt(value))}>
-              <SelectTrigger className="w-full h-9 sm:h-10 text-sm">
+              <SelectTrigger className="w-full h-8 sm:h-9 md:h-10 text-xs sm:text-sm">
                 <SelectValue placeholder="Select hour" />
               </SelectTrigger>
               <SelectContent>
@@ -423,8 +423,8 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
       </Card>
 
       <Card>
-        <CardContent className="pt-4 sm:pt-6 space-y-6">
-          <Accordion type="multiple" defaultValue={['winding', 'bearing', 'electrical']} className="space-y-3 sm:space-y-4">
+        <CardContent className="pt-4 sm:pt-6 space-y-4 sm:space-y-6 px-3 sm:px-6">
+          <Accordion type="multiple" defaultValue={['winding', 'bearing', 'electrical']} className="space-y-2 sm:space-y-3 md:space-y-4">
             {/* Section 1: Generator Winding Temperatures */}
             <GeneratorSection
               value="winding"
@@ -928,7 +928,7 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
           </Accordion>
 
           {/* Remarks */}
-          <div className="space-y-2">
+          <div className="space-y-1 sm:space-y-2">
             <label className="text-xs sm:text-sm font-medium">Remarks</label>
             <Textarea
               value={formData.remarks ?? ''}
@@ -936,22 +936,22 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
               disabled={!isEditable}
               placeholder="Enter any additional notes or observations..."
               rows={3}
-              className="text-sm"
+              className="text-xs sm:text-sm resize-none"
             />
           </div>
         </CardContent>
       </Card>
 
       {/* Fixed Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card border-t shadow-lg p-3 sm:p-4 z-50">
-        <div className="flex flex-wrap gap-2 max-w-4xl mx-auto">
-          <div className="flex gap-2 flex-shrink-0">
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t shadow-lg p-2 sm:p-3 md:p-4 z-50">
+        <div className="flex gap-1.5 sm:gap-2 max-w-4xl mx-auto px-2 sm:px-0">
+          <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigateHour(-1)}
               disabled={selectedHour === 0}
-              className="h-8 sm:h-9"
+              className="h-8 sm:h-9 px-2 sm:px-3"
             >
               <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
@@ -960,7 +960,7 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
               size="sm"
               onClick={() => navigateHour(1)}
               disabled={selectedHour === 23}
-              className="h-8 sm:h-9"
+              className="h-8 sm:h-9 px-2 sm:px-3"
             >
               <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
@@ -970,7 +970,7 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             size="sm"
             onClick={handleClear}
             disabled={!isEditable}
-            className="flex-1 min-w-[80px] h-8 sm:h-9"
+            className="flex-1 min-w-[70px] sm:min-w-[80px] h-8 sm:h-9 px-2 sm:px-4"
           >
             <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
             <span className="text-xs sm:text-sm">Clear</span>
@@ -979,7 +979,7 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             size="sm"
             onClick={handleSaveClick}
             disabled={!isEditable || isSaving}
-            className="flex-[2] min-w-[100px] h-8 sm:h-9"
+            className="flex-[2] min-w-[90px] sm:min-w-[100px] h-8 sm:h-9 px-2 sm:px-4"
           >
             {isSaving ? (
               <span className="text-xs sm:text-sm">Saving...</span>
@@ -992,7 +992,7 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
           </Button>
         </div>
         {autoSaveStatus && (
-          <p className="text-xs text-center text-muted-foreground mt-2">
+          <p className="text-xs text-center text-muted-foreground mt-1 sm:mt-2 px-2">
             {autoSaveStatus}
           </p>
         )}

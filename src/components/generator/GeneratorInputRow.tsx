@@ -28,8 +28,8 @@ export function GeneratorInputRow({
 }: GeneratorInputRowProps) {
   return (
     <div className="space-y-1">
-      <div className="flex items-center gap-3">
-        <label className="w-40 flex-shrink-0 text-sm font-medium text-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+        <label className="text-xs sm:text-sm font-medium text-foreground sm:w-32 md:w-40 flex-shrink-0">
           {label}
         </label>
         <div className="flex-1 flex items-center gap-2">
@@ -41,13 +41,13 @@ export function GeneratorInputRow({
             disabled={disabled}
             placeholder={placeholder || `0${step === '0.01' ? '.00' : step === '0.1' ? '.0' : ''}`}
             className={cn(
-              'flex-1',
+              'flex-1 h-8 sm:h-9 text-sm',
               validation && getValidationStyles(validation.status),
               disabled && 'opacity-60 cursor-not-allowed'
             )}
           />
           {unit && (
-            <span className="text-sm text-muted-foreground w-16 flex-shrink-0">
+            <span className="text-xs sm:text-sm text-muted-foreground w-12 sm:w-16 flex-shrink-0">
               {unit}
             </span>
           )}
@@ -56,7 +56,7 @@ export function GeneratorInputRow({
       {validation?.message && (
         <p
           className={cn(
-            'text-xs ml-[172px] pl-3',
+            'text-xs sm:ml-36 md:ml-[172px] pl-0 sm:pl-3',
             validation.status === 'error' && 'text-red-600',
             validation.status === 'warning' && 'text-yellow-600'
           )}
