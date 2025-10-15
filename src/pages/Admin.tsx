@@ -4,10 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { AdminOverviewCards } from '@/components/admin/AdminOverviewCards';
 import { TodaysChecklistsTable } from '@/components/admin/TodaysChecklistsTable';
 import { AdminTransformerLogsTable } from '@/components/admin/AdminTransformerLogsTable';
+import { AdminGeneratorLogsTable } from '@/components/admin/AdminGeneratorLogsTable';
+import { AdminGeneratorStats } from '@/components/admin/AdminGeneratorStats';
 import { AdminChecklistHistory } from '@/components/admin/AdminChecklistHistory';
 import { ChecklistReportViewer } from '@/components/checklist/ChecklistReportViewer';
 import { TransformerReportViewer } from '@/components/transformer/TransformerReportViewer';
+import { GeneratorReportViewer } from '@/components/generator/GeneratorReportViewer';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
@@ -23,10 +27,19 @@ export default function Admin() {
   });
   const [todaysChecklists, setTodaysChecklists] = useState<any[]>([]);
   const [transformerLogs, setTransformerLogs] = useState<any[]>([]);
+  const [generatorLogs, setGeneratorLogs] = useState<any[]>([]);
+  const [generatorStats, setGeneratorStats] = useState({
+    totalLogs: 0,
+    hoursLogged: 0,
+    avgPower: 0,
+    avgFrequency: 0,
+  });
   const [selectedChecklist, setSelectedChecklist] = useState<any>(null);
   const [isChecklistViewerOpen, setIsChecklistViewerOpen] = useState(false);
   const [selectedTransformerReport, setSelectedTransformerReport] = useState<any>(null);
   const [isTransformerViewerOpen, setIsTransformerViewerOpen] = useState(false);
+  const [selectedGeneratorReport, setSelectedGeneratorReport] = useState<any>(null);
+  const [isGeneratorViewerOpen, setIsGeneratorViewerOpen] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -51,6 +64,17 @@ export default function Admin() {
           event: '*',
           schema: 'public',
           table: 'transformer_logs',
+        },
+        () => {
+          loadDashboardData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'generator_logs',
         },
         () => {
           loadDashboardData();
@@ -149,6 +173,72 @@ export default function Admin() {
     }));
 
     setTransformerLogs(formattedTransformerLogs);
+
+    // Get today's generator logs
+    const { data: generatorData } = await supabase
+      .from('generator_logs')
+      .select(`
+        *,
+        profiles:user_id (
+          full_name,
+          employee_id
+        )
+      `)
+      .eq('date', today)
+      .order('logged_at', { ascending: false });
+
+    // Group generator logs by date and user
+    const groupedGeneratorLogs = generatorData?.reduce((acc: any, log: any) => {
+      const key = `${log.date}-${log.user_id}`;
+      if (!acc[key]) {
+        acc[key] = {
+          date: log.date,
+          user_id: log.user_id,
+          user_name: log.profiles?.full_name || 'Unknown',
+          employee_id: log.profiles?.employee_id || '',
+          hours_logged: 0,
+          logs: [],
+          total_power: 0,
+          total_frequency: 0,
+        };
+      }
+      acc[key].hours_logged++;
+      acc[key].logs.push(log);
+      if (log.gen_kw) acc[key].total_power += log.gen_kw;
+      if (log.gen_frequency) acc[key].total_frequency += log.gen_frequency;
+      return acc;
+    }, {}) || {};
+
+    const formattedGeneratorLogs = Object.values(groupedGeneratorLogs).map((group: any) => ({
+      date: group.date,
+      user_name: group.user_name,
+      employee_id: group.employee_id,
+      user_id: group.user_id,
+      hours_logged: group.hours_logged,
+      completion_percentage: Math.round((group.hours_logged / 24) * 100),
+      avg_power: group.hours_logged > 0 ? group.total_power / group.hours_logged : 0,
+      avg_frequency: group.hours_logged > 0 ? group.total_frequency / group.hours_logged : 0,
+    }));
+
+    setGeneratorLogs(formattedGeneratorLogs);
+
+    // Calculate generator stats
+    const totalGeneratorLogs = generatorData?.length || 0;
+    const uniqueHours = new Set(generatorData?.map(log => log.hour) || []).size;
+    const avgPower = generatorData && generatorData.length > 0
+      ? generatorData.reduce((sum, log) => sum + (log.gen_kw || 0), 0) / generatorData.length
+      : 0;
+    const avgFreq = generatorData && generatorData.length > 0
+      ? generatorData.reduce((sum, log) => sum + (log.gen_frequency || 0), 0) / generatorData.length
+      : 0;
+
+    setGeneratorStats({
+      totalLogs: totalGeneratorLogs,
+      hoursLogged: uniqueHours,
+      avgPower,
+      avgFrequency: avgFreq,
+    });
+
     } finally {
       setLoading(false);
     }
@@ -203,6 +293,26 @@ export default function Admin() {
     }
   };
 
+  const handleViewGeneratorReport = async (date: string, userId: string) => {
+    const { data, error } = await supabase
+      .from('generator_logs')
+      .select(`
+        *,
+        profiles:user_id (
+          full_name,
+          employee_id
+        )
+      `)
+      .eq('date', date)
+      .eq('user_id', userId)
+      .order('hour', { ascending: true });
+
+    if (!error && data && data.length > 0) {
+      setSelectedGeneratorReport(data[0]); // Pass first log with all data
+      setIsGeneratorViewerOpen(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -228,9 +338,10 @@ export default function Admin() {
         )}
 
         <Tabs defaultValue="today" className="space-y-4">
-          <TabsList className="w-full grid grid-cols-2 sm:grid-cols-5 h-auto">
+          <TabsList className="w-full grid grid-cols-3 sm:grid-cols-6 h-auto">
             <TabsTrigger value="today" className="text-xs sm:text-sm">Checklists</TabsTrigger>
             <TabsTrigger value="transformer" className="text-xs sm:text-sm">Transformer</TabsTrigger>
+            <TabsTrigger value="generator" className="text-xs sm:text-sm">Generator</TabsTrigger>
             <TabsTrigger value="problems" className="text-xs sm:text-sm">Problems</TabsTrigger>
             <TabsTrigger value="issues" className="text-xs sm:text-sm">Issues</TabsTrigger>
             <TabsTrigger value="history" className="text-xs sm:text-sm">History</TabsTrigger>
@@ -258,6 +369,26 @@ export default function Admin() {
                 />
               </div>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="generator">
+            <div className="space-y-4">
+              <AdminGeneratorStats
+                totalLogs={generatorStats.totalLogs}
+                hoursLogged={generatorStats.hoursLogged}
+                avgPower={generatorStats.avgPower}
+                avgFrequency={generatorStats.avgFrequency}
+              />
+              <Card className="p-3 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Today's Generator Logs</h2>
+                <div className="overflow-x-auto -mx-3 sm:mx-0">
+                  <AdminGeneratorLogsTable
+                    logs={generatorLogs}
+                    onViewReport={handleViewGeneratorReport}
+                  />
+                </div>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="problems">
@@ -296,6 +427,25 @@ export default function Admin() {
         userName={selectedTransformerReport?.userName}
         employeeId={selectedTransformerReport?.employeeId}
       />
+
+      {isGeneratorViewerOpen && selectedGeneratorReport && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
+          <div className="fixed inset-4 z-50 overflow-y-auto bg-background p-6 rounded-lg shadow-lg">
+            <div className="flex justify-end mb-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsGeneratorViewerOpen(false);
+                  setSelectedGeneratorReport(null);
+                }}
+              >
+                Close
+              </Button>
+            </div>
+            <GeneratorReportViewer log={selectedGeneratorReport} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
