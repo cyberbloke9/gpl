@@ -7,6 +7,8 @@ import { AdminTransformerLogsTable } from '@/components/admin/AdminTransformerLo
 import { AdminGeneratorLogsTable } from '@/components/admin/AdminGeneratorLogsTable';
 import { AdminGeneratorStats } from '@/components/admin/AdminGeneratorStats';
 import { AdminChecklistHistory } from '@/components/admin/AdminChecklistHistory';
+import { AdminTransformerHistory } from '@/components/admin/AdminTransformerHistory';
+import { AdminGeneratorHistory } from '@/components/admin/AdminGeneratorHistory';
 import { ChecklistReportViewer } from '@/components/checklist/ChecklistReportViewer';
 import { TransformerReportViewer } from '@/components/transformer/TransformerReportViewer';
 import { GeneratorReportViewer } from '@/components/generator/GeneratorReportViewer';
@@ -342,12 +344,10 @@ export default function Admin() {
         )}
 
         <Tabs defaultValue="today" className="space-y-4">
-          <TabsList className="w-full grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 h-auto gap-1">
+          <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 h-auto gap-1">
             <TabsTrigger value="today" className="text-xs sm:text-sm">Checklists</TabsTrigger>
             <TabsTrigger value="transformer" className="text-xs sm:text-sm">Transformer</TabsTrigger>
             <TabsTrigger value="generator" className="text-xs sm:text-sm">Generator</TabsTrigger>
-            <TabsTrigger value="problems" className="text-xs sm:text-sm">Problems</TabsTrigger>
-            <TabsTrigger value="issues" className="text-xs sm:text-sm">Issues</TabsTrigger>
             <TabsTrigger value="history" className="text-xs sm:text-sm">History</TabsTrigger>
             <TabsTrigger value="users" className="text-xs sm:text-sm">Users</TabsTrigger>
             <TabsTrigger value="database" className="text-xs sm:text-sm">Database</TabsTrigger>
@@ -399,22 +399,28 @@ export default function Admin() {
             </div>
           </TabsContent>
 
-          <TabsContent value="problems">
-            <Card className="p-3 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Problem Detection Dashboard</h2>
-              <p className="text-sm text-muted-foreground">Coming soon - detailed problem tracking</p>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="issues">
-            <Card className="p-3 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Flagged Issues Management</h2>
-              <p className="text-sm text-muted-foreground">Coming soon - issue management interface</p>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="history">
-            <AdminChecklistHistory onViewReport={handleViewReport} />
+            <Card className="p-6">
+              <Tabs defaultValue="checklists" className="space-y-4">
+                <TabsList className="grid grid-cols-3 w-full">
+                  <TabsTrigger value="checklists">Checklists</TabsTrigger>
+                  <TabsTrigger value="transformer">Transformer Logs</TabsTrigger>
+                  <TabsTrigger value="generator">Generator Logs</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="checklists">
+                  <AdminChecklistHistory onViewReport={handleViewReport} />
+                </TabsContent>
+                
+                <TabsContent value="transformer">
+                  <AdminTransformerHistory onViewReport={handleViewTransformerReport} />
+                </TabsContent>
+                
+                <TabsContent value="generator">
+                  <AdminGeneratorHistory onViewReport={handleViewGeneratorReport} />
+                </TabsContent>
+              </Tabs>
+            </Card>
           </TabsContent>
 
           <TabsContent value="users">
