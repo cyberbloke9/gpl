@@ -443,10 +443,16 @@ export default function Admin() {
           <TabsContent value="history">
             <Card className="p-6">
               <Tabs defaultValue="checklists" className="space-y-4">
-                <TabsList className="grid grid-cols-3 w-full">
-                  <TabsTrigger value="checklists">Checklists</TabsTrigger>
-                  <TabsTrigger value="transformer">Transformer Logs</TabsTrigger>
-                  <TabsTrigger value="generator">Generator Logs</TabsTrigger>
+                <TabsList className="w-full grid grid-cols-1 sm:grid-cols-3 h-auto gap-1 p-1">
+                  <TabsTrigger value="checklists" className="text-xs sm:text-sm px-2 py-2">
+                    Checklists
+                  </TabsTrigger>
+                  <TabsTrigger value="transformer" className="text-xs sm:text-sm px-2 py-2">
+                    Transformer Logs
+                  </TabsTrigger>
+                  <TabsTrigger value="generator" className="text-xs sm:text-sm px-2 py-2">
+                    Generator Logs
+                  </TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="checklists">
