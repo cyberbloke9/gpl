@@ -4,7 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Clock, User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, Clock, User, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,6 +18,17 @@ import {
   PaginationNext, 
   PaginationPrevious 
 } from '@/components/ui/pagination';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from '@/hooks/use-toast';
 import React from 'react';
 
 interface FlaggedIssue {
@@ -56,6 +68,8 @@ export default function Issues() {
   const [severityFilter, setSeverityFilter] = useState<'all' | 'low' | 'medium' | 'high' | 'critical'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [resolvingIssueId, setResolvingIssueId] = useState<string | null>(null);
+  const [isResolving, setIsResolving] = useState(false);
   const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
@@ -94,7 +108,9 @@ export default function Issues() {
         }
 
         if (userRole !== 'admin') {
-          query = query.eq('user_id', user.id);
+          query = query
+            .eq('user_id', user.id)
+            .neq('status', 'resolved');
         }
 
         const { data, error, count } = await query;
@@ -171,6 +187,38 @@ export default function Issues() {
         return 'secondary';
       default:
         return 'default';
+    }
+  };
+
+  const handleResolveIssue = async (issueId: string) => {
+    setIsResolving(true);
+    try {
+      const { error } = await supabase
+        .from('flagged_issues')
+        .update({
+          status: 'resolved',
+          resolved_at: new Date().toISOString(),
+          resolution_notes: 'Resolved by admin',
+        })
+        .eq('id', issueId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Issue Resolved',
+        description: 'The issue has been marked as resolved.',
+      });
+
+      setResolvingIssueId(null);
+    } catch (error) {
+      console.error('Error resolving issue:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to resolve issue. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsResolving(false);
     }
   };
 
@@ -294,6 +342,20 @@ export default function Issues() {
                     <p className="text-xs sm:text-sm break-words">{issue.description}</p>
                   </div>
 
+                  {userRole === 'admin' && issue.status !== 'resolved' && (
+                    <div className="pt-2">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => setResolvingIssueId(issue.id)}
+                        className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
+                        Mark as Resolved
+                      </Button>
+                    </div>
+                  )}
+
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4 border-t text-xs sm:text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
@@ -369,6 +431,27 @@ export default function Issues() {
             </Pagination>
           </div>
         )}
+
+        <AlertDialog open={resolvingIssueId !== null} onOpenChange={(open) => !open && setResolvingIssueId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Resolution</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to mark this issue as resolved? This action will update the issue status and hide it from operators' view.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isResolving}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => resolvingIssueId && handleResolveIssue(resolvingIssueId)}
+                disabled={isResolving}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {isResolving ? 'Resolving...' : 'Confirm'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );
