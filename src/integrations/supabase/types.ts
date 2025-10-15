@@ -173,6 +173,186 @@ export type Database = {
           },
         ]
       }
+      generator_logs: {
+        Row: {
+          avr_field_current: number | null
+          avr_field_voltage: number | null
+          bearing_bgb_high_speed_ch12: number | null
+          bearing_bgb_low_speed_ch11: number | null
+          bearing_g_de_brg_main_ch7: number | null
+          bearing_g_nde_brg_stand_ch8: number | null
+          bearing_tgb_high_speed_ch14: number | null
+          bearing_tgb_low_speed_ch13: number | null
+          bearing_thrust_1_ch9: number | null
+          bearing_thrust_2_ch10: number | null
+          cooling_bearing_flow: number | null
+          cooling_los_flow: number | null
+          cooling_main_pressure: number | null
+          created_at: string | null
+          date: string
+          finalized: boolean | null
+          finalized_at: string | null
+          finalized_by: string | null
+          gblos_oil_level: number | null
+          gblos_oil_pressure: number | null
+          gblos_oil_temperature: number | null
+          gen_current_b: number | null
+          gen_current_r: number | null
+          gen_current_y: number | null
+          gen_frequency: number | null
+          gen_kva: number | null
+          gen_kvar: number | null
+          gen_kw: number | null
+          gen_mvah: number | null
+          gen_mvarh: number | null
+          gen_mwh: number | null
+          gen_power_factor: number | null
+          gen_rpm: number | null
+          gen_voltage_br: number | null
+          gen_voltage_ry: number | null
+          gen_voltage_yb: number | null
+          hour: number
+          id: string
+          intake_gv_percentage: number | null
+          intake_rb_percentage: number | null
+          intake_water_level: number | null
+          intake_water_pressure: number | null
+          logged_at: string | null
+          remarks: string | null
+          tail_race_net_head: number | null
+          tail_race_water_level: number | null
+          topu_oil_level: number | null
+          topu_oil_pressure: number | null
+          topu_oil_temperature: number | null
+          updated_at: string | null
+          user_id: string
+          winding_temp_b1: number | null
+          winding_temp_b2: number | null
+          winding_temp_r1: number | null
+          winding_temp_r2: number | null
+          winding_temp_y1: number | null
+          winding_temp_y2: number | null
+        }
+        Insert: {
+          avr_field_current?: number | null
+          avr_field_voltage?: number | null
+          bearing_bgb_high_speed_ch12?: number | null
+          bearing_bgb_low_speed_ch11?: number | null
+          bearing_g_de_brg_main_ch7?: number | null
+          bearing_g_nde_brg_stand_ch8?: number | null
+          bearing_tgb_high_speed_ch14?: number | null
+          bearing_tgb_low_speed_ch13?: number | null
+          bearing_thrust_1_ch9?: number | null
+          bearing_thrust_2_ch10?: number | null
+          cooling_bearing_flow?: number | null
+          cooling_los_flow?: number | null
+          cooling_main_pressure?: number | null
+          created_at?: string | null
+          date?: string
+          finalized?: boolean | null
+          finalized_at?: string | null
+          finalized_by?: string | null
+          gblos_oil_level?: number | null
+          gblos_oil_pressure?: number | null
+          gblos_oil_temperature?: number | null
+          gen_current_b?: number | null
+          gen_current_r?: number | null
+          gen_current_y?: number | null
+          gen_frequency?: number | null
+          gen_kva?: number | null
+          gen_kvar?: number | null
+          gen_kw?: number | null
+          gen_mvah?: number | null
+          gen_mvarh?: number | null
+          gen_mwh?: number | null
+          gen_power_factor?: number | null
+          gen_rpm?: number | null
+          gen_voltage_br?: number | null
+          gen_voltage_ry?: number | null
+          gen_voltage_yb?: number | null
+          hour: number
+          id?: string
+          intake_gv_percentage?: number | null
+          intake_rb_percentage?: number | null
+          intake_water_level?: number | null
+          intake_water_pressure?: number | null
+          logged_at?: string | null
+          remarks?: string | null
+          tail_race_net_head?: number | null
+          tail_race_water_level?: number | null
+          topu_oil_level?: number | null
+          topu_oil_pressure?: number | null
+          topu_oil_temperature?: number | null
+          updated_at?: string | null
+          user_id: string
+          winding_temp_b1?: number | null
+          winding_temp_b2?: number | null
+          winding_temp_r1?: number | null
+          winding_temp_r2?: number | null
+          winding_temp_y1?: number | null
+          winding_temp_y2?: number | null
+        }
+        Update: {
+          avr_field_current?: number | null
+          avr_field_voltage?: number | null
+          bearing_bgb_high_speed_ch12?: number | null
+          bearing_bgb_low_speed_ch11?: number | null
+          bearing_g_de_brg_main_ch7?: number | null
+          bearing_g_nde_brg_stand_ch8?: number | null
+          bearing_tgb_high_speed_ch14?: number | null
+          bearing_tgb_low_speed_ch13?: number | null
+          bearing_thrust_1_ch9?: number | null
+          bearing_thrust_2_ch10?: number | null
+          cooling_bearing_flow?: number | null
+          cooling_los_flow?: number | null
+          cooling_main_pressure?: number | null
+          created_at?: string | null
+          date?: string
+          finalized?: boolean | null
+          finalized_at?: string | null
+          finalized_by?: string | null
+          gblos_oil_level?: number | null
+          gblos_oil_pressure?: number | null
+          gblos_oil_temperature?: number | null
+          gen_current_b?: number | null
+          gen_current_r?: number | null
+          gen_current_y?: number | null
+          gen_frequency?: number | null
+          gen_kva?: number | null
+          gen_kvar?: number | null
+          gen_kw?: number | null
+          gen_mvah?: number | null
+          gen_mvarh?: number | null
+          gen_mwh?: number | null
+          gen_power_factor?: number | null
+          gen_rpm?: number | null
+          gen_voltage_br?: number | null
+          gen_voltage_ry?: number | null
+          gen_voltage_yb?: number | null
+          hour?: number
+          id?: string
+          intake_gv_percentage?: number | null
+          intake_rb_percentage?: number | null
+          intake_water_level?: number | null
+          intake_water_pressure?: number | null
+          logged_at?: string | null
+          remarks?: string | null
+          tail_race_net_head?: number | null
+          tail_race_water_level?: number | null
+          topu_oil_level?: number | null
+          topu_oil_pressure?: number | null
+          topu_oil_temperature?: number | null
+          updated_at?: string | null
+          user_id?: string
+          winding_temp_b1?: number | null
+          winding_temp_b2?: number | null
+          winding_temp_r1?: number | null
+          winding_temp_r2?: number | null
+          winding_temp_y1?: number | null
+          winding_temp_y2?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null

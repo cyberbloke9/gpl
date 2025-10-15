@@ -10,7 +10,8 @@ import {
   User,
   Menu,
   X,
-  AlertCircle
+  AlertCircle,
+  Power
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -82,6 +83,16 @@ export const Navigation = () => {
             >
               <Gauge className="mr-2 h-4 w-4" />
               Transformer
+            </Button>
+          </Link>
+          <Link to="/generator" onClick={() => mobile && setIsOpen(false)}>
+            <Button 
+              variant={isActive('/generator') ? 'default' : 'ghost'} 
+              size="sm"
+              className={mobile ? "w-full justify-start" : ""}
+            >
+              <Power className="mr-2 h-4 w-4" />
+              Generator
             </Button>
           </Link>
           <Link to="/issues" onClick={() => mobile && setIsOpen(false)}>

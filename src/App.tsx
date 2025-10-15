@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import Checklist from "./pages/Checklist";
 import Transformer from "./pages/Transformer";
+import Generator from "./pages/Generator";
 import Issues from "./pages/Issues";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/checklist" element={<ProtectedRoute requireOperator><Checklist /></ProtectedRoute>} />
             <Route path="/transformer" element={<ProtectedRoute requireOperator><Transformer /></ProtectedRoute>} />
+            <Route path="/generator" element={<ProtectedRoute requireOperator><Generator /></ProtectedRoute>} />
             <Route path="/issues" element={<ProtectedRoute><Issues /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
