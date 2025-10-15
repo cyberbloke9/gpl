@@ -1,10 +1,8 @@
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface GeneratorSectionProps {
   title: string;
-  fieldCount: number;
   children: React.ReactNode;
   disabled?: boolean;
   value: string;
@@ -12,7 +10,6 @@ interface GeneratorSectionProps {
 
 export function GeneratorSection({
   title,
-  fieldCount,
   children,
   disabled = false,
   value,
@@ -26,11 +23,8 @@ export function GeneratorSection({
         )}
         disabled={disabled}
       >
-        <div className="flex items-center justify-between w-full pr-4">
+        <div className="flex items-center w-full pr-4">
           <h3 className="text-sm sm:text-base font-semibold">{title}</h3>
-          <Badge variant="secondary" className="text-xs">
-            {fieldCount} fields
-          </Badge>
         </div>
       </AccordionTrigger>
 

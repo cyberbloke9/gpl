@@ -429,7 +429,6 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             <GeneratorSection
               value="winding"
               title="GENERATOR WINDING TEMPERATURES"
-              fieldCount={6}
               disabled={!isEditable}
             >
           <GeneratorInputRow
@@ -486,7 +485,6 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             <GeneratorSection
               value="bearing"
               title="BEARING TEMPERATURES"
-              fieldCount={8}
               disabled={!isEditable}
             >
           <div className="space-y-4">
@@ -578,7 +576,6 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             <GeneratorSection
               value="electrical"
               title="3.3 KV GENERATOR - ELECTRICAL PARAMETERS"
-              fieldCount={15}
               disabled={!isEditable}
             >
           <div className="space-y-4">
@@ -736,7 +733,6 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             <GeneratorSection
               value="avr"
               title="AVR (AUTOMATIC VOLTAGE REGULATOR)"
-              fieldCount={2}
               disabled={!isEditable}
             >
           <GeneratorInputRow
@@ -761,7 +757,6 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             <GeneratorSection
               value="intake"
               title="INTAKE SYSTEM"
-              fieldCount={4}
               disabled={!isEditable}
             >
           <GeneratorInputRow
@@ -802,7 +797,6 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             <GeneratorSection
               value="tailrace"
               title="TAIL RACE"
-              fieldCount={2}
               disabled={!isEditable}
             >
           <GeneratorInputRow
@@ -827,7 +821,6 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             <GeneratorSection
               value="topu"
               title="T.OPU (TURBINE OIL PRESSURE UNIT)"
-              fieldCount={3}
               disabled={!isEditable}
             >
           <GeneratorInputRow
@@ -860,7 +853,6 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             <GeneratorSection
               value="cooling"
               title="GB.LOS & COOLING WATER SYSTEM"
-              fieldCount={6}
               disabled={!isEditable}
             >
           <div className="space-y-4">
