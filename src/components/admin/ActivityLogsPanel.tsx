@@ -215,19 +215,19 @@ export const ActivityLogsPanel = () => {
       <CardContent>
         <div className="space-y-4 max-h-[600px] overflow-y-auto">
           {activities.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No recent activity</p>
+            <p className="text-center text-muted-foreground py-8 text-sm">No recent activity</p>
           ) : (
             activities.map((activity) => (
-              <div key={activity.id} className="flex items-start gap-4 border-b pb-4 last:border-0">
-                <div className="mt-1">
+              <div key={activity.id} className="flex items-start gap-3 sm:gap-4 border-b pb-3 sm:pb-4 last:border-0">
+                <div className="mt-1 flex-shrink-0">
                   {getActivityIcon(activity.type)}
                 </div>
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Badge variant={getActivityColor(activity.type)}>
+                <div className="flex-1 space-y-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant={getActivityColor(activity.type)} className="text-xs">
                       {activity.type}
                     </Badge>
-                    <span className="text-sm font-medium">{activity.user_name}</span>
+                    <span className="text-sm font-medium truncate">{activity.user_name}</span>
                     <span className="text-xs text-muted-foreground">({activity.employee_id})</span>
                   </div>
                   <p className="text-sm text-muted-foreground">{activity.action}</p>

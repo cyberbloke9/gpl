@@ -6,7 +6,14 @@ import { DatabaseStats, DailySubmission } from '@/types/admin';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format, subDays } from 'date-fns';
 
-const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))'];
+// Deep, high-contrast colors for better visualization
+const CHART_COLORS = {
+  checklists: '#0ea5e9',    // Deep Sky Blue
+  transformer: '#8b5cf6',   // Deep Purple
+  generator: '#f59e0b',     // Deep Amber
+  open: '#ef4444',          // Deep Red (for open issues)
+  resolved: '#10b981',      // Deep Green (for resolved issues)
+};
 
 export const DatabaseMonitoring = () => {
   const [stats, setStats] = useState<DatabaseStats | null>(null);
@@ -163,8 +170,8 @@ export const DatabaseMonitoring = () => {
   }
 
   const issuesPieData = [
-    { name: 'Open', value: stats?.open_issues || 0 },
-    { name: 'Resolved', value: stats?.resolved_issues || 0 },
+    { name: 'Open', value: stats?.open_issues || 0, color: CHART_COLORS.open },
+    { name: 'Resolved', value: stats?.resolved_issues || 0, color: CHART_COLORS.resolved },
   ];
 
   return (
@@ -251,46 +258,89 @@ export const DatabaseMonitoring = () => {
           <CardTitle>Daily Submissions (Last 30 Days)</CardTitle>
           <CardDescription>Trend of submissions over time</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={dailyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tickFormatter={(date) => format(new Date(date), 'MM/dd')} />
-              <YAxis />
-              <Tooltip labelFormatter={(date) => format(new Date(date), 'PPP')} />
-              <Legend />
-              <Line type="monotone" dataKey="checklists" stroke="hsl(var(--primary))" name="Checklists" />
-              <Line type="monotone" dataKey="transformer_logs" stroke="hsl(var(--secondary))" name="Transformer" />
-              <Line type="monotone" dataKey="generator_logs" stroke="hsl(var(--accent))" name="Generator" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis 
+                dataKey="date" 
+                tickFormatter={(date) => format(new Date(date), 'MM/dd')}
+                stroke="#6b7280"
+                tick={{ fontSize: 12 }}
+              />
+              <YAxis stroke="#6b7280" tick={{ fontSize: 12 }} />
+              <Tooltip 
+                labelFormatter={(date) => format(new Date(date), 'PPP')}
+                contentStyle={{ 
+                  backgroundColor: 'white', 
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px'
+                }}
+              />
+              <Legend wrapperStyle={{ fontSize: '14px' }} />
+              <Line 
+                type="monotone" 
+                dataKey="checklists" 
+                stroke={CHART_COLORS.checklists}
+                strokeWidth={2.5}
+                name="Checklists" 
+                dot={{ fill: CHART_COLORS.checklists, r: 4 }}
+                activeDot={{ r: 6 }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="transformer_logs" 
+                stroke={CHART_COLORS.transformer}
+                strokeWidth={2.5}
+                name="Transformer" 
+                dot={{ fill: CHART_COLORS.transformer, r: 4 }}
+                activeDot={{ r: 6 }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="generator_logs" 
+                stroke={CHART_COLORS.generator}
+                strokeWidth={2.5}
+                name="Generator" 
+                dot={{ fill: CHART_COLORS.generator, r: 4 }}
+                activeDot={{ r: 6 }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Issue Status Distribution</CardTitle>
             <CardDescription>Open vs Resolved issues</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6">
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
                   data={issuesPieData}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
+                  labelLine={true}
                   label={(entry) => `${entry.name}: ${entry.value}`}
-                  outerRadius={80}
+                  outerRadius={90}
                   fill="#8884d8"
                   dataKey="value"
                 >
                   {issuesPieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'white', 
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: '14px' }} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -303,16 +353,16 @@ export const DatabaseMonitoring = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Total Issues:</span>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-muted">
+                <span className="text-sm font-medium text-muted-foreground">Total Issues:</span>
                 <span className="text-2xl font-bold">{stats?.total_issues}</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Open Issues:</span>
-                <span className="text-2xl font-bold text-destructive">{stats?.open_issues}</span>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-red-50 border border-red-200">
+                <span className="text-sm font-medium text-red-700">Open Issues:</span>
+                <span className="text-2xl font-bold text-red-600">{stats?.open_issues}</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Resolved Issues:</span>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-green-50 border border-green-200">
+                <span className="text-sm font-medium text-green-700">Resolved Issues:</span>
                 <span className="text-2xl font-bold text-green-600">{stats?.resolved_issues}</span>
               </div>
             </div>

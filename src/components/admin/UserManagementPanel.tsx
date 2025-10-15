@@ -102,30 +102,32 @@ export const UserManagementPanel = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Full Name</TableHead>
-                  <TableHead>Employee ID</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Registration Date</TableHead>
+                  <TableHead className="whitespace-nowrap">Full Name</TableHead>
+                  <TableHead className="hidden sm:table-cell whitespace-nowrap">Employee ID</TableHead>
+                  <TableHead className="whitespace-nowrap">Role</TableHead>
+                  <TableHead className="hidden md:table-cell whitespace-nowrap">Registration Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8 text-sm">
                       No users found
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredUsers.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.full_name}</TableCell>
-                      <TableCell>{user.employee_id || 'N/A'}</TableCell>
+                      <TableCell className="font-medium text-sm">{user.full_name}</TableCell>
+                      <TableCell className="hidden sm:table-cell text-xs text-muted-foreground">
+                        {user.employee_id || 'N/A'}
+                      </TableCell>
                       <TableCell>
-                        <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                        <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
                           {user.role}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
                         {format(new Date(user.created_at), 'PPp')}
                       </TableCell>
                     </TableRow>

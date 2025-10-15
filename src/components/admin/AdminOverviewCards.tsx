@@ -1,18 +1,18 @@
 import { Card } from '@/components/ui/card';
-import { Users, ClipboardList, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Users, ClipboardList, Zap, Activity } from 'lucide-react';
 
 interface AdminOverviewCardsProps {
   totalUsers: number;
   todaysChecklists: number;
-  completedToday: number;
-  activeProblems: number;
+  todaysTransformerLogs: number;
+  todaysGeneratorLogs: number;
 }
 
 export const AdminOverviewCards = ({
   totalUsers,
   todaysChecklists,
-  completedToday,
-  activeProblems,
+  todaysTransformerLogs,
+  todaysGeneratorLogs,
 }: AdminOverviewCardsProps) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
@@ -44,30 +44,26 @@ export const AdminOverviewCards = ({
 
       <Card className="p-4 sm:p-6">
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="p-2 sm:p-3 bg-green-100 rounded-lg flex-shrink-0">
-            <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+          <div className="p-2 sm:p-3 bg-purple-100 rounded-lg flex-shrink-0">
+            <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs sm:text-sm text-muted-foreground">Completed Today</p>
-            <p className="text-xl sm:text-2xl font-bold">
-              {completedToday}/{todaysChecklists}
-            </p>
-            <p className="text-xs text-muted-foreground truncate">
-              {todaysChecklists > 0 ? Math.round((completedToday / todaysChecklists) * 100) : 0}% completion rate
-            </p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Transformer Logs</p>
+            <p className="text-xl sm:text-2xl font-bold">{todaysTransformerLogs}</p>
+            <p className="text-xs text-muted-foreground truncate">Hours logged today</p>
           </div>
         </div>
       </Card>
 
       <Card className="p-4 sm:p-6">
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="p-2 sm:p-3 bg-red-100 rounded-lg flex-shrink-0">
-            <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
+          <div className="p-2 sm:p-3 bg-amber-100 rounded-lg flex-shrink-0">
+            <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs sm:text-sm text-muted-foreground">Active Problems</p>
-            <p className="text-xl sm:text-2xl font-bold text-red-600">{activeProblems}</p>
-            <p className="text-xs text-muted-foreground truncate">Requires attention</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Generator Logs</p>
+            <p className="text-xl sm:text-2xl font-bold">{todaysGeneratorLogs}</p>
+            <p className="text-xs text-muted-foreground truncate">Hours logged today</p>
           </div>
         </div>
       </Card>

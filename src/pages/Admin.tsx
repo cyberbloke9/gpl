@@ -28,8 +28,8 @@ export default function Admin() {
   const [stats, setStats] = useState({
     totalUsers: 0,
     todaysChecklists: 0,
-    completedToday: 0,
-    activeProblems: 0,
+    todaysTransformerLogs: 0,
+    todaysGeneratorLogs: 0,
   });
   const [todaysChecklists, setTodaysChecklists] = useState<any[]>([]);
   const [transformerLogs, setTransformerLogs] = useState<any[]>([]);
@@ -103,29 +103,18 @@ export default function Admin() {
         .from('profiles')
         .select('*', { count: 'exact', head: true });
 
-      // Get today's checklists with user details
-      const { data: checklists } = await supabase
-        .from('checklists')
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            employee_id
-          )
-        `)
-        .eq('date', today)
-        .order('start_time', { ascending: false });
-
-    // Calculate stats
-    const completed = checklists?.filter((c) => c.submitted || c.status === 'completed').length || 0;
-    const totalProblems = checklists?.reduce((sum, c) => sum + (c.problem_count || 0), 0) || 0;
-
-    setStats({
-      totalUsers: usersCount || 0,
-      todaysChecklists: checklists?.length || 0,
-      completedToday: completed,
-      activeProblems: totalProblems,
-    });
+    // Get today's checklists with user details
+    const { data: checklists } = await supabase
+      .from('checklists')
+      .select(`
+        *,
+        profiles:user_id (
+          full_name,
+          employee_id
+        )
+      `)
+      .eq('date', today)
+      .order('start_time', { ascending: false });
 
     // Format checklists for table
     const formattedChecklists = checklists?.map((c: any) => ({
@@ -238,6 +227,14 @@ export default function Admin() {
 
     console.log('Formatted Generator Logs:', formattedGeneratorLogs);
     setGeneratorLogs(formattedGeneratorLogs);
+
+    // Calculate stats - MOVED HERE after all data is fetched
+    setStats({
+      totalUsers: usersCount || 0,
+      todaysChecklists: checklists?.length || 0,
+      todaysTransformerLogs: transformerData?.length || 0,
+      todaysGeneratorLogs: generatorData?.length || 0,
+    });
 
     // Calculate generator stats
     const totalGeneratorLogs = generatorData?.length || 0;
@@ -354,7 +351,7 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+      <main className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
         <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Admin Dashboard</h1>
 
         {loading ? (
@@ -370,21 +367,21 @@ export default function Admin() {
           <AdminOverviewCards
             totalUsers={stats.totalUsers}
             todaysChecklists={stats.todaysChecklists}
-            completedToday={stats.completedToday}
-            activeProblems={stats.activeProblems}
+            todaysTransformerLogs={stats.todaysTransformerLogs}
+            todaysGeneratorLogs={stats.todaysGeneratorLogs}
           />
         )}
 
         <Tabs defaultValue="today" className="space-y-4">
-          <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 h-auto gap-1">
-            <TabsTrigger value="today" className="text-xs sm:text-sm">Checklists</TabsTrigger>
-            <TabsTrigger value="transformer" className="text-xs sm:text-sm">Transformer</TabsTrigger>
-            <TabsTrigger value="generator" className="text-xs sm:text-sm">Generator</TabsTrigger>
-            <TabsTrigger value="history" className="text-xs sm:text-sm">History</TabsTrigger>
-            <TabsTrigger value="users" className="text-xs sm:text-sm">Users</TabsTrigger>
-            <TabsTrigger value="database" className="text-xs sm:text-sm">Database</TabsTrigger>
-            <TabsTrigger value="activity" className="text-xs sm:text-sm">Activity</TabsTrigger>
-            <TabsTrigger value="export" className="text-xs sm:text-sm">Export</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 h-auto gap-1 p-1">
+            <TabsTrigger value="today" className="text-xs sm:text-sm px-2 py-1.5">Checklists</TabsTrigger>
+            <TabsTrigger value="transformer" className="text-xs sm:text-sm px-2 py-1.5">Transformer</TabsTrigger>
+            <TabsTrigger value="generator" className="text-xs sm:text-sm px-2 py-1.5">Generator</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs sm:text-sm px-2 py-1.5">History</TabsTrigger>
+            <TabsTrigger value="users" className="text-xs sm:text-sm px-2 py-1.5">Users</TabsTrigger>
+            <TabsTrigger value="database" className="text-xs sm:text-sm px-2 py-1.5">Database</TabsTrigger>
+            <TabsTrigger value="activity" className="text-xs sm:text-sm px-2 py-1.5">Activity</TabsTrigger>
+            <TabsTrigger value="export" className="text-xs sm:text-sm px-2 py-1.5">Export</TabsTrigger>
           </TabsList>
 
           <TabsContent value="today">
