@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAutoSave } from '@/hooks/useAutoSave';
-import { HourSelector } from './HourSelector';
 import { GeneratorSection } from './GeneratorSection';
 import { GeneratorInputRow } from './GeneratorInputRow';
 import { GeneratorLog } from '@/types/generator';
@@ -21,8 +19,9 @@ import {
 } from '@/lib/generatorValidation';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { Save, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Save, Trash2, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { Accordion } from '@/components/ui/accordion';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface GeneratorLogFormProps {
   isFinalized: boolean;
@@ -41,6 +40,11 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
   const currentHour = new Date().getHours();
   const isCurrentHour = selectedHour === currentHour;
   const isEditable = isCurrentHour && !isFinalized;
+  const isToday = true; // Always today
+
+  const handleHourChange = (hour: number) => {
+    setSelectedHour(hour);
+  };
 
   // Fetch logs for the selected date
   useEffect(() => {
@@ -377,27 +381,49 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
               </Badge>
             )}
           </div>
+
+          <div className="space-y-2">
+            <label className="text-xs sm:text-sm font-medium">Select Hour</label>
+            <Select value={selectedHour.toString()} onValueChange={(value) => handleHourChange(parseInt(value))}>
+              <SelectTrigger className="w-full h-9 sm:h-10 text-sm">
+                <SelectValue placeholder="Select hour" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 24 }, (_, i) => i).map((hour) => {
+                  const isFuture = isToday && hour > currentHour;
+                  const isLogged = loggedHours.includes(hour);
+                  const isCurrent = hour === currentHour && isToday;
+
+                  return (
+                    <SelectItem key={hour} value={hour.toString()} disabled={isFuture} className="text-sm">
+                      <div className="flex items-center gap-2">
+                        <span>{hour.toString().padStart(2, "0")}:00</span>
+                        {isLogged && <CheckCircle2 className="h-3 w-3 text-green-600" />}
+                        {isCurrent && (
+                          <Badge variant="outline" className="text-xs ml-2">
+                            Current
+                          </Badge>
+                        )}
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+
+            {/* Status indicator */}
+            {selectedHour < currentHour && (
+              <p className="text-xs text-muted-foreground">⏱ This hour has passed - viewing only</p>
+            )}
+            {selectedHour === currentHour && !isFinalized && (
+              <p className="text-xs text-green-600">✓ Current hour - editable until {currentHour}:59</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardContent className="pt-4 sm:pt-6 space-y-6">
-          {/* Hour Grid Selector */}
-          <HourSelector
-            selectedHour={selectedHour}
-            onHourSelect={setSelectedHour}
-            loggedHours={loggedHours}
-            currentHour={currentHour}
-          />
-
-          {/* Status indicator */}
-          {selectedHour < currentHour && (
-            <p className="text-xs text-muted-foreground">⏱ This hour has passed - viewing only</p>
-          )}
-          {selectedHour === currentHour && !isFinalized && (
-            <p className="text-xs text-green-600">✓ Current hour - editable until {currentHour}:59</p>
-          )}
-
           <Accordion type="multiple" defaultValue={['winding', 'bearing', 'electrical']} className="space-y-3 sm:space-y-4">
             {/* Section 1: Generator Winding Temperatures */}
             <GeneratorSection
@@ -918,31 +944,33 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
 
       {/* Fixed Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-card border-t shadow-lg p-3 sm:p-4 z-50">
-        <div className="flex gap-2 max-w-4xl mx-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigateHour(-1)}
-            disabled={selectedHour === 0}
-            className="flex-shrink-0"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigateHour(1)}
-            disabled={selectedHour === 23}
-            className="flex-shrink-0"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+        <div className="flex flex-wrap gap-2 max-w-4xl mx-auto">
+          <div className="flex gap-2 flex-shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigateHour(-1)}
+              disabled={selectedHour === 0}
+              className="h-8 sm:h-9"
+            >
+              <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigateHour(1)}
+              disabled={selectedHour === 23}
+              className="h-8 sm:h-9"
+            >
+              <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+            </Button>
+          </div>
           <Button
             variant="outline"
             size="sm"
             onClick={handleClear}
             disabled={!isEditable}
-            className="flex-1"
+            className="flex-1 min-w-[80px] h-8 sm:h-9"
           >
             <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
             <span className="text-xs sm:text-sm">Clear</span>
@@ -951,7 +979,7 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             size="sm"
             onClick={handleSaveClick}
             disabled={!isEditable || isSaving}
-            className="flex-[2]"
+            className="flex-[2] min-w-[100px] h-8 sm:h-9"
           >
             {isSaving ? (
               <span className="text-xs sm:text-sm">Saving...</span>

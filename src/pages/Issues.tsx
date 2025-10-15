@@ -177,20 +177,20 @@ export default function Issues() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Flagged Issues</h1>
-          <p className="text-muted-foreground mt-2">
+      <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        <div className="mb-4 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold">Flagged Issues</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
             Monitor and track reported issues
           </p>
         </div>
 
-        <Card className="p-4 mb-6">
-          <div className="flex flex-col gap-4">
-            <h3 className="text-sm font-medium">Filter Issues</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <Card className="p-3 sm:p-4 mb-4 sm:mb-6">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <h3 className="text-xs sm:text-sm font-medium">Filter Issues</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
               <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full h-8 sm:h-10 text-xs sm:text-sm">
                   <SelectValue placeholder="Date range" />
                 </SelectTrigger>
                 <SelectContent>
@@ -203,7 +203,7 @@ export default function Issues() {
               </Select>
               
               <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'reported' | 'in_progress' | 'resolved')}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full h-8 sm:h-10 text-xs sm:text-sm">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -215,7 +215,7 @@ export default function Issues() {
               </Select>
               
               <Select value={severityFilter} onValueChange={(value) => setSeverityFilter(value as 'all' | 'low' | 'medium' | 'high' | 'critical')}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full h-8 sm:h-10 text-xs sm:text-sm">
                   <SelectValue placeholder="Severity" />
                 </SelectTrigger>
                 <SelectContent>
@@ -246,66 +246,66 @@ export default function Issues() {
           </div>
         ) : issues.length === 0 ? (
           <Card>
-            <CardContent className="py-12 text-center text-muted-foreground">
-              <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg">No issues reported yet</p>
+            <CardContent className="py-8 sm:py-12 text-center text-muted-foreground">
+              <AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-50" />
+              <p className="text-base sm:text-lg">No issues reported yet</p>
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {issues.map((issue) => (
               <Card key={issue.id} className="border-l-4" style={{
                 borderLeftColor: issue.severity === 'critical' || issue.severity === 'high' 
                   ? 'hsl(var(--destructive))' 
                   : 'hsl(var(--border))'
               }}>
-                <CardHeader>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <CardHeader className="p-3 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                     <div className="flex-1">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <AlertCircle className="h-5 w-5" />
-                        {issue.issue_code}
+                      <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                        <span className="break-words">{issue.issue_code}</span>
                       </CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                         {getIssueContext(issue)}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant={getSeverityColor(issue.severity)}>
+                      <Badge variant={getSeverityColor(issue.severity)} className="text-xs">
                         {issue.severity}
                       </Badge>
-                      <Badge variant={getStatusColor(issue.status)}>
+                      <Badge variant={getStatusColor(issue.status)} className="text-xs">
                         {issue.status}
                       </Badge>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6 pt-0">
                   <div>
-                    <p className="text-sm font-medium mb-1">Location:</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs sm:text-sm font-medium mb-1">Location:</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground break-words">
                       {issue.module} → {issue.section} → {issue.item}
                       {issue.unit && ` → ${issue.unit}`}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-sm font-medium mb-1">Description:</p>
-                    <p className="text-sm">{issue.description}</p>
+                    <p className="text-xs sm:text-sm font-medium mb-1">Description:</p>
+                    <p className="text-xs sm:text-sm break-words">{issue.description}</p>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t text-sm text-muted-foreground">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4 border-t text-xs sm:text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      <span>
+                      <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                      <span className="break-words">
                         {format(new Date(issue.reported_at), 'PPp')}
                       </span>
                     </div>
                     
                     {userRole === 'admin' && issue.profiles && (
                       <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        <span>
+                        <User className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                        <span className="break-words">
                           Reported by: {issue.profiles.full_name}
                           {issue.profiles.employee_id && ` (${issue.profiles.employee_id})`}
                         </span>
@@ -319,8 +319,8 @@ export default function Issues() {
         )}
 
         {totalCount > ITEMS_PER_PAGE && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6">
-            <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 pt-4 sm:pt-6">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)} of {totalCount} issues
             </p>
             

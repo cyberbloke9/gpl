@@ -199,7 +199,7 @@ export default function Checklist() {
         {isSubmitted && submittedAt && (
           <Alert className="mb-4 border-green-500 bg-green-50 dark:bg-green-950">
             <Lock className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800 dark:text-green-200">
+            <AlertDescription className="text-xs sm:text-sm text-green-800 dark:text-green-200">
               This checklist was submitted on {new Date(submittedAt).toLocaleString()} - View only mode
             </AlertDescription>
           </Alert>
@@ -207,17 +207,17 @@ export default function Checklist() {
 
         <Card className="p-3 sm:p-6 mb-24 sm:mb-28">
           <Tabs value={activeModule} onValueChange={setActiveModule}>
-            <TabsList className="grid w-full grid-cols-5 h-auto">
-              <TabsTrigger value="1" className="text-xs sm:text-sm px-1 sm:px-3">M1</TabsTrigger>
-              <TabsTrigger value="2" className="text-xs sm:text-sm px-1 sm:px-3">M2</TabsTrigger>
-              <TabsTrigger value="3" className="text-xs sm:text-sm px-1 sm:px-3">M3</TabsTrigger>
-              <TabsTrigger value="4" className="text-xs sm:text-sm px-1 sm:px-3">M4</TabsTrigger>
-              <TabsTrigger value="history" className="text-xs sm:text-sm px-1 sm:px-3">History</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-5 h-auto gap-1">
+              <TabsTrigger value="1" className="text-xs sm:text-sm px-1 sm:px-3 py-2">M1</TabsTrigger>
+              <TabsTrigger value="2" className="text-xs sm:text-sm px-1 sm:px-3 py-2">M2</TabsTrigger>
+              <TabsTrigger value="3" className="text-xs sm:text-sm px-1 sm:px-3 py-2">M3</TabsTrigger>
+              <TabsTrigger value="4" className="text-xs sm:text-sm px-1 sm:px-3 py-2">M4</TabsTrigger>
+              <TabsTrigger value="history" className="text-xs sm:text-sm px-1 sm:px-3 py-2">History</TabsTrigger>
             </TabsList>
 
             <TabsContent value="1">
               {isSubmitted ? (
-                <Alert>
+                <Alert className="text-xs sm:text-sm">
                   <AlertDescription>
                     Module data is locked. View the submitted report in the History tab.
                   </AlertDescription>
@@ -237,7 +237,7 @@ export default function Checklist() {
 
             <TabsContent value="2">
               {isSubmitted ? (
-                <Alert>
+                <Alert className="text-xs sm:text-sm">
                   <AlertDescription>
                     Module data is locked. View the submitted report in the History tab.
                   </AlertDescription>
@@ -257,7 +257,7 @@ export default function Checklist() {
 
             <TabsContent value="3">
               {isSubmitted ? (
-                <Alert>
+                <Alert className="text-xs sm:text-sm">
                   <AlertDescription>
                     Module data is locked. View the submitted report in the History tab.
                   </AlertDescription>
@@ -277,7 +277,7 @@ export default function Checklist() {
 
             <TabsContent value="4">
               {isSubmitted ? (
-                <Alert>
+                <Alert className="text-xs sm:text-sm">
                   <AlertDescription>
                     Module data is locked. View the submitted report in the History tab.
                   </AlertDescription>
@@ -313,21 +313,21 @@ export default function Checklist() {
       )}
 
       <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>Submit Complete Checklist?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-base sm:text-lg">Submit Complete Checklist?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs sm:text-sm">
               This will mark your daily checklist as complete and notify the admin for review.
               {problemFields.length > 0 && (
-                <span className="block mt-2 text-red-600 font-semibold">
+                <span className="block mt-2 text-red-600 font-semibold text-xs sm:text-sm">
                   ⚠️ Note: {problemFields.length} problem(s) detected will be highlighted for admin attention.
                 </span>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSubmitChecklist}>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="text-xs sm:text-sm">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSubmitChecklist} className="text-xs sm:text-sm">
               Submit Checklist
             </AlertDialogAction>
           </AlertDialogFooter>
