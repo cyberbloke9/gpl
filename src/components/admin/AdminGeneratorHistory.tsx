@@ -46,13 +46,7 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
 
       const { data: logsData, error } = await supabase
         .from('generator_logs')
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            employee_id
-          )
-        `)
+        .select('*')
         .eq('finalized', true)
         .gte('date', daysAgo.toISOString().split('T')[0])
         .order('date', { ascending: false })
@@ -60,15 +54,28 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
 
       if (error) throw error;
 
+      // Get user profiles
+      const userIds = [...new Set(logsData?.map(log => log.user_id) || [])];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name, employee_id')
+        .in('id', userIds);
+
+      const profilesMap = profilesData?.reduce((acc: any, profile: any) => {
+        acc[profile.id] = profile;
+        return acc;
+      }, {}) || {};
+
       // Group by date + user_id
       const grouped = logsData?.reduce((acc: any, log: any) => {
         const key = `${log.date}-${log.user_id}`;
+        const profile = profilesMap[log.user_id];
         if (!acc[key]) {
           acc[key] = {
             date: log.date,
             user_id: log.user_id,
-            user_name: log.profiles?.full_name || 'Unknown',
-            employee_id: log.profiles?.employee_id || '',
+            user_name: profile?.full_name || 'Unknown',
+            employee_id: profile?.employee_id || '',
             hours_logged: 0,
             finalized_at: log.finalized_at,
             total_power: 0,

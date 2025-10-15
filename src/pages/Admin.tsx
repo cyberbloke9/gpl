@@ -181,27 +181,37 @@ export default function Admin() {
     setTransformerLogs(formattedTransformerLogs);
 
     // Get today's generator logs
-    const { data: generatorData } = await supabase
+    const { data: generatorData, error: generatorError } = await supabase
       .from('generator_logs')
-      .select(`
-        *,
-        profiles:user_id (
-          full_name,
-          employee_id
-        )
-      `)
+      .select('*')
       .eq('date', today)
       .order('logged_at', { ascending: false });
+
+    console.log('Generator Data Raw:', generatorData);
+    console.log('Generator Error:', generatorError);
+
+    // Get user profiles for generator logs
+    const generatorUserIds = [...new Set(generatorData?.map(log => log.user_id) || [])];
+    const { data: generatorProfiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, employee_id')
+      .in('id', generatorUserIds);
+
+    const generatorProfilesMap = generatorProfiles?.reduce((acc: any, profile: any) => {
+      acc[profile.id] = profile;
+      return acc;
+    }, {}) || {};
 
     // Group generator logs by date and user
     const groupedGeneratorLogs = generatorData?.reduce((acc: any, log: any) => {
       const key = `${log.date}-${log.user_id}`;
+      const profile = generatorProfilesMap[log.user_id];
       if (!acc[key]) {
         acc[key] = {
           date: log.date,
           user_id: log.user_id,
-          user_name: log.profiles?.full_name || 'Unknown',
-          employee_id: log.profiles?.employee_id || '',
+          user_name: profile?.full_name || 'Unknown',
+          employee_id: profile?.employee_id || '',
           hours_logged: 0,
           logs: [],
           total_power: 0,
@@ -226,6 +236,7 @@ export default function Admin() {
       avg_frequency: group.hours_logged > 0 ? group.total_frequency / group.hours_logged : 0,
     }));
 
+    console.log('Formatted Generator Logs:', formattedGeneratorLogs);
     setGeneratorLogs(formattedGeneratorLogs);
 
     // Calculate generator stats
