@@ -4,7 +4,7 @@ import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
-import { ClipboardCheck, Gauge, Calendar } from 'lucide-react';
+import { ClipboardCheck, Gauge, Zap } from 'lucide-react';
 
 export default function Dashboard() {
   const { userRole } = useAuth();
@@ -33,7 +33,7 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           <Link to="/checklist">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
               <CardHeader className="space-y-3">
@@ -56,6 +56,21 @@ export default function Dashboard() {
                 <CardTitle className="text-lg sm:text-xl">Transformer Log</CardTitle>
                 <CardDescription className="text-sm">
                   Record hourly transformer readings and parameters
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full">Log Readings</Button>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/generator">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+              <CardHeader className="space-y-3">
+                <Zap className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                <CardTitle className="text-lg sm:text-xl">Generator Log</CardTitle>
+                <CardDescription className="text-sm">
+                  Record hourly generator readings and electrical parameters
                 </CardDescription>
               </CardHeader>
               <CardContent>

@@ -96,57 +96,246 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
     }));
   };
 
-  const saveLogEntry = async () => {
-    if (!user) return;
+  // === Validation Function ===
+  const validateForm = (): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+
+    // Validate power factor (0-1)
+    if (formData.gen_power_factor !== undefined && formData.gen_power_factor !== null) {
+      if (formData.gen_power_factor < 0 || formData.gen_power_factor > 1) {
+        errors.push('Power Factor must be between 0 and 1');
+      }
+    }
+
+    // Validate frequency (45-55 Hz)
+    if (formData.gen_frequency !== undefined && formData.gen_frequency !== null) {
+      if (formData.gen_frequency < 45 || formData.gen_frequency > 55) {
+        errors.push('Frequency must be between 45-55 Hz');
+      }
+    }
+
+    // Validate bearing temperatures (0-200°C)
+    const bearingFields = [
+      'bearing_g_de_brg_main_ch7', 'bearing_g_nde_brg_stand_ch8',
+      'bearing_thrust_1_ch9', 'bearing_thrust_2_ch10',
+      'bearing_bgb_low_speed_ch11', 'bearing_bgb_high_speed_ch12',
+      'bearing_tgb_low_speed_ch13', 'bearing_tgb_high_speed_ch14'
+    ];
+    bearingFields.forEach(field => {
+      const value = formData[field as keyof GeneratorLog] as number | undefined;
+      if (value !== undefined && value !== null) {
+        if (value < 0 || value > 200) {
+          errors.push(`${field} must be between 0-200°C`);
+        }
+      }
+    });
+
+    // Validate oil temperatures (0-150°C)
+    const oilTempFields = ['topu_oil_temperature', 'gblos_oil_temperature'];
+    oilTempFields.forEach(field => {
+      const value = formData[field as keyof GeneratorLog] as number | undefined;
+      if (value !== undefined && value !== null) {
+        if (value < 0 || value > 150) {
+          errors.push(`${field} must be between 0-150°C`);
+        }
+      }
+    });
+
+    // Validate percentage fields (0-100%)
+    const percentageFields = ['intake_gv_percentage', 'intake_rb_percentage', 'topu_oil_level', 'gblos_oil_level'];
+    percentageFields.forEach(field => {
+      const value = formData[field as keyof GeneratorLog] as number | undefined;
+      if (value !== undefined && value !== null) {
+        if (value < 0 || value > 100) {
+          errors.push(`${field} must be between 0-100%`);
+        }
+      }
+    });
+
+    // Validate non-negative fields
+    const nonNegativeFields = [
+      'gen_current_r', 'gen_current_y', 'gen_current_b',
+      'gen_voltage_ry', 'gen_voltage_yb', 'gen_voltage_br',
+      'gen_kw', 'gen_kvar', 'gen_kva', 'gen_rpm',
+      'gen_mwh', 'gen_mvarh', 'gen_mvah',
+      'avr_field_current', 'avr_field_voltage',
+      'intake_water_pressure', 'tail_race_net_head',
+      'topu_oil_pressure', 'gblos_oil_pressure',
+      'cooling_main_pressure', 'cooling_los_flow', 'cooling_bearing_flow'
+    ];
+    nonNegativeFields.forEach(field => {
+      const value = formData[field as keyof GeneratorLog] as number | undefined;
+      if (value !== undefined && value !== null && value < 0) {
+        errors.push(`${field} must be non-negative`);
+      }
+    });
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
+  };
+
+  const saveLogEntry = async (showToast: boolean = true): Promise<boolean> => {
+    if (!user) {
+      console.error('[saveLogEntry] No user');
+      return false;
+    }
 
     if (!isEditable) {
-      toast({
-        title: 'Cannot Save',
-        description: 'You can only edit data for the current hour.',
-        variant: 'destructive',
-      });
-      return;
+      console.error('[saveLogEntry] Fields are disabled');
+      if (showToast) {
+        toast({
+          title: 'Cannot Save',
+          description: 'You can only edit data for the current hour.',
+          variant: 'destructive',
+        });
+      }
+      return false;
+    }
+
+    // Validate before saving
+    const validation = validateForm();
+    if (!validation.isValid) {
+      console.error('[saveLogEntry] Validation failed:', validation.errors);
+      if (showToast) {
+        toast({
+          title: 'Validation Error',
+          description: validation.errors.join('. '),
+          variant: 'destructive',
+        });
+      }
+      return false;
     }
 
     setIsSaving(true);
-    try {
-      const { error } = await supabase.from('generator_logs').upsert(
-        {
-          user_id: user.id,
-          date: selectedDate,
-          hour: selectedHour,
-          ...formData,
-          logged_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id,date,hour' }
-      );
 
-      if (error) throw error;
+    const payload = {
+      user_id: user.id,
+      date: selectedDate,
+      hour: selectedHour,
+      winding_temp_r1: formData.winding_temp_r1 ?? null,
+      winding_temp_r2: formData.winding_temp_r2 ?? null,
+      winding_temp_y1: formData.winding_temp_y1 ?? null,
+      winding_temp_y2: formData.winding_temp_y2 ?? null,
+      winding_temp_b1: formData.winding_temp_b1 ?? null,
+      winding_temp_b2: formData.winding_temp_b2 ?? null,
+      bearing_g_de_brg_main_ch7: formData.bearing_g_de_brg_main_ch7 ?? null,
+      bearing_g_nde_brg_stand_ch8: formData.bearing_g_nde_brg_stand_ch8 ?? null,
+      bearing_thrust_1_ch9: formData.bearing_thrust_1_ch9 ?? null,
+      bearing_thrust_2_ch10: formData.bearing_thrust_2_ch10 ?? null,
+      bearing_bgb_low_speed_ch11: formData.bearing_bgb_low_speed_ch11 ?? null,
+      bearing_bgb_high_speed_ch12: formData.bearing_bgb_high_speed_ch12 ?? null,
+      bearing_tgb_low_speed_ch13: formData.bearing_tgb_low_speed_ch13 ?? null,
+      bearing_tgb_high_speed_ch14: formData.bearing_tgb_high_speed_ch14 ?? null,
+      gen_current_r: formData.gen_current_r ?? null,
+      gen_current_y: formData.gen_current_y ?? null,
+      gen_current_b: formData.gen_current_b ?? null,
+      gen_voltage_ry: formData.gen_voltage_ry ?? null,
+      gen_voltage_yb: formData.gen_voltage_yb ?? null,
+      gen_voltage_br: formData.gen_voltage_br ?? null,
+      gen_kw: formData.gen_kw ?? null,
+      gen_kvar: formData.gen_kvar ?? null,
+      gen_kva: formData.gen_kva ?? null,
+      gen_frequency: formData.gen_frequency ?? null,
+      gen_power_factor: formData.gen_power_factor ?? null,
+      gen_rpm: formData.gen_rpm ?? null,
+      gen_mwh: formData.gen_mwh ?? null,
+      gen_mvarh: formData.gen_mvarh ?? null,
+      gen_mvah: formData.gen_mvah ?? null,
+      avr_field_current: formData.avr_field_current ?? null,
+      avr_field_voltage: formData.avr_field_voltage ?? null,
+      intake_gv_percentage: formData.intake_gv_percentage ?? null,
+      intake_rb_percentage: formData.intake_rb_percentage ?? null,
+      intake_water_pressure: formData.intake_water_pressure ?? null,
+      intake_water_level: formData.intake_water_level ?? null,
+      tail_race_water_level: formData.tail_race_water_level ?? null,
+      tail_race_net_head: formData.tail_race_net_head ?? null,
+      topu_oil_pressure: formData.topu_oil_pressure ?? null,
+      topu_oil_temperature: formData.topu_oil_temperature ?? null,
+      topu_oil_level: formData.topu_oil_level ?? null,
+      gblos_oil_pressure: formData.gblos_oil_pressure ?? null,
+      gblos_oil_temperature: formData.gblos_oil_temperature ?? null,
+      gblos_oil_level: formData.gblos_oil_level ?? null,
+      cooling_main_pressure: formData.cooling_main_pressure ?? null,
+      cooling_los_flow: formData.cooling_los_flow ?? null,
+      cooling_bearing_flow: formData.cooling_bearing_flow ?? null,
+      remarks: formData.remarks ?? null,
+      logged_at: new Date().toISOString(),
+    };
 
+    console.log('📤 Sending payload:', payload);
+
+    const { error } = await supabase.from('generator_logs').upsert(payload, {
+      onConflict: 'user_id,date,hour',
+    });
+
+    setIsSaving(false);
+
+    if (error) {
+      console.error('🔴 FULL SUPABASE ERROR:', error);
+
+      let errorMessage = error.message || 'Failed to save log entry';
+
+      // Parse check constraint violations (23514)
+      if (error.code === '23514') {
+        if (error.message.includes('gen_power_factor')) {
+          errorMessage = 'Power Factor must be between 0 and 1';
+        } else if (error.message.includes('gen_frequency')) {
+          errorMessage = 'Frequency must be between 45-55 Hz';
+        } else if (error.message.includes('bearing') && error.message.includes('check')) {
+          errorMessage = 'Bearing temperature must be between 0-200°C';
+        } else if (error.message.includes('oil_temperature')) {
+          errorMessage = 'Oil temperature must be between 0-150°C';
+        } else if (error.message.includes('percentage') || error.message.includes('level')) {
+          errorMessage = 'Percentage values must be between 0-100%';
+        } else {
+          errorMessage = 'Invalid value detected. Please check all fields.';
+        }
+      }
+
+      // Parse unique constraint violations (23505)
+      if (error.code === '23505') {
+        errorMessage = 'A log entry for this hour already exists';
+      }
+
+      if (showToast) {
+        toast({
+          title: 'Error Saving',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      }
+
+      return false;
+    }
+
+    if (showToast) {
       toast({
         title: 'Saved',
         description: 'Generator log saved successfully.',
       });
-
-      // Refresh logged hours
-      if (!loggedHours.includes(selectedHour)) {
-        setLoggedHours([...loggedHours, selectedHour]);
-      }
-    } catch (error) {
-      console.error('Error saving log:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to save generator log.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSaving(false);
     }
+
+    // Refresh logged hours
+    if (!loggedHours.includes(selectedHour)) {
+      setLoggedHours([...loggedHours, selectedHour]);
+    }
+
+    return true;
+  };
+
+  const handleSaveClick = async () => {
+    await saveLogEntry(true);
+  };
+
+  const autoSaveWrapper = async () => {
+    await saveLogEntry(false);
   };
 
   const { status: autoSaveStatus } = useAutoSave({
     data: formData,
-    onSave: saveLogEntry,
+    onSave: autoSaveWrapper,
     delay: 2000,
     enabled: isEditable && Object.keys(formData).length > 0,
   });
@@ -760,7 +949,7 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             Clear
           </Button>
           <Button
-            onClick={saveLogEntry}
+            onClick={handleSaveClick}
             disabled={!isEditable || isSaving}
             className="flex-[2] bg-green-600 hover:bg-green-700 text-white"
           >
