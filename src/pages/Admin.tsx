@@ -176,9 +176,6 @@ export default function Admin() {
       .eq('date', today)
       .order('logged_at', { ascending: false });
 
-    console.log('Generator Data Raw:', generatorData);
-    console.log('Generator Error:', generatorError);
-
     // Get user profiles for generator logs
     const generatorUserIds = [...new Set(generatorData?.map(log => log.user_id) || [])];
     const { data: generatorProfiles } = await supabase
@@ -225,7 +222,6 @@ export default function Admin() {
       avg_frequency: group.hours_logged > 0 ? group.total_frequency / group.hours_logged : 0,
     }));
 
-    console.log('Formatted Generator Logs:', formattedGeneratorLogs);
     setGeneratorLogs(formattedGeneratorLogs);
 
     // Calculate stats - MOVED HERE after all data is fetched
@@ -308,8 +304,6 @@ export default function Admin() {
   };
 
   const handleViewGeneratorReport = async (date: string, userId: string) => {
-    console.log('Fetching generator report for:', { date, userId });
-    
     // Fetch all logs for this date and user
     const { data: logs, error: logsError } = await supabase
       .from('generator_logs')
@@ -329,13 +323,6 @@ export default function Admin() {
       .select('full_name, employee_id')
       .eq('id', userId)
       .single();
-
-    if (profileError) {
-      console.error('Error fetching profile:', profileError);
-    }
-
-    console.log('Generator logs fetched:', logs);
-    console.log('Profile fetched:', profile);
 
     if (logs && logs.length > 0) {
       setSelectedGeneratorReport({

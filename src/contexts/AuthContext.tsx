@@ -12,6 +12,8 @@ interface AuthContextType {
   signUp: (email: string, password: string, fullName: string, employeeId?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   userRole: string | null;
+  isLockedOut: boolean;
+  lockoutTimeRemaining: number;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,6 +24,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [roleLoading, setRoleLoading] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  
+  // Rate limiting state
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutUntil, setLockoutUntil] = useState<Date | null>(null);
+  const [lockoutTimeRemaining, setLockoutTimeRemaining] = useState(0);
+  const [isLockedOut, setIsLockedOut] = useState(false);
+
+  // Update lockout timer every second
+  useEffect(() => {
+    if (!lockoutUntil) {
+      setIsLockedOut(false);
+      setLockoutTimeRemaining(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const remaining = Math.ceil((lockoutUntil.getTime() - Date.now()) / 1000);
+      if (remaining <= 0) {
+        setLockoutUntil(null);
+        setFailedAttempts(0);
+        setIsLockedOut(false);
+        setLockoutTimeRemaining(0);
+      } else {
+        setIsLockedOut(true);
+        setLockoutTimeRemaining(remaining);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lockoutUntil]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -64,10 +96,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
+    // Check if account is locked out
+    if (lockoutUntil && new Date() < lockoutUntil) {
+      const remaining = Math.ceil((lockoutUntil.getTime() - Date.now()) / 1000);
+      const minutes = Math.floor(remaining / 60);
+      const seconds = remaining % 60;
+      const timeMessage = minutes > 0 
+        ? `${minutes} minute${minutes > 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''}`
+        : `${seconds} second${seconds !== 1 ? 's' : ''}`;
+      
+      toast.error(`Too many failed attempts. Try again in ${timeMessage}.`);
+      return { error: new Error('Rate limited') };
+    }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (!error) {
+    
+    if (error) {
+      // Increment failed attempts
+      const newAttempts = failedAttempts + 1;
+      setFailedAttempts(newAttempts);
+      
+      // Lock account after 5 failed attempts
+      if (newAttempts >= 5) {
+        const lockout = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+        setLockoutUntil(lockout);
+        toast.error('Too many failed attempts. Account locked for 15 minutes.');
+      } else {
+        const remainingAttempts = 5 - newAttempts;
+        toast.error(`Invalid credentials. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining.`);
+      }
+    } else {
+      // Reset on successful login
+      setFailedAttempts(0);
+      setLockoutUntil(null);
       toast.success('Signed in successfully!');
     }
+    
     return { error };
   };
 
@@ -117,7 +181,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, roleLoading, signIn, signUp, signOut, userRole }}>
+    <AuthContext.Provider value={{ user, session, loading, roleLoading, signIn, signUp, signOut, userRole, isLockedOut, lockoutTimeRemaining }}>
       {children}
     </AuthContext.Provider>
   );

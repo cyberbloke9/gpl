@@ -269,8 +269,6 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
       logged_at: new Date().toISOString(),
     };
 
-    console.log('📤 Sending payload:', payload);
-
     const { error } = await supabase.from('generator_logs').upsert(payload, {
       onConflict: 'user_id,date,hour',
     });

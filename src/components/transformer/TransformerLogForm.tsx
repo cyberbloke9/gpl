@@ -134,28 +134,6 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
   // Calculate if fields should be disabled
   const isFieldDisabled = isFinalized || selectedHour < currentHour;
 
-  // Debug logging
-  useEffect(() => {
-    console.log("[TransformerLog] State:", {
-      selectedHour,
-      currentHour,
-      isDirty,
-      isFieldDisabled,
-      isSaving,
-      isFinalized,
-    });
-  }, [selectedHour, isDirty, isFieldDisabled, isSaving, isFinalized]);
-
-  useEffect(() => {
-    console.log("[Field Status]:", {
-      selectedHour,
-      currentHour,
-      isFinalized,
-      isFieldDisabled,
-      comparison: `${selectedHour} < ${currentHour} = ${selectedHour < currentHour}`,
-    });
-  }, [selectedHour, currentHour, isFinalized, isFieldDisabled]);
-
   useEffect(() => {
     if (!user?.id) return;
 
@@ -417,8 +395,6 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
       logged_at: new Date().toISOString(),
     };
 
-    console.log("📤 Sending payload:", payload);
-
     const { data, error } = await supabase.from("transformer_logs").upsert(payload, {
       onConflict: "date,hour,transformer_number,user_id",
     });
@@ -457,7 +433,6 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
       }
       return false;
     } else {
-      console.log("✅ Save successful!", data);
       setIsDirty(false);
       if (showToast) {
         toast({

@@ -211,7 +211,6 @@ export default function Issues() {
 
       setResolvingIssueId(null);
     } catch (error) {
-      console.error('Error resolving issue:', error);
       toast({
         title: 'Error',
         description: 'Failed to resolve issue. Please try again.',
