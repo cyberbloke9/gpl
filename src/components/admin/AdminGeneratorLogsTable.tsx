@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 
 interface AdminGeneratorLog {
   date: string;
+  user_id: string;
   user_name: string;
   employee_id: string;
   hours_logged: number;
@@ -74,7 +75,7 @@ export const AdminGeneratorLogsTable = ({ logs, onViewReport }: AdminGeneratorLo
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onViewReport(log.date, log.employee_id)}
+                    onClick={() => onViewReport(log.date, log.user_id)}
                     className="text-xs"
                   >
                     <span className="hidden sm:inline">View</span>
