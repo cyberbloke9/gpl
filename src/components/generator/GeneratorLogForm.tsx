@@ -20,7 +20,9 @@ import {
   validatePowerFactor
 } from '@/lib/generatorValidation';
 import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
 import { Save, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Accordion } from '@/components/ui/accordion';
 
 interface GeneratorLogFormProps {
   isFinalized: boolean;
@@ -35,7 +37,6 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
   const [formData, setFormData] = useState<Partial<GeneratorLog>>({});
   const [loggedHours, setLoggedHours] = useState<number[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [openSections, setOpenSections] = useState<string[]>(['winding']);
 
   const currentHour = new Date().getHours();
   const isCurrentHour = selectedHour === currentHour;
@@ -354,58 +355,57 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
     }
   };
 
-  const toggleSection = (section: string) => {
-    setOpenSections((prev) =>
-      prev.includes(section) ? prev.filter((s) => s !== section) : [...prev, section]
-    );
-  };
-
   return (
-    <Card>
-      {/* Fixed Header */}
-      <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white sticky top-0 z-10 shadow-md">
-        <CardTitle className="text-center text-2xl font-bold">
-          GAYATRI POWER PRIVATE LIMITED
-        </CardTitle>
-        <p className="text-center text-lg font-medium">GENERATOR LOG SHEET</p>
-        <div className="flex justify-center mt-4">
-          <label className="text-white font-medium mr-2">DATE:-</label>
-          <Input
-            type="date"
-            value={selectedDate}
-            disabled
-            className="w-48 bg-white text-black"
-          />
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-6 pb-24">
-        {/* Hour Grid Selector */}
-        <HourSelector
-          selectedHour={selectedHour}
-          onHourSelect={setSelectedHour}
-          loggedHours={loggedHours}
-          currentHour={currentHour}
-        />
-
-        {!isEditable && (
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800">
-              {selectedHour < currentHour
-                ? '🔒 This hour is locked. You can view but not edit historical data.'
-                : '⏳ Future hours cannot be edited yet.'}
+    <div className="space-y-6 pb-24">
+      <Card>
+        <CardHeader className="pb-3 sm:pb-4">
+          <div className="flex flex-col space-y-2">
+            <CardTitle className="text-lg sm:text-xl">Generator Log Sheet</CardTitle>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Gayatri Power Private Limited • {format(new Date(selectedDate), "PPP")}
             </p>
           </div>
-        )}
+        </CardHeader>
+        <CardContent className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+            <Badge variant="secondary" className="text-xs sm:text-sm">
+              {loggedHours.length}/24 hours logged
+            </Badge>
+            {!isEditable && selectedHour < currentHour && (
+              <Badge variant="outline" className="text-xs sm:text-sm">
+                🔒 Locked - View Only
+              </Badge>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Section 1: Generator Winding Temperatures */}
-        <GeneratorSection
-          title="GENERATOR WINDING TEMPERATURES"
-          fieldCount={6}
-          isOpen={openSections.includes('winding')}
-          onToggle={() => toggleSection('winding')}
-          disabled={!isEditable}
-        >
+      <Card>
+        <CardContent className="pt-4 sm:pt-6 space-y-6">
+          {/* Hour Grid Selector */}
+          <HourSelector
+            selectedHour={selectedHour}
+            onHourSelect={setSelectedHour}
+            loggedHours={loggedHours}
+            currentHour={currentHour}
+          />
+
+          {/* Status indicator */}
+          {selectedHour < currentHour && (
+            <p className="text-xs text-muted-foreground">⏱ This hour has passed - viewing only</p>
+          )}
+          {selectedHour === currentHour && !isFinalized && (
+            <p className="text-xs text-green-600">✓ Current hour - editable until {currentHour}:59</p>
+          )}
+
+          <Accordion type="multiple" defaultValue={['winding', 'bearing', 'electrical']} className="space-y-3 sm:space-y-4">
+            {/* Section 1: Generator Winding Temperatures */}
+            <GeneratorSection
+              value="winding"
+              title="GENERATOR WINDING TEMPERATURES"
+              fieldCount={6}
+              disabled={!isEditable}
+            >
           <GeneratorInputRow
             label="R1 (Red Phase)"
             value={formData.winding_temp_r1 ?? ''}
@@ -454,16 +454,15 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             unit="°C"
             validation={validateWindingTemperature(formData.winding_temp_b2)}
           />
-        </GeneratorSection>
+            </GeneratorSection>
 
-        {/* Section 2: Bearing Temperatures */}
-        <GeneratorSection
-          title="BEARING TEMPERATURES"
-          fieldCount={8}
-          isOpen={openSections.includes('bearing')}
-          onToggle={() => toggleSection('bearing')}
-          disabled={!isEditable}
-        >
+            {/* Section 2: Bearing Temperatures */}
+            <GeneratorSection
+              value="bearing"
+              title="BEARING TEMPERATURES"
+              fieldCount={8}
+              disabled={!isEditable}
+            >
           <div className="space-y-4">
             <div>
               <h5 className="font-medium text-sm text-primary mb-2">Generator Drive End (G.DE)</h5>
@@ -547,16 +546,15 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
               </div>
             </div>
           </div>
-        </GeneratorSection>
+            </GeneratorSection>
 
-        {/* Section 3: Electrical Parameters */}
-        <GeneratorSection
-          title="3.3 KV GENERATOR - ELECTRICAL PARAMETERS"
-          fieldCount={15}
-          isOpen={openSections.includes('electrical')}
-          onToggle={() => toggleSection('electrical')}
-          disabled={!isEditable}
-        >
+            {/* Section 3: Electrical Parameters */}
+            <GeneratorSection
+              value="electrical"
+              title="3.3 KV GENERATOR - ELECTRICAL PARAMETERS"
+              fieldCount={15}
+              disabled={!isEditable}
+            >
           <div className="space-y-4">
             <div>
               <h5 className="font-medium text-sm text-primary mb-2">Three-Phase Current</h5>
@@ -706,16 +704,15 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
               </div>
             </div>
           </div>
-        </GeneratorSection>
+            </GeneratorSection>
 
-        {/* Section 4: AVR */}
-        <GeneratorSection
-          title="AVR (AUTOMATIC VOLTAGE REGULATOR)"
-          fieldCount={2}
-          isOpen={openSections.includes('avr')}
-          onToggle={() => toggleSection('avr')}
-          disabled={!isEditable}
-        >
+            {/* Section 4: AVR */}
+            <GeneratorSection
+              value="avr"
+              title="AVR (AUTOMATIC VOLTAGE REGULATOR)"
+              fieldCount={2}
+              disabled={!isEditable}
+            >
           <GeneratorInputRow
             label="Field Current"
             value={formData.avr_field_current ?? ''}
@@ -732,16 +729,15 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             unit="V"
             step="0.01"
           />
-        </GeneratorSection>
+            </GeneratorSection>
 
-        {/* Section 5: Intake System */}
-        <GeneratorSection
-          title="INTAKE SYSTEM"
-          fieldCount={4}
-          isOpen={openSections.includes('intake')}
-          onToggle={() => toggleSection('intake')}
-          disabled={!isEditable}
-        >
+            {/* Section 5: Intake System */}
+            <GeneratorSection
+              value="intake"
+              title="INTAKE SYSTEM"
+              fieldCount={4}
+              disabled={!isEditable}
+            >
           <GeneratorInputRow
             label="GV%"
             value={formData.intake_gv_percentage ?? ''}
@@ -774,16 +770,15 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             unit="m"
             step="0.01"
           />
-        </GeneratorSection>
+            </GeneratorSection>
 
-        {/* Section 6: Tail Race */}
-        <GeneratorSection
-          title="TAIL RACE"
-          fieldCount={2}
-          isOpen={openSections.includes('tailrace')}
-          onToggle={() => toggleSection('tailrace')}
-          disabled={!isEditable}
-        >
+            {/* Section 6: Tail Race */}
+            <GeneratorSection
+              value="tailrace"
+              title="TAIL RACE"
+              fieldCount={2}
+              disabled={!isEditable}
+            >
           <GeneratorInputRow
             label="Water Level"
             value={formData.tail_race_water_level ?? ''}
@@ -800,16 +795,15 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             unit="m"
             step="0.01"
           />
-        </GeneratorSection>
+            </GeneratorSection>
 
-        {/* Section 7: T.OPU */}
-        <GeneratorSection
-          title="T.OPU (TURBINE OIL PRESSURE UNIT)"
-          fieldCount={3}
-          isOpen={openSections.includes('topu')}
-          onToggle={() => toggleSection('topu')}
-          disabled={!isEditable}
-        >
+            {/* Section 7: T.OPU */}
+            <GeneratorSection
+              value="topu"
+              title="T.OPU (TURBINE OIL PRESSURE UNIT)"
+              fieldCount={3}
+              disabled={!isEditable}
+            >
           <GeneratorInputRow
             label="Oil Pressure"
             value={formData.topu_oil_pressure ?? ''}
@@ -834,16 +828,15 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
             unit="%"
             step="0.01"
           />
-        </GeneratorSection>
+            </GeneratorSection>
 
-        {/* Section 8: GB.LOS & Cooling Water */}
-        <GeneratorSection
-          title="GB.LOS & COOLING WATER SYSTEM"
-          fieldCount={6}
-          isOpen={openSections.includes('cooling')}
-          onToggle={() => toggleSection('cooling')}
-          disabled={!isEditable}
-        >
+            {/* Section 8: GB.LOS & Cooling Water */}
+            <GeneratorSection
+              value="cooling"
+              title="GB.LOS & COOLING WATER SYSTEM"
+              fieldCount={6}
+              disabled={!isEditable}
+            >
           <div className="space-y-4">
             <div>
               <h5 className="font-medium text-sm text-primary mb-2">GB.LOS (Gearbox Lubrication Oil System)</h5>
@@ -905,60 +898,67 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
               </div>
             </div>
           </div>
-        </GeneratorSection>
+            </GeneratorSection>
+          </Accordion>
 
-        {/* Remarks */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Remarks</label>
-          <Textarea
-            value={formData.remarks ?? ''}
-            onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
-            disabled={!isEditable}
-            placeholder="Enter any additional notes or observations..."
-            rows={3}
-          />
-        </div>
-      </CardContent>
+          {/* Remarks */}
+          <div className="space-y-2">
+            <label className="text-xs sm:text-sm font-medium">Remarks</label>
+            <Textarea
+              value={formData.remarks ?? ''}
+              onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
+              disabled={!isEditable}
+              placeholder="Enter any additional notes or observations..."
+              rows={3}
+              className="text-sm"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Fixed Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg p-4 z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t shadow-lg p-3 sm:p-4 z-50">
         <div className="flex gap-2 max-w-4xl mx-auto">
           <Button
             variant="outline"
-            size="icon"
+            size="sm"
             onClick={() => navigateHour(-1)}
             disabled={selectedHour === 0}
+            className="flex-shrink-0"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
-            size="icon"
+            size="sm"
             onClick={() => navigateHour(1)}
             disabled={selectedHour === 23}
+            className="flex-shrink-0"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={handleClear}
             disabled={!isEditable}
             className="flex-1"
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Clear
+            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="text-xs sm:text-sm">Clear</span>
           </Button>
           <Button
+            size="sm"
             onClick={handleSaveClick}
             disabled={!isEditable || isSaving}
-            className="flex-[2] bg-green-600 hover:bg-green-700 text-white"
+            className="flex-[2]"
           >
             {isSaving ? (
-              'Saving...'
+              <span className="text-xs sm:text-sm">Saving...</span>
             ) : (
               <>
-                <Save className="h-4 w-4 mr-2" />
-                Save
+                <Save className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="text-xs sm:text-sm">Save</span>
               </>
             )}
           </Button>
@@ -969,6 +969,6 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
           </p>
         )}
       </div>
-    </Card>
+    </div>
   );
 }
