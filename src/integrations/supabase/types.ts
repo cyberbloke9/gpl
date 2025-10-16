@@ -217,7 +217,9 @@ export type Database = {
           intake_rb_percentage: number | null
           intake_water_level: number | null
           intake_water_pressure: number | null
+          last_modified_by: string | null
           logged_at: string | null
+          logged_by: string | null
           remarks: string | null
           tail_race_net_head: number | null
           tail_race_water_level: number | null
@@ -225,7 +227,7 @@ export type Database = {
           topu_oil_pressure: number | null
           topu_oil_temperature: number | null
           updated_at: string | null
-          user_id: string
+          user_id: string | null
           winding_temp_b1: number | null
           winding_temp_b2: number | null
           winding_temp_r1: number | null
@@ -276,7 +278,9 @@ export type Database = {
           intake_rb_percentage?: number | null
           intake_water_level?: number | null
           intake_water_pressure?: number | null
+          last_modified_by?: string | null
           logged_at?: string | null
+          logged_by?: string | null
           remarks?: string | null
           tail_race_net_head?: number | null
           tail_race_water_level?: number | null
@@ -284,7 +288,7 @@ export type Database = {
           topu_oil_pressure?: number | null
           topu_oil_temperature?: number | null
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
           winding_temp_b1?: number | null
           winding_temp_b2?: number | null
           winding_temp_r1?: number | null
@@ -335,7 +339,9 @@ export type Database = {
           intake_rb_percentage?: number | null
           intake_water_level?: number | null
           intake_water_pressure?: number | null
+          last_modified_by?: string | null
           logged_at?: string | null
+          logged_by?: string | null
           remarks?: string | null
           tail_race_net_head?: number | null
           tail_race_water_level?: number | null
@@ -343,7 +349,7 @@ export type Database = {
           topu_oil_pressure?: number | null
           topu_oil_temperature?: number | null
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
           winding_temp_b1?: number | null
           winding_temp_b2?: number | null
           winding_temp_r1?: number | null
