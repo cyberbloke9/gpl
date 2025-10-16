@@ -70,6 +70,17 @@ export const ChecklistHistory = ({ userId }: { userId?: string }) => {
     if (checklist.submitted) {
       return <Badge className="bg-green-100 text-green-800">Submitted</Badge>;
     }
+    
+    // Check if date has passed and checklist is incomplete
+    const checklistDate = new Date(checklist.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    checklistDate.setHours(0, 0, 0, 0);
+    
+    if (checklistDate < today && checklist.completion_percentage < 100) {
+      return <Badge className="bg-red-600 text-white font-bold">Missed</Badge>;
+    }
+    
     if (checklist.status === 'completed') {
       return <Badge className="bg-blue-100 text-blue-800">Completed</Badge>;
     }

@@ -128,8 +128,19 @@ export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
     setIsViewerOpen(true);
   };
 
-  const getProgressBadge = (logsCount: number) => {
+  const getProgressBadge = (logsCount: number, date: string) => {
     const percentage = Math.round((logsCount / 24) * 100);
+    
+    // Check if date has passed
+    const logDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    logDate.setHours(0, 0, 0, 0);
+    
+    if (logDate < today && percentage < 100) {
+      return <Badge className="bg-red-600 text-white font-bold"><AlertCircle className="h-3 w-3 mr-1" /> Missed</Badge>;
+    }
+    
     if (percentage === 100) {
       return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" /> Complete</Badge>;
     } else if (percentage >= 50) {
@@ -161,7 +172,7 @@ export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
                   </div>
                   <div className="flex gap-2">
                     <Badge variant="outline">{logs.length}/24 hours</Badge>
-                    {getProgressBadge(logs.length)}
+                    {getProgressBadge(logs.length, date)}
                   </div>
                 </div>
               </AccordionTrigger>
@@ -169,7 +180,7 @@ export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
                 <div className="border rounded-lg p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold">Unified Transformer Report</h3>
-                    {getProgressBadge(logs.length)}
+                    {getProgressBadge(logs.length, date)}
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {logs.length} out of 24 hours logged • Includes PTR Feeder, LTAC Feeder & Generation Data

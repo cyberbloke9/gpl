@@ -212,6 +212,19 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
                   <Badge variant={log.finalized ? 'default' : 'secondary'} className="text-xs">
                     {log.finalized ? 'Finalized' : 'In Progress'}
                   </Badge>
+                  {(() => {
+                    const logDate = new Date(log.date);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    logDate.setHours(0, 0, 0, 0);
+                    const isMissed = logDate < today && log.completion_percentage < 100;
+                    
+                    return isMissed ? (
+                      <Badge className="bg-red-600 text-white font-bold text-xs">
+                        Missed
+                      </Badge>
+                    ) : null;
+                  })()}
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-xs sm:text-sm text-muted-foreground">

@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
@@ -148,6 +149,13 @@ export function GeneratorLogHistory({ userId }: GeneratorLogHistoryProps) {
               const isExpanded = expandedDates.has(date);
               const completedHours = dateLogs.length;
               const completionPercentage = Math.round((completedHours / 24) * 100);
+              
+              // Check if date has passed
+              const logDate = new Date(date);
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              logDate.setHours(0, 0, 0, 0);
+              const isMissed = logDate < today && completedHours < 24;
 
               return (
                 <Card key={date} className="overflow-hidden">
@@ -166,9 +174,16 @@ export function GeneratorLogHistory({ userId }: GeneratorLogHistoryProps) {
                           <h3 className="font-semibold">
                             {format(new Date(date), 'MMMM dd, yyyy')}
                           </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {completedHours} / 24 hours logged ({completionPercentage}%)
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm text-muted-foreground">
+                              {completedHours} / 24 hours logged ({completionPercentage}%)
+                            </p>
+                            {isMissed && (
+                              <Badge className="bg-red-600 text-white font-bold ml-2">
+                                Missed
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <Button
