@@ -46,15 +46,41 @@ export default function Checklist() {
     loadOrCreateTodayChecklist();
   }, [user]);
 
+  // Real-time synchronization for checklist changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('checklist-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'checklists',
+          filter: `date=eq.${getTodayIST()}`
+        },
+        (payload) => {
+          console.log('Checklist updated by another user:', payload);
+          loadOrCreateTodayChecklist();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const loadOrCreateTodayChecklist = async () => {
     if (!user) return;
 
     const today = getTodayIST();
     
+    // Load shared checklist for today (no user_id filter - collective work)
     const { data, error } = await supabase
       .from('checklists')
       .select('*')
-      .eq('user_id', user.id)
       .eq('date', today)
       .maybeSingle();
 
@@ -78,13 +104,14 @@ export default function Checklist() {
         toast.info('This checklist has already been submitted');
       }
     } else {
+      // Create shared checklist (user_id is nullable for collective work)
       const { data: newChecklist, error: createError } = await supabase
         .from('checklists')
         .insert({
-          user_id: user.id,
           date: today,
-          start_time: istToUTC(new Date())
-        })
+          start_time: istToUTC(new Date()),
+          contributors: {}
+        } as any)
         .select()
         .single();
 
@@ -97,7 +124,7 @@ export default function Checklist() {
   };
 
   const saveModuleData = async (moduleNum: number, data: any) => {
-    if (!currentChecklistId) return;
+    if (!currentChecklistId || !user) return;
 
     setIsSaving(true);
     const updateField = `module${moduleNum}_data`;
@@ -105,14 +132,33 @@ export default function Checklist() {
     // Calculate progress and update problem tracking
     const progress = calculateProgress();
     
+    // Fetch current contributors
+    const { data: currentChecklist } = await supabase
+      .from('checklists')
+      .select('contributors')
+      .eq('id', currentChecklistId)
+      .single();
+
+    const contributors: any = (currentChecklist as any)?.contributors || {};
+    const moduleKey = `module${moduleNum}`;
+    
+    // Add current user to contributors for this module
+    if (!contributors[moduleKey]) {
+      contributors[moduleKey] = [];
+    }
+    if (!contributors[moduleKey].includes(user.id)) {
+      contributors[moduleKey].push(user.id);
+    }
+    
     const { error } = await supabase
       .from('checklists')
       .update({ 
         [updateField]: data,
+        contributors: contributors,
         problem_fields: problemFields,
         problem_count: problemFields.length,
         completion_percentage: progress,
-      })
+      } as any)
       .eq('id', currentChecklistId);
 
     setIsSaving(false);

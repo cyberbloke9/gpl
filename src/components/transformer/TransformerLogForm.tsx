@@ -145,6 +145,38 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     setIsDirty(false);
   }, [selectedDate, selectedHour, transformerNumber, user?.id]);
 
+  // Real-time synchronization for transformer log changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('transformer-logs-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'transformer_logs',
+          filter: `date=eq.${selectedDate}`
+        },
+        (payload) => {
+          console.log('Transformer log updated by another user:', payload);
+          // Only reload if not editing current hour
+          const newData = payload.new as any;
+          if (newData && newData.hour !== selectedHour) {
+            loadHourData();
+          } else if (payload.eventType === 'DELETE') {
+            loadHourData();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, selectedDate, selectedHour]);
+
   const loadHourData = async () => {
     if (!user) return;
 
@@ -153,22 +185,22 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     // Clear form data immediately to prevent flash of wrong data
     setFormData(initialFormState);
 
+    // Fetch all logged hours (collective - no user filter)
     const { data: logs } = await supabase
       .from("transformer_logs")
       .select("hour")
       .eq("date", selectedDate)
-      .eq("transformer_number", transformerNumber)
-      .eq("user_id", user.id);
+      .eq("transformer_number", transformerNumber);
 
-    setLoggedHours(logs?.map((l) => l.hour) || []);
+    setLoggedHours(logs?.map((l: any) => l.hour) || []);
 
+    // Fetch data for selected hour (collective - no user filter)
     const { data: hourData } = await supabase
       .from("transformer_logs")
       .select("*")
       .eq("date", selectedDate)
       .eq("hour", selectedHour)
       .eq("transformer_number", transformerNumber)
-      .eq("user_id", user.id)
       .maybeSingle();
 
     if (hourData) {
@@ -342,8 +374,9 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
 
     setIsSaving(true);
 
-    const payload = {
-      user_id: user.id,
+    const payload: any = {
+      logged_by: (formData as any).logged_by || user.id, // Track original logger
+      last_modified_by: user.id, // Track who last modified
       transformer_number: transformerNumber,
       date: selectedDate,
       hour: selectedHour,
@@ -397,7 +430,7 @@ export function TransformerLogForm({ isFinalized, onDateChange, onFinalizeDay }:
     };
 
     const { data, error } = await supabase.from("transformer_logs").upsert(payload, {
-      onConflict: "date,hour,transformer_number,user_id",
+      onConflict: "transformer_number,date,hour", // Collective constraint (no user_id)
     });
 
     setIsSaving(false);

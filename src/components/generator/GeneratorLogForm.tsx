@@ -46,7 +46,7 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
     setSelectedHour(hour);
   };
 
-  // Fetch logs for the selected date
+  // Fetch logs for the selected date (collective - no user filter)
   useEffect(() => {
     if (!user) return;
 
@@ -54,7 +54,6 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
       const { data, error } = await supabase
         .from('generator_logs')
         .select('*')
-        .eq('user_id', user.id)
         .eq('date', selectedDate);
 
       if (error) {
@@ -76,6 +75,53 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
     };
 
     fetchLogs();
+  }, [user, selectedDate, selectedHour]);
+
+  // Real-time synchronization for generator log changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('generator-logs-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'generator_logs',
+          filter: `date=eq.${selectedDate}`
+        },
+        (payload) => {
+          console.log('Generator log updated by another user:', payload);
+          // Refresh the data
+          const fetchLogs = async () => {
+            const { data } = await supabase
+              .from('generator_logs')
+              .select('*')
+              .eq('date', selectedDate);
+
+            if (data) {
+              const hours = data.map((log) => log.hour);
+              setLoggedHours(hours);
+
+              const currentLog = data.find((log) => log.hour === selectedHour);
+              if (currentLog && currentLog.hour !== selectedHour) {
+                // Don't override if user is editing current hour
+                return;
+              }
+              if (currentLog) {
+                setFormData(currentLog);
+              }
+            }
+          };
+          fetchLogs();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user, selectedDate, selectedHour]);
 
   // Auto-lock when hour changes
@@ -215,8 +261,9 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
 
     setIsSaving(true);
 
-    const payload = {
-      user_id: user.id,
+    const payload: any = {
+      logged_by: (formData as any).logged_by || user.id, // Keep original logger if updating
+      last_modified_by: user.id, // Track who last modified
       date: selectedDate,
       hour: selectedHour,
       winding_temp_r1: formData.winding_temp_r1 ?? null,
@@ -270,7 +317,7 @@ export function GeneratorLogForm({ isFinalized }: GeneratorLogFormProps) {
     };
 
     const { error } = await supabase.from('generator_logs').upsert(payload, {
-      onConflict: 'user_id,date,hour',
+      onConflict: 'date,hour', // Collective constraint (no user_id)
     });
 
     setIsSaving(false);
