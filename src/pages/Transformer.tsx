@@ -23,7 +23,6 @@ export default function Transformer() {
         .select('finalized')
         .eq('date', selectedDate)
         .eq('transformer_number', 1)
-        .eq('user_id', user.id)
         .limit(1)
         .maybeSingle();
       
@@ -37,13 +36,12 @@ export default function Transformer() {
   const handleFinalizeDay = async () => {
     if (!user) return;
 
-    // Check if all 24 hours are logged
+    // Check if all 24 hours are logged (collective)
     const { data: logs, error: fetchError } = await supabase
       .from('transformer_logs')
       .select('hour')
       .eq('date', selectedDate)
-      .eq('transformer_number', 1)
-      .eq('user_id', user.id);
+      .eq('transformer_number', 1);
 
     if (fetchError) {
       toast({
@@ -63,7 +61,7 @@ export default function Transformer() {
       return;
     }
 
-    // Finalize all logs for this date
+    // Finalize all logs for this date (collective)
     const { error: updateError } = await supabase
       .from('transformer_logs')
       .update({
@@ -72,8 +70,7 @@ export default function Transformer() {
         finalized_by: user.id,
       })
       .eq('date', selectedDate)
-      .eq('transformer_number', 1)
-      .eq('user_id', user.id);
+      .eq('transformer_number', 1);
 
     if (updateError) {
       toast({
