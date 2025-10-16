@@ -411,7 +411,9 @@ export type Database = {
           hour: number
           id: string
           kva: number | null
+          last_modified_by: string | null
           logged_at: string | null
+          logged_by: string | null
           ltac_current_b: number | null
           ltac_current_r: number | null
           ltac_current_y: number | null
@@ -440,7 +442,7 @@ export type Database = {
           tap_position: string | null
           transformer_number: number
           updated_at: string | null
-          user_id: string
+          user_id: string | null
           voltage_rb: number | null
           voltage_ry: number | null
           voltage_yb: number | null
@@ -470,7 +472,9 @@ export type Database = {
           hour: number
           id?: string
           kva?: number | null
+          last_modified_by?: string | null
           logged_at?: string | null
+          logged_by?: string | null
           ltac_current_b?: number | null
           ltac_current_r?: number | null
           ltac_current_y?: number | null
@@ -499,7 +503,7 @@ export type Database = {
           tap_position?: string | null
           transformer_number: number
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
           voltage_rb?: number | null
           voltage_ry?: number | null
           voltage_yb?: number | null
@@ -529,7 +533,9 @@ export type Database = {
           hour?: number
           id?: string
           kva?: number | null
+          last_modified_by?: string | null
           logged_at?: string | null
+          logged_by?: string | null
           ltac_current_b?: number | null
           ltac_current_r?: number | null
           ltac_current_y?: number | null
@@ -558,7 +564,7 @@ export type Database = {
           tap_position?: string | null
           transformer_number?: number
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
           voltage_rb?: number | null
           voltage_ry?: number | null
           voltage_yb?: number | null
