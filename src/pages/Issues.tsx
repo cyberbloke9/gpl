@@ -135,10 +135,9 @@ export default function Issues() {
           query = query.eq('severity', severityFilter);
         }
 
+        // Non-admins don't see resolved issues
         if (userRole !== 'admin') {
-          query = query
-            .eq('user_id', user.id)
-            .neq('status', 'resolved');
+          query = query.neq('status', 'resolved');
         }
 
         const { data, error, count } = await query;
@@ -391,7 +390,7 @@ export default function Issues() {
                       </span>
                     </div>
                     
-                    {userRole === 'admin' && issue.profiles && (
+                    {issue.profiles && (
                       <div className="flex items-center gap-2">
                         <User className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                         <span className="break-words">
