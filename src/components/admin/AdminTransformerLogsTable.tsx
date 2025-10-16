@@ -7,8 +7,8 @@ import { format } from 'date-fns';
 interface AdminTransformerLog {
   date: string;
   transformer_number: number;
-  user_name: string;
-  employee_id: string;
+  user_names: string;
+  employee_ids: string;
   hours_logged: number;
   completion_percentage: number;
 }
@@ -49,9 +49,11 @@ export const AdminTransformerLogsTable = ({ logs, onViewReport }: AdminTransform
                 <TableCell>
                   <Badge variant="outline" className="text-xs">{log.transformer_number === 1 ? 'PT' : 'AT'}</Badge>
                 </TableCell>
-                <TableCell className="text-sm max-w-[120px] truncate">{log.user_name}</TableCell>
-                <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
-                  {log.employee_id}
+                <TableCell className="text-sm max-w-[150px] truncate" title={log.user_names}>
+                  {log.user_names}
+                </TableCell>
+                <TableCell className="hidden md:table-cell text-xs text-muted-foreground max-w-[100px] truncate" title={log.employee_ids}>
+                  {log.employee_ids}
                 </TableCell>
                 <TableCell className="text-sm">
                   <span className="font-medium">{log.hours_logged}</span>

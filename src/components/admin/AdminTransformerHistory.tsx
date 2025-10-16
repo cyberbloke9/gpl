@@ -68,30 +68,41 @@ export const AdminTransformerHistory = ({ onViewReport }: AdminTransformerHistor
 
       if (error) throw error;
 
-      // Group by date + transformer_number + user_id
+      // Group by date + transformer_number (collective progress across all users)
       const grouped = logsData?.reduce((acc: any, log: any) => {
-        const key = `${log.date}-${log.transformer_number}-${log.user_id}`;
+        const key = `${log.date}-${log.transformer_number}`;
         if (!acc[key]) {
           acc[key] = {
             date: log.date,
             transformer_number: log.transformer_number,
-            user_id: log.user_id,
-            user_name: log.profiles?.full_name || 'Unknown',
-            employee_id: log.profiles?.employee_id || '',
-            hours_logged: 0,
+            users: new Set(),
+            employee_ids: new Set(),
+            unique_hours: new Set(),
             finalized: log.finalized,
             finalized_at: log.finalized_at,
             logs: []
           };
         }
-        acc[key].hours_logged++;
+        acc[key].users.add(log.profiles?.full_name || 'Unknown');
+        if (log.profiles?.employee_id) {
+          acc[key].employee_ids.add(log.profiles.employee_id);
+        }
+        acc[key].unique_hours.add(log.hour);
         acc[key].logs.push(log);
         return acc;
       }, {}) || {};
 
       const groupedArray = Object.values(grouped).map((group: any) => ({
-        ...group,
-        completion_percentage: Math.round((group.hours_logged / 24) * 100)
+        date: group.date,
+        transformer_number: group.transformer_number,
+        user_id: '', // Not used for collective view
+        user_name: Array.from(group.users).join(', '),
+        employee_id: Array.from(group.employee_ids).join(', '),
+        hours_logged: group.unique_hours.size,
+        completion_percentage: Math.round((group.unique_hours.size / 24) * 100),
+        finalized: group.finalized,
+        finalized_at: group.finalized_at,
+        logs: group.logs
       }));
 
       // Pagination

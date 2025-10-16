@@ -169,27 +169,36 @@ export default function Admin() {
       .eq('date', today)
       .order('logged_at', { ascending: false });
 
-    // Group transformer logs by date, transformer_number, and user
+    // Group transformer logs by date and transformer_number (collective progress across all users)
     const groupedTransformerLogs = transformerData?.reduce((acc: any, log: any) => {
-      const key = `${log.date}-${log.transformer_number}-${log.user_id}`;
+      const key = `${log.date}-${log.transformer_number}`;
       if (!acc[key]) {
         acc[key] = {
           date: log.date,
           transformer_number: log.transformer_number,
-          user_name: log.profiles?.full_name || 'Unknown',
-          employee_id: log.profiles?.employee_id || '',
-          hours_logged: 0,
+          users: new Set(),
+          employee_ids: new Set(),
+          unique_hours: new Set(),
           logs: []
         };
       }
-      acc[key].hours_logged++;
+      acc[key].users.add(log.profiles?.full_name || 'Unknown');
+      if (log.profiles?.employee_id) {
+        acc[key].employee_ids.add(log.profiles.employee_id);
+      }
+      acc[key].unique_hours.add(log.hour);
       acc[key].logs.push(log);
       return acc;
     }, {}) || {};
 
     const formattedTransformerLogs = Object.values(groupedTransformerLogs).map((group: any) => ({
-      ...group,
-      completion_percentage: Math.round((group.hours_logged / 24) * 100)
+      date: group.date,
+      transformer_number: group.transformer_number,
+      user_names: Array.from(group.users).join(', '),
+      employee_ids: Array.from(group.employee_ids).join(', '),
+      hours_logged: group.unique_hours.size,
+      completion_percentage: Math.round((group.unique_hours.size / 24) * 100),
+      logs: group.logs
     }));
 
     setTransformerLogs(formattedTransformerLogs);
