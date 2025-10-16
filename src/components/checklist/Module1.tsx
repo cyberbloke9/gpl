@@ -420,7 +420,16 @@ export const ChecklistModule1 = ({ checklistId, userId, data, onSave }: Module1P
         {renderUnitSection("unit2", "Unit 2 (0.7 MW)")}
       </div>
 
-      <Button onClick={() => onSave(formData)} size="lg" className="w-full" disabled={!isModule1Complete()}>
+      <Button 
+        onClick={(e) => {
+          e.preventDefault();
+          onSave(formData);
+        }} 
+        size="lg" 
+        className="w-full" 
+        disabled={!isModule1Complete()}
+        type="button"
+      >
         Save Module 1
       </Button>
     </div>

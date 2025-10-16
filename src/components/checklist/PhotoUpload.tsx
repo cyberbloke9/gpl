@@ -38,6 +38,7 @@ export const PhotoUpload = ({ label, value, onChange, required, userId, checklis
   }, []);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -141,7 +142,10 @@ export const PhotoUpload = ({ label, value, onChange, required, userId, checklis
             size="icon"
             variant="destructive"
             className="absolute -top-2 -right-2 h-6 w-6"
-            onClick={handleRemove}
+            onClick={(e) => {
+              e.preventDefault();
+              handleRemove();
+            }}
             disabled={uploading}
             type="button"
           >
@@ -166,20 +170,24 @@ export const PhotoUpload = ({ label, value, onChange, required, userId, checklis
             disabled={uploading}
           />
           <label htmlFor={`photo-${fieldName}`}>
-            <Button type="button" variant="outline" asChild disabled={uploading}>
-              <span className="cursor-pointer">
-                {uploading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Camera className="mr-2 h-4 w-4" />
-                    Capture Photo
-                  </>
-                )}
-              </span>
+            <Button 
+              type="button" 
+              variant="outline" 
+              disabled={uploading}
+              className="cursor-pointer"
+              onClick={(e) => e.preventDefault()}
+            >
+              {uploading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Camera className="mr-2 h-4 w-4" />
+                  Capture Photo
+                </>
+              )}
             </Button>
           </label>
         </div>

@@ -109,7 +109,16 @@ export const ChecklistModule4 = ({ checklistId, userId, data, onSave }: Module4P
         </TabsContent>
       </Tabs>
 
-      <Button onClick={() => onSave(formData)} size="lg" className="w-full" disabled={!isModule4Complete()}>
+      <Button 
+        onClick={(e) => {
+          e.preventDefault();
+          onSave(formData);
+        }} 
+        size="lg" 
+        className="w-full" 
+        disabled={!isModule4Complete()}
+        type="button"
+      >
         Save Module 4
       </Button>
     </div>
