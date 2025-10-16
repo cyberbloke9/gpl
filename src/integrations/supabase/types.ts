@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           completion_percentage: number | null
           completion_time: string | null
+          contributors: Json | null
           created_at: string | null
           date: string
           flagged_issues_count: number | null
@@ -34,11 +35,12 @@ export type Database = {
           submitted: boolean | null
           submitted_at: string | null
           updated_at: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           completion_percentage?: number | null
           completion_time?: string | null
+          contributors?: Json | null
           created_at?: string | null
           date?: string
           flagged_issues_count?: number | null
@@ -55,11 +57,12 @@ export type Database = {
           submitted?: boolean | null
           submitted_at?: string | null
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           completion_percentage?: number | null
           completion_time?: string | null
+          contributors?: Json | null
           created_at?: string | null
           date?: string
           flagged_issues_count?: number | null
@@ -76,7 +79,7 @@ export type Database = {
           submitted?: boolean | null
           submitted_at?: string | null
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
