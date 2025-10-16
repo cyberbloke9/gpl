@@ -19,7 +19,7 @@ import {
 import React from 'react';
 
 interface AdminGeneratorHistoryProps {
-  onViewReport: (date: string, userId: string) => void;
+  onViewReport: (date: string) => void;
 }
 
 export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryProps) => {
@@ -74,17 +74,16 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
         return acc;
       }, {}) || {};
 
-      // Group by date + user_id
+      // Group by date only (collective progress across all users)
       const grouped = logsData?.reduce((acc: any, log: any) => {
-        const key = `${log.date}-${log.user_id}`;
+        const key = log.date;
         const profile = profilesMap[log.user_id];
         if (!acc[key]) {
           acc[key] = {
             date: log.date,
-            user_id: log.user_id,
-            user_name: profile?.full_name || 'Unknown',
-            employee_id: profile?.employee_id || '',
-            hours_logged: 0,
+            users: new Set(),
+            employee_ids: new Set(),
+            unique_hours: new Set(),
             finalized: log.finalized,
             finalized_at: log.finalized_at,
             total_power: 0,
@@ -92,7 +91,11 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
             logs: []
           };
         }
-        acc[key].hours_logged++;
+        acc[key].users.add(profile?.full_name || 'Unknown');
+        if (profile?.employee_id) {
+          acc[key].employee_ids.add(profile.employee_id);
+        }
+        acc[key].unique_hours.add(log.hour);
         if (log.gen_kw) acc[key].total_power += log.gen_kw;
         if (log.gen_frequency) acc[key].total_frequency += log.gen_frequency;
         acc[key].logs.push(log);
@@ -100,10 +103,16 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
       }, {}) || {};
 
       const groupedArray = Object.values(grouped).map((group: any) => ({
-        ...group,
-        completion_percentage: Math.round((group.hours_logged / 24) * 100),
-        avg_power: group.hours_logged > 0 ? (group.total_power / group.hours_logged).toFixed(2) : 0,
-        avg_frequency: group.hours_logged > 0 ? (group.total_frequency / group.hours_logged).toFixed(2) : 0,
+        date: group.date,
+        user_names: Array.from(group.users).join(', '),
+        employee_ids: Array.from(group.employee_ids).join(', '),
+        hours_logged: group.unique_hours.size,
+        completion_percentage: Math.round((group.unique_hours.size / 24) * 100),
+        avg_power: group.logs.length > 0 ? (group.total_power / group.logs.length).toFixed(2) : 0,
+        avg_frequency: group.logs.length > 0 ? (group.total_frequency / group.logs.length).toFixed(2) : 0,
+        finalized: group.finalized,
+        finalized_at: group.finalized_at,
+        logs: group.logs
       }));
 
       // Pagination
@@ -182,19 +191,19 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
 
       <div className="space-y-4">
         {logs.map((log, idx) => (
-          <Card key={`${log.date}-${log.user_id}-${idx}`} className="p-4 sm:p-6 hover:shadow-md transition-shadow">
+          <Card key={`${log.date}-${idx}`} className="p-4 sm:p-6 hover:shadow-md transition-shadow">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="space-y-3 flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex items-center gap-2 min-w-0">
                     <User className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <span className="font-medium text-sm sm:text-base truncate">
-                      {log.user_name}
+                      {log.user_names}
                     </span>
                   </div>
-                  {log.employee_id && (
+                  {log.employee_ids && (
                     <Badge variant="outline" className="text-xs flex-shrink-0">
-                      ID: {log.employee_id}
+                      ID: {log.employee_ids}
                     </Badge>
                   )}
                 </div>
@@ -237,7 +246,7 @@ export const AdminGeneratorHistory = ({ onViewReport }: AdminGeneratorHistoryPro
               </div>
 
               <Button
-                onClick={() => onViewReport(log.date, log.user_id)}
+                onClick={() => onViewReport(log.date)}
                 className="w-full lg:w-auto flex-shrink-0"
                 size="sm"
               >

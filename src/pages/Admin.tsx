@@ -222,23 +222,26 @@ export default function Admin() {
       return acc;
     }, {}) || {};
 
-    // Group generator logs by date and user
+    // Group generator logs by date only (collective progress across all users)
     const groupedGeneratorLogs = generatorData?.reduce((acc: any, log: any) => {
-      const key = `${log.date}-${log.user_id}`;
-      const profile = generatorProfilesMap[log.user_id];
+      const key = log.date;
       if (!acc[key]) {
         acc[key] = {
           date: log.date,
-          user_id: log.user_id,
-          user_name: profile?.full_name || 'Unknown',
-          employee_id: profile?.employee_id || '',
-          hours_logged: 0,
+          users: new Set(),
+          employee_ids: new Set(),
+          unique_hours: new Set(),
           logs: [],
           total_power: 0,
           total_frequency: 0,
         };
       }
-      acc[key].hours_logged++;
+      const profile = generatorProfilesMap[log.user_id];
+      acc[key].users.add(profile?.full_name || 'Unknown');
+      if (profile?.employee_id) {
+        acc[key].employee_ids.add(profile.employee_id);
+      }
+      acc[key].unique_hours.add(log.hour);
       acc[key].logs.push(log);
       if (log.gen_kw) acc[key].total_power += log.gen_kw;
       if (log.gen_frequency) acc[key].total_frequency += log.gen_frequency;
@@ -247,13 +250,12 @@ export default function Admin() {
 
     const formattedGeneratorLogs = Object.values(groupedGeneratorLogs).map((group: any) => ({
       date: group.date,
-      user_name: group.user_name,
-      employee_id: group.employee_id,
-      user_id: group.user_id,
-      hours_logged: group.hours_logged,
-      completion_percentage: Math.round((group.hours_logged / 24) * 100),
-      avg_power: group.hours_logged > 0 ? group.total_power / group.hours_logged : 0,
-      avg_frequency: group.hours_logged > 0 ? group.total_frequency / group.hours_logged : 0,
+      user_names: Array.from(group.users).join(', '),
+      employee_ids: Array.from(group.employee_ids).join(', '),
+      hours_logged: group.unique_hours.size,
+      completion_percentage: Math.round((group.unique_hours.size / 24) * 100),
+      avg_power: group.logs.length > 0 ? group.total_power / group.logs.length : 0,
+      avg_frequency: group.logs.length > 0 ? group.total_frequency / group.logs.length : 0,
     }));
 
     setGeneratorLogs(formattedGeneratorLogs);
@@ -337,13 +339,12 @@ export default function Admin() {
     }
   };
 
-  const handleViewGeneratorReport = async (date: string, userId: string) => {
-    // Fetch all logs for this date and user
+  const handleViewGeneratorReport = async (date: string) => {
+    // Fetch all logs for this date (collective from all users)
     const { data: logs, error: logsError } = await supabase
       .from('generator_logs')
       .select('*')
       .eq('date', date)
-      .eq('user_id', userId)
       .order('hour', { ascending: true });
 
     if (logsError) {
@@ -351,19 +352,28 @@ export default function Admin() {
       return;
     }
 
-    // Fetch user profile info
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('full_name, employee_id')
-      .eq('id', userId)
-      .single();
-
     if (logs && logs.length > 0) {
+      // Get user profiles for all logs
+      const userIds = [...new Set(logs.map(log => log.user_id))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name, employee_id')
+        .in('id', userIds);
+
+      const profilesMap = profilesData?.reduce((acc: any, profile: any) => {
+        acc[profile.id] = profile;
+        return acc;
+      }, {}) || {};
+
+      // Get all unique users who contributed
+      const users = new Set(logs.map(l => profilesMap[l.user_id]?.full_name).filter(Boolean));
+      const employeeIds = new Set(logs.map(l => profilesMap[l.user_id]?.employee_id).filter(Boolean));
+      
       setSelectedGeneratorReport({
         date,
         logs: logs as any[],
-        userName: profile?.full_name,
-        employeeId: profile?.employee_id,
+        userName: Array.from(users).join(', '),
+        employeeId: Array.from(employeeIds).join(', '),
       } as any);
       setIsGeneratorViewerOpen(true);
     }

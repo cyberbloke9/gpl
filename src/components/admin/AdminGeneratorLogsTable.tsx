@@ -5,9 +5,8 @@ import { format } from 'date-fns';
 
 interface AdminGeneratorLog {
   date: string;
-  user_id: string;
-  user_name: string;
-  employee_id: string;
+  user_names: string;
+  employee_ids: string;
   hours_logged: number;
   completion_percentage: number;
   avg_power?: number;
@@ -16,7 +15,7 @@ interface AdminGeneratorLog {
 
 interface AdminGeneratorLogsTableProps {
   logs: AdminGeneratorLog[];
-  onViewReport: (date: string, userId: string) => void;
+  onViewReport: (date: string) => void;
 }
 
 export const AdminGeneratorLogsTable = ({ logs, onViewReport }: AdminGeneratorLogsTableProps) => {
@@ -48,9 +47,9 @@ export const AdminGeneratorLogsTable = ({ logs, onViewReport }: AdminGeneratorLo
                 <TableCell className="font-medium text-sm whitespace-nowrap">
                   {format(new Date(log.date), 'MMM d')}
                 </TableCell>
-                <TableCell className="text-sm max-w-[120px] truncate">{log.user_name}</TableCell>
+                <TableCell className="text-sm max-w-[120px] truncate">{log.user_names}</TableCell>
                 <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
-                  {log.employee_id}
+                  {log.employee_ids}
                 </TableCell>
                 <TableCell className="text-sm">
                   <span className="font-medium">{log.hours_logged}</span>
@@ -71,7 +70,7 @@ export const AdminGeneratorLogsTable = ({ logs, onViewReport }: AdminGeneratorLo
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onViewReport(log.date, log.user_id)}
+                    onClick={() => onViewReport(log.date)}
                     className="text-xs"
                   >
                     <span className="hidden sm:inline">View</span>
