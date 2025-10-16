@@ -35,7 +35,6 @@ export function GeneratorLogHistory({ userId }: GeneratorLogHistoryProps) {
       let query = supabase
         .from('generator_logs')
         .select('*')
-        .eq('user_id', userId)
         .gte('date', startDate)
         .lte('date', endDate)
         .order('date', { ascending: false })

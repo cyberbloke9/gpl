@@ -27,7 +27,6 @@ export const ChecklistHistory = ({ userId }: { userId?: string }) => {
     const { data, error } = await supabase
       .from('checklists')
       .select('id, date, shift, submitted, status, completion_percentage, problem_count, problem_fields, flagged_issues_count, start_time, completion_time, submitted_at, user_id')
-      .eq('user_id', userId)
       .order('date', { ascending: false })
       .limit(30);
 

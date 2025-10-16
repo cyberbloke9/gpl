@@ -87,7 +87,6 @@ export const TransformerLogHistory = ({ userId }: { userId?: string }) => {
     const { data, error } = await supabase
       .from('transformer_logs')
       .select('*')
-      .eq('user_id', userId)
       .eq('transformer_number', 1)
       .order('date', { ascending: false })
       .order('hour', { ascending: true })
