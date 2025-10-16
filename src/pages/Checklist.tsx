@@ -187,9 +187,9 @@ export default function Checklist() {
   const isComplete = overallProgress === 100;
 
   return (
-    <div className="min-h-screen bg-background pb-32 sm:pb-28">
+    <div className="min-h-screen bg-background">
       <Navigation />
-      <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+      <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 pb-36 sm:pb-32">
         <div className="mb-4 sm:mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold">Daily Checklist</h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
@@ -206,7 +206,7 @@ export default function Checklist() {
           </Alert>
         )}
 
-        <Card className="p-3 sm:p-6 mb-24 sm:mb-28">
+        <Card className="p-3 sm:p-6">
           <Tabs value={activeModule} onValueChange={setActiveModule}>
             <TabsList className="grid w-full grid-cols-5 h-auto gap-1">
               <TabsTrigger value="1" className="text-xs sm:text-sm px-1 sm:px-3 py-2">M1</TabsTrigger>

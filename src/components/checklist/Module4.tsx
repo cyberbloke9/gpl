@@ -78,7 +78,7 @@ export const ChecklistModule4 = ({ checklistId, userId, data, onSave }: Module4P
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4">
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 pb-8">
       <h2 className="text-xl sm:text-2xl font-bold">Module 4: Electrical Systems</h2>
 
       <Tabs defaultValue="od-yard">
