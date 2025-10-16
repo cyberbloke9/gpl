@@ -38,9 +38,13 @@ const signInSchema = z.object({
 });
 
 export default function Auth() {
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, checkLockoutStatus } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [lockoutInfo, setLockoutInfo] = useState<{ isLockedOut: boolean; timeRemaining: number }>({ 
+    isLockedOut: false, 
+    timeRemaining: 0 
+  });
 
   // Redirect if already logged in
   useEffect(() => {
@@ -68,11 +72,24 @@ export default function Auth() {
         password: signInPassword
       });
 
+      // Check lockout status for this specific email
+      const status = checkLockoutStatus(validatedData.email);
+      if (status.isLockedOut) {
+        setLockoutInfo(status);
+        const minutes = Math.floor(status.timeRemaining / 60);
+        const seconds = status.timeRemaining % 60;
+        const timeMessage = minutes > 0 
+          ? `${minutes} minute${minutes > 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''}`
+          : `${seconds} second${seconds !== 1 ? 's' : ''}`;
+        toast.error(`This account is locked. Try again in ${timeMessage}.`);
+        return;
+      }
+
       setLoading(true);
       const { error } = await signIn(validatedData.email, validatedData.password);
-      if (error) {
+      if (error && error.message !== 'Rate limited') {
         toast.error(error.message || 'Failed to sign in');
-      } else {
+      } else if (!error) {
         navigate('/');
       }
     } catch (error) {
@@ -156,8 +173,13 @@ export default function Auth() {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Signing in...' : 'Sign In'}
+                {lockoutInfo.isLockedOut && (
+                  <div className="text-sm text-destructive text-center p-2 bg-destructive/10 rounded">
+                    Account locked. Try again in {Math.floor(lockoutInfo.timeRemaining / 60)}m {lockoutInfo.timeRemaining % 60}s
+                  </div>
+                )}
+                <Button type="submit" className="w-full" disabled={loading || lockoutInfo.isLockedOut}>
+                  {loading ? 'Signing in...' : lockoutInfo.isLockedOut ? 'Account Locked' : 'Sign In'}
                 </Button>
               </form>
             </TabsContent>
