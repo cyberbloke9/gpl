@@ -74,10 +74,10 @@ export const AdminQueryInterface = () => {
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-4 sm:p-6">
       <div className="flex items-center gap-2 mb-4">
-        <Search className="h-5 w-5 text-primary" />
-        <h2 className="text-xl font-semibold">Natural Language Analytics</h2>
+        <Search className="h-5 w-5 text-primary flex-shrink-0" />
+        <h2 className="text-lg sm:text-xl font-semibold break-words">Natural Language Analytics</h2>
       </div>
 
       <div className="space-y-4">
@@ -111,10 +111,10 @@ export const AdminQueryInterface = () => {
                   size="sm"
                   onClick={() => handleQuery(sq)}
                   disabled={loading}
-                  className="justify-start text-left h-auto py-2 px-3"
+                  className="justify-start text-left h-auto py-2 px-3 whitespace-normal break-words"
                 >
                   <Sparkles className="h-3 w-3 mr-2 flex-shrink-0" />
-                  <span className="text-xs">{sq}</span>
+                  <span className="text-xs break-words">{sq}</span>
                 </Button>
               ))}
             </div>
