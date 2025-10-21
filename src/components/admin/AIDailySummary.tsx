@@ -48,15 +48,15 @@ export const AIDailySummary = () => {
 
   return (
     <Card className="p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
+          <Sparkles className="h-5 w-5 text-primary flex-shrink-0" />
           <h2 className="text-xl font-semibold">AI Daily Summary</h2>
         </div>
         <Button 
           onClick={generateSummary} 
           disabled={loading}
-          className="gap-2"
+          className="gap-2 w-full sm:w-auto"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           {loading ? 'Analyzing...' : 'Generate Summary'}
@@ -66,21 +66,21 @@ export const AIDailySummary = () => {
       {summary && (
         <div className="space-y-4">
           {metrics && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-muted rounded-lg">
-              <div>
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 p-4 bg-muted rounded-lg">
+              <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">Checklists</p>
-                <p className="text-lg font-bold">{metrics.checklists.completed}/{metrics.checklists.total}</p>
+                <p className="text-lg font-bold break-words">{metrics.checklists.completed}/{metrics.checklists.total}</p>
                 <p className="text-xs text-muted-foreground">{metrics.checklists.completionRate}% complete</p>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">Transformer Hours</p>
                 <p className="text-lg font-bold">{metrics.transformer.hoursLogged}</p>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">Generator Hours</p>
                 <p className="text-lg font-bold">{metrics.generator.hoursLogged}/24</p>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">Open Issues</p>
                 <p className="text-lg font-bold text-destructive">{metrics.issues.open}</p>
                 <p className="text-xs text-muted-foreground">{metrics.issues.critical} critical</p>

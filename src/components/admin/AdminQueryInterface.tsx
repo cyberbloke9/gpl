@@ -81,18 +81,19 @@ export const AdminQueryInterface = () => {
       </div>
 
       <div className="space-y-4">
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Input
             placeholder="Ask anything about your operations data..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleQuery()}
             disabled={loading}
+            className="flex-1"
           />
           <Button 
             onClick={() => handleQuery()} 
             disabled={loading || !query.trim()}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
             Query
@@ -120,9 +121,9 @@ export const AdminQueryInterface = () => {
           </div>
         )}
 
-        <div className="space-y-4 max-h-[600px] overflow-y-auto">
+        <div className="space-y-4 max-h-[400px] sm:max-h-[500px] lg:max-h-[600px] overflow-y-auto">
           {results.map((result, idx) => (
-            <div key={idx} className="border rounded-lg p-4 space-y-2">
+            <div key={idx} className="border rounded-lg p-3 sm:p-4 space-y-2">
               <div className="flex items-start gap-2">
                 <Search className="h-4 w-4 text-primary mt-1 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -132,8 +133,8 @@ export const AdminQueryInterface = () => {
                   </p>
                 </div>
               </div>
-              <div className="pl-6 prose prose-sm max-w-none dark:prose-invert">
-                <div className="whitespace-pre-wrap text-sm leading-relaxed">
+              <div className="sm:pl-6 prose prose-sm max-w-none dark:prose-invert">
+                <div className="whitespace-pre-wrap text-sm leading-relaxed break-words">
                   {result.answer}
                 </div>
               </div>

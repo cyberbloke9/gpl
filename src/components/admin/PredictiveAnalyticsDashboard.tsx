@@ -72,16 +72,16 @@ export const PredictiveAnalyticsDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <TrendingUp className="h-6 w-6 text-primary" />
-          <h2 className="text-2xl font-bold">Predictive Analytics</h2>
+          <TrendingUp className="h-6 w-6 text-primary flex-shrink-0" />
+          <h2 className="text-xl sm:text-2xl font-bold">Predictive Analytics</h2>
         </div>
         <Button 
           onClick={loadAnalytics} 
           disabled={loading}
           variant="outline"
-          className="gap-2"
+          className="gap-2 w-full sm:w-auto"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
           Refresh
@@ -106,18 +106,18 @@ export const PredictiveAnalyticsDashboard = () => {
                 <CheckCircle2 className="h-5 w-5 text-primary" />
                 Equipment Health Scores
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {structured.healthScores.map((item: any, idx: number) => (
                   <Card key={idx} className="p-4 border-2">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold">{item.equipment}</h4>
+                    <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 mb-2">
+                      <h4 className="font-semibold break-words min-w-0 flex-1">{item.equipment}</h4>
                       {getScoreBadge(item.score)}
                     </div>
                     <div className="text-3xl font-bold mb-2 flex items-center gap-2">
                       <span className={getScoreColor(item.score)}>{item.score}</span>
                       <span className="text-sm text-muted-foreground">/100</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{item.explanation}</p>
+                    <p className="text-sm text-muted-foreground break-words">{item.explanation}</p>
                   </Card>
                 ))}
               </div>
@@ -133,18 +133,18 @@ export const PredictiveAnalyticsDashboard = () => {
               </h3>
               <div className="space-y-3">
                 {structured.maintenanceAlerts.map((alert: any, idx: number) => (
-                  <div key={idx} className="flex items-start gap-3 p-3 border rounded-lg bg-yellow-50 dark:bg-yellow-950/20">
+                  <div key={idx} className="flex flex-col xs:flex-row items-start gap-2 xs:gap-3 p-3 border rounded-lg bg-yellow-50 dark:bg-yellow-950/20">
                     <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm">{alert.equipment}</p>
-                      <p className="text-sm text-muted-foreground">{alert.issue}</p>
+                      <p className="font-semibold text-sm break-words">{alert.equipment}</p>
+                      <p className="text-sm text-muted-foreground break-words">{alert.issue}</p>
                       {alert.timeframe && (
                         <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
                           Estimated: {alert.timeframe}
                         </p>
                       )}
                     </div>
-                    <Badge variant={alert.priority === 'high' ? 'destructive' : 'secondary'}>
+                    <Badge variant={alert.priority === 'high' ? 'destructive' : 'secondary'} className="self-start xs:self-auto">
                       {alert.priority}
                     </Badge>
                   </div>
@@ -165,10 +165,10 @@ export const PredictiveAnalyticsDashboard = () => {
                   <div key={idx} className="flex items-start gap-3 p-3 border rounded-lg bg-red-50 dark:bg-red-950/20">
                     <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm">{warning.parameter}</p>
-                      <p className="text-sm text-muted-foreground">{warning.warning}</p>
+                      <p className="font-semibold text-sm break-words">{warning.parameter}</p>
+                      <p className="text-sm text-muted-foreground break-words">{warning.warning}</p>
                       {warning.currentValue && (
-                        <p className="text-xs text-red-700 dark:text-red-300 mt-1">
+                        <p className="text-xs text-red-700 dark:text-red-300 mt-1 break-all">
                           Current: {warning.currentValue} | Threshold: {warning.threshold}
                         </p>
                       )}
@@ -191,10 +191,10 @@ export const PredictiveAnalyticsDashboard = () => {
                   <div key={idx} className="flex items-start gap-3 p-3 border rounded-lg bg-green-50 dark:bg-green-950/20">
                     <TrendingUp className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm">{suggestion.area}</p>
-                      <p className="text-sm text-muted-foreground">{suggestion.suggestion}</p>
+                      <p className="font-semibold text-sm break-words">{suggestion.area}</p>
+                      <p className="text-sm text-muted-foreground break-words">{suggestion.suggestion}</p>
                       {suggestion.potentialBenefit && (
-                        <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                        <p className="text-xs text-green-700 dark:text-green-300 mt-1 break-words">
                           Potential Benefit: {suggestion.potentialBenefit}
                         </p>
                       )}
