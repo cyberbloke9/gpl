@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import { format } from "date-fns";
+import logo from "@/assets/logo.png";
 
 interface TransformerLog {
   hour: number;
@@ -127,7 +128,12 @@ export const TransformerPrintView = forwardRef<HTMLDivElement, TransformerPrintV
 
         {/* PAGE 1: Cover & Table of Contents */}
         <div className="p-8">
-          <div className="text-center mb-8 border-b-2 border-black pb-4">
+          <div className="text-center mb-8 border-b-2 border-black pb-4 relative">
+            <img 
+              src={logo} 
+              alt="Company Logo" 
+              className="absolute top-0 right-0 w-20 h-20 object-contain"
+            />
             <h1 className="text-3xl font-bold">GAYATRI POWER PRIVATE LIMITED</h1>
             <h2 className="text-2xl mt-3">UNIFIED TRANSFORMER LOG SHEET</h2>
             <p className="text-base mt-2">Date: {format(new Date(date), "PPP")}</p>

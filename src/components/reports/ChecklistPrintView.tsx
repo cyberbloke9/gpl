@@ -4,6 +4,7 @@ import { Module2DataDisplay } from "@/components/checklist/reports/Module2DataDi
 import { Module3DataDisplay } from "@/components/checklist/reports/Module3DataDisplay";
 import { Module4DataDisplay } from "@/components/checklist/reports/Module4DataDisplay";
 import { format } from "date-fns";
+import logo from "@/assets/logo.png";
 
 interface ChecklistPrintViewProps {
   checklist: any;
@@ -19,8 +20,13 @@ export const ChecklistPrintView = forwardRef<HTMLDivElement, ChecklistPrintViewP
     return (
       <div ref={ref} className="p-8 bg-white text-black">
         {/* Header */}
-        <div className="border-b-2 border-gray-800 pb-4 mb-6">
-          <h1 className="text-3xl font-bold text-center mb-2">Daily Checklist Inspection Report</h1>
+        <div className="border-b-2 border-gray-800 pb-4 mb-6 relative">
+          <img 
+            src={logo} 
+            alt="Company Logo" 
+            className="absolute top-0 right-0 w-20 h-20 object-contain"
+          />
+          <h1 className="text-3xl font-bold text-center mb-2 pr-24">Daily Checklist Inspection Report</h1>
           <p className="text-center text-sm text-gray-600">Generated on {format(new Date(), "PPpp")}</p>
         </div>
 

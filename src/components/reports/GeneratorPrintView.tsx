@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { GeneratorLog } from '@/types/generator';
+import logo from '@/assets/logo.png';
 
 interface GeneratorPrintViewProps {
   log: GeneratorLog;
@@ -22,7 +23,12 @@ export function GeneratorPrintView({ log }: GeneratorPrintViewProps) {
   return (
     <div className="bg-white p-8 print:p-0 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="text-center mb-8 pb-6 border-b-4 border-blue-600">
+      <div className="text-center mb-8 pb-6 border-b-4 border-blue-600 relative">
+        <img 
+          src={logo} 
+          alt="Company Logo" 
+          className="absolute top-0 right-0 w-20 h-20 object-contain"
+        />
         <h1 className="text-3xl font-bold text-blue-600 mb-2">
           GAYATRI POWER PRIVATE LIMITED
         </h1>
