@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import logo from "@/assets/logo.png";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -24,7 +25,7 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
     >
       <div className="flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-700">
         <img
-          src="https://storage.googleapis.com/gpt-engineer-file-uploads/ShFliboZjRRmoUV2sHc7LSvnB3B2/uploads/1759910434585-Gpl.png"
+          src={logo}
           alt="GPL Logo"
           className="w-32 h-32 sm:w-40 sm:h-40 object-contain drop-shadow-2xl"
         />
