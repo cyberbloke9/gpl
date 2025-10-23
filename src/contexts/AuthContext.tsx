@@ -10,6 +10,7 @@ interface AuthContextType {
   roleLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string, employeeId?: string) => Promise<{ error: any }>;
+  signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   userRole: string | null;
   checkLockoutStatus: (email: string) => { isLockedOut: boolean; timeRemaining: number };
@@ -192,6 +193,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        }
+      });
+
+      if (error) {
+        if (error.message.includes('popup')) {
+          toast.error('Please allow popups for Google Sign-In');
+        } else {
+          toast.error(`Google Sign-In failed: ${error.message}`);
+        }
+        return { error };
+      }
+
+      return { error: null };
+    } catch (err: any) {
+      toast.error('An unexpected error occurred with Google Sign-In');
+      return { error: err };
+    }
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setUserRole(null);
@@ -199,7 +229,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, roleLoading, signIn, signUp, signOut, userRole, checkLockoutStatus }}>
+    <AuthContext.Provider value={{ user, session, loading, roleLoading, signIn, signUp, signInWithGoogle, signOut, userRole, checkLockoutStatus }}>
       {children}
     </AuthContext.Provider>
   );
