@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 // Validation schemas
 const signUpSchema = z.object({
@@ -46,6 +47,39 @@ export default function Auth() {
     isLockedOut: false, 
     timeRemaining: 0 
   });
+
+  // Handle OAuth callback on mount
+  useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const searchParams = new URLSearchParams(window.location.search);
+    
+    const hasOAuthParams = hashParams.has('access_token') || 
+                           searchParams.has('code') || 
+                           searchParams.has('error');
+    
+    if (hasOAuthParams) {
+      // Handle OAuth errors
+      const error = hashParams.get('error') || searchParams.get('error');
+      const errorDescription = hashParams.get('error_description') || searchParams.get('error_description');
+      
+      if (error) {
+        toast.error(`Authentication failed: ${errorDescription || error}`);
+        window.history.replaceState({}, document.title, '/auth');
+        return;
+      }
+      
+      // Explicitly get the session after OAuth redirect
+      supabase.auth.getSession().then(({ data: { session }, error }) => {
+        if (error) {
+          toast.error(`Authentication failed: ${error.message}`);
+          window.history.replaceState({}, document.title, '/auth');
+        } else if (session) {
+          toast.success('Signed in with Google successfully!');
+          // Session established, user state will update and trigger redirect
+        }
+      });
+    }
+  }, []);
 
   // Redirect if already logged in
   useEffect(() => {
