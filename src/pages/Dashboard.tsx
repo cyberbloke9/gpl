@@ -23,58 +23,58 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-8">
       <Navigation />
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Welcome to Gayatri Power</h1>
-          <p className="text-muted-foreground mt-2">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold">Welcome to Gayatri Power</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
             Daily Checklist & Monitoring System
           </p>
         </div>
 
-        <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           <Link to="/checklist">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-              <CardHeader className="space-y-3">
-                <ClipboardCheck className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
-                <CardTitle className="text-lg sm:text-xl">Daily Checklist</CardTitle>
-                <CardDescription className="text-sm">
+              <CardHeader className="space-y-2 sm:space-y-3 p-4 sm:p-6">
+                <ClipboardCheck className="h-7 w-7 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-primary" />
+                <CardTitle className="text-base sm:text-lg lg:text-xl">Daily Checklist</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   Complete your daily inspection checklist across 4 modules
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button className="w-full">Start Checklist</Button>
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <Button className="w-full text-xs sm:text-sm">Start Checklist</Button>
               </CardContent>
             </Card>
           </Link>
 
           <Link to="/transformer">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-              <CardHeader className="space-y-3">
-                <Gauge className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
-                <CardTitle className="text-lg sm:text-xl">Transformer Log</CardTitle>
-                <CardDescription className="text-sm">
+              <CardHeader className="space-y-2 sm:space-y-3 p-4 sm:p-6">
+                <Gauge className="h-7 w-7 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-primary" />
+                <CardTitle className="text-base sm:text-lg lg:text-xl">Transformer Log</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   Record hourly transformer readings and parameters
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button className="w-full">Log Readings</Button>
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <Button className="w-full text-xs sm:text-sm">Log Readings</Button>
               </CardContent>
             </Card>
           </Link>
 
           <Link to="/generator">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-              <CardHeader className="space-y-3">
-                <Zap className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
-                <CardTitle className="text-lg sm:text-xl">Generator Log</CardTitle>
-                <CardDescription className="text-sm">
+              <CardHeader className="space-y-2 sm:space-y-3 p-4 sm:p-6">
+                <Zap className="h-7 w-7 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-primary" />
+                <CardTitle className="text-base sm:text-lg lg:text-xl">Generator Log</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   Record hourly generator readings and electrical parameters
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button className="w-full">Log Readings</Button>
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <Button className="w-full text-xs sm:text-sm">Log Readings</Button>
               </CardContent>
             </Card>
           </Link>

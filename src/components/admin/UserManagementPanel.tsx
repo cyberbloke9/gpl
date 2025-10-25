@@ -143,54 +143,56 @@ export const UserManagementPanel = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5" />
                 User Management
               </CardTitle>
-              <CardDescription>View and manage all system users</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">View and manage all system users</CardDescription>
             </div>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
-                  <UserPlus className="h-4 w-4 mr-2" />
+                <Button className="w-full sm:w-auto text-xs sm:text-sm">
+                  <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                   Create User
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="max-w-[90vw] sm:max-w-[425px]">
                 <form onSubmit={handleCreateUser}>
                   <DialogHeader>
-                    <DialogTitle>Create New User</DialogTitle>
-                    <DialogDescription>
+                    <DialogTitle className="text-base sm:text-lg">Create New User</DialogTitle>
+                    <DialogDescription className="text-xs sm:text-sm">
                       Add a new user to the system. They will be able to sign in immediately.
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="grid gap-4 py-4">
+                  <div className="grid gap-3 sm:gap-4 py-3 sm:py-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="fullName">Full Name *</Label>
+                      <Label htmlFor="fullName" className="text-xs sm:text-sm">Full Name *</Label>
                       <Input
                         id="fullName"
                         value={newUser.fullName}
                         onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })}
                         placeholder="John Doe"
                         required
+                        className="text-sm"
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="employeeId">Employee ID</Label>
+                      <Label htmlFor="employeeId" className="text-xs sm:text-sm">Employee ID</Label>
                       <Input
                         id="employeeId"
                         value={newUser.employeeId}
                         onChange={(e) => setNewUser({ ...newUser, employeeId: e.target.value })}
                         placeholder="EMP001"
+                        className="text-sm"
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="email">Email *</Label>
+                      <Label htmlFor="email" className="text-xs sm:text-sm">Email *</Label>
                       <Input
                         id="email"
                         type="email"
@@ -198,10 +200,11 @@ export const UserManagementPanel = () => {
                         onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                         placeholder="user@gayatripower.com"
                         required
+                        className="text-sm"
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="password">Temporary Password *</Label>
+                      <Label htmlFor="password" className="text-xs sm:text-sm">Temporary Password *</Label>
                       <Input
                         id="password"
                         type="password"
@@ -210,29 +213,30 @@ export const UserManagementPanel = () => {
                         placeholder="Min 8 characters"
                         minLength={8}
                         required
+                        className="text-sm"
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="role">Role *</Label>
+                      <Label htmlFor="role" className="text-xs sm:text-sm">Role *</Label>
                       <Select
                         value={newUser.role}
                         onValueChange={(value: 'admin' | 'operator') => setNewUser({ ...newUser, role: value })}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="text-sm">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="operator">Operator</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="operator" className="text-sm">Operator</SelectItem>
+                          <SelectItem value="admin" className="text-sm">Admin</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
-                  <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                  <DialogFooter className="flex-col sm:flex-row gap-2">
+                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="text-xs sm:text-sm">
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={creating}>
+                    <Button type="submit" disabled={creating} className="text-xs sm:text-sm">
                       {creating ? 'Creating...' : 'Create User'}
                     </Button>
                   </DialogFooter>
@@ -241,15 +245,15 @@ export const UserManagementPanel = () => {
             </Dialog>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="mb-4">
+        <CardContent className="p-4 sm:p-6">
+          <div className="mb-3 sm:mb-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by name, email, or employee ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-8 sm:pl-10 text-xs sm:text-sm"
               />
             </div>
           </div>
@@ -258,10 +262,10 @@ export const UserManagementPanel = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="whitespace-nowrap">Full Name</TableHead>
-                  <TableHead className="hidden sm:table-cell whitespace-nowrap">Employee ID</TableHead>
-                  <TableHead className="whitespace-nowrap">Role</TableHead>
-                  <TableHead className="hidden md:table-cell whitespace-nowrap">Registration Date</TableHead>
+                  <TableHead className="whitespace-nowrap text-xs sm:text-sm">Full Name</TableHead>
+                  <TableHead className="hidden sm:table-cell whitespace-nowrap text-xs sm:text-sm">Employee ID</TableHead>
+                  <TableHead className="whitespace-nowrap text-xs sm:text-sm">Role</TableHead>
+                  <TableHead className="hidden md:table-cell whitespace-nowrap text-xs sm:text-sm">Registration Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
