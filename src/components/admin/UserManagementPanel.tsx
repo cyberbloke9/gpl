@@ -3,16 +3,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
-import { Search, Users } from 'lucide-react';
+import { Search, Users, UserPlus } from 'lucide-react';
 import { UserManagementData } from '@/types/admin';
+import { useToast } from '@/hooks/use-toast';
 
 export const UserManagementPanel = () => {
+  const { toast } = useToast();
   const [users, setUsers] = useState<UserManagementData[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserManagementData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  
+  // New user form state
+  const [newUser, setNewUser] = useState({
+    fullName: '',
+    employeeId: '',
+    email: '',
+    password: '',
+    role: 'operator' as 'admin' | 'operator'
+  });
 
   useEffect(() => {
     loadUsers();
@@ -71,6 +88,56 @@ export const UserManagementPanel = () => {
     }
   };
 
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-user', {
+        body: {
+          email: newUser.email,
+          password: newUser.password,
+          full_name: newUser.fullName,
+          employee_id: newUser.employeeId || null,
+          role: newUser.role
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      toast({
+        title: "User created successfully",
+        description: `${newUser.fullName} has been added to the system.`,
+      });
+
+      // Reset form and close dialog
+      setNewUser({
+        fullName: '',
+        employeeId: '',
+        email: '',
+        password: '',
+        role: 'operator'
+      });
+      setDialogOpen(false);
+
+      // Reload users
+      loadUsers();
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      toast({
+        variant: "destructive",
+        title: "Failed to create user",
+        description: error.message || "An error occurred while creating the user.",
+      });
+    } finally {
+      setCreating(false);
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-8">Loading users...</div>;
   }
@@ -79,11 +146,100 @@ export const UserManagementPanel = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            User Management
-          </CardTitle>
-          <CardDescription>View and manage all system users</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                User Management
+              </CardTitle>
+              <CardDescription>View and manage all system users</CardDescription>
+            </div>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Create User
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <form onSubmit={handleCreateUser}>
+                  <DialogHeader>
+                    <DialogTitle>Create New User</DialogTitle>
+                    <DialogDescription>
+                      Add a new user to the system. They will be able to sign in immediately.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="fullName">Full Name *</Label>
+                      <Input
+                        id="fullName"
+                        value={newUser.fullName}
+                        onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })}
+                        placeholder="John Doe"
+                        required
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="employeeId">Employee ID</Label>
+                      <Input
+                        id="employeeId"
+                        value={newUser.employeeId}
+                        onChange={(e) => setNewUser({ ...newUser, employeeId: e.target.value })}
+                        placeholder="EMP001"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={newUser.email}
+                        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                        placeholder="user@gayatripower.com"
+                        required
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="password">Temporary Password *</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={newUser.password}
+                        onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                        placeholder="Min 8 characters"
+                        minLength={8}
+                        required
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="role">Role *</Label>
+                      <Select
+                        value={newUser.role}
+                        onValueChange={(value: 'admin' | 'operator') => setNewUser({ ...newUser, role: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="operator">Operator</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={creating}>
+                      {creating ? 'Creating...' : 'Create User'}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="mb-4">

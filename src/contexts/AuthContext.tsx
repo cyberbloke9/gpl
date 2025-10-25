@@ -9,8 +9,6 @@ interface AuthContextType {
   loading: boolean;
   roleLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName: string, employeeId?: string) => Promise<{ error: any }>;
-  signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   userRole: string | null;
   checkLockoutStatus: (email: string) => { isLockedOut: boolean; timeRemaining: number };
@@ -154,74 +152,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, fullName: string, employeeId?: string) => {
-    try {
-      if (!fullName || fullName.trim().length === 0) {
-        const error = new Error('Full name is required');
-        toast.error('Please provide your full name');
-        return { error };
-      }
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            full_name: fullName.trim(),
-            employee_id: employeeId?.trim() || null
-          }
-        }
-      });
-
-      if (error) {
-        if (error.message.includes('timeout')) {
-          toast.error('Server is taking too long to respond. Please try again.');
-        } else if (error.message.includes('already registered')) {
-          toast.error('This email is already registered. Please sign in instead.');
-        } else {
-          toast.error(`Failed to create account: ${error.message}`);
-        }
-        return { error };
-      }
-
-      toast.success('Account created successfully!');
-      return { error: null };
-    } catch (err: any) {
-      toast.error('An unexpected error occurred. Please try again.');
-      return { error: err };
-    }
-  };
-
-  const signInWithGoogle = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        }
-      });
-
-      if (error) {
-        if (error.message.includes('popup')) {
-          toast.error('Please allow popups for Google Sign-In');
-        } else {
-          toast.error(`Google Sign-In failed: ${error.message}`);
-        }
-        return { error };
-      }
-
-      return { error: null };
-    } catch (err: any) {
-      toast.error('An unexpected error occurred with Google Sign-In');
-      return { error: err };
-    }
-  };
-
   const signOut = async () => {
     await supabase.auth.signOut();
     setUserRole(null);
@@ -229,7 +159,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, roleLoading, signIn, signUp, signInWithGoogle, signOut, userRole, checkLockoutStatus }}>
+    <AuthContext.Provider value={{ user, session, loading, roleLoading, signIn, signOut, userRole, checkLockoutStatus }}>
       {children}
     </AuthContext.Provider>
   );
