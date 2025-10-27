@@ -5,218 +5,145 @@ import { Badge } from '@/components/ui/badge';
 import { TrendingUp, AlertTriangle, CheckCircle2, Loader2, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
-interface HealthScore {
-  equipment: string;
-  score: number;
-  status: 'good' | 'warning' | 'critical';
-  explanation: string;
-}
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 
 export const PredictiveAnalyticsDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [structured, setStructured] = useState<any>(null);
+  const [dateRange, setDateRange] = useState<string>('30');
   const { toast } = useToast();
 
   const loadAnalytics = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('predictive-analytics');
-
+      const days = parseInt(dateRange);
+      const { data, error } = await supabase.functions.invoke('predictive-analytics', { body: { days } });
       if (error) throw error;
-
       if (data.error) {
-        toast({
-          title: 'Error',
-          description: data.error,
-          variant: 'destructive',
-        });
+        toast({ title: 'Error', description: data.error, variant: 'destructive' });
         return;
       }
-
       setAnalysis(data.analysis);
       setStructured(data.structured);
-      
-      toast({
-        title: 'Analytics Updated',
-        description: 'Predictive insights generated',
-      });
+      toast({ title: 'Analytics Updated', description: `Analysis for ${days} days complete` });
     } catch (error) {
       console.error('Error loading analytics:', error);
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to load analytics',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to load analytics', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadAnalytics();
-  }, []);
+  useEffect(() => { loadAnalytics(); }, []);
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
-  const getScoreBadge = (score: number) => {
-    if (score >= 80) return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Excellent</Badge>;
-    if (score >= 60) return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Warning</Badge>;
-    return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Critical</Badge>;
-  };
+  const getScoreColor = (score: number) => score >= 80 ? 'text-green-600' : score >= 60 ? 'text-yellow-600' : 'text-red-600';
+  const getScoreBadge = (score: number) => score >= 80 ? <Badge className="bg-green-50 text-green-700">Excellent</Badge> : score >= 60 ? <Badge className="bg-yellow-50 text-yellow-700">Warning</Badge> : <Badge className="bg-red-50 text-red-700">Critical</Badge>;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <TrendingUp className="h-6 w-6 text-primary flex-shrink-0" />
+          <TrendingUp className="h-6 w-6 text-primary" />
           <h2 className="text-xl sm:text-2xl font-bold">Predictive Analytics</h2>
         </div>
-        <Button 
-          onClick={loadAnalytics} 
-          disabled={loading}
-          variant="outline"
-          className="gap-2 w-full sm:w-auto"
-        >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-          Refresh
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Select value={dateRange} onValueChange={setDateRange}>
+            <SelectTrigger className="w-full sm:w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Last 7 days</SelectItem>
+              <SelectItem value="14">Last 14 days</SelectItem>
+              <SelectItem value="30">Last 30 days</SelectItem>
+              <SelectItem value="60">Last 60 days</SelectItem>
+              <SelectItem value="90">Last 90 days</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button onClick={loadAnalytics} disabled={loading} variant="outline" className="gap-2">
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {loading && !analysis && (
-        <Card className="p-8">
-          <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-muted-foreground">Analyzing 30 days of operational data...</p>
-          </div>
-        </Card>
+        <Card className="p-8"><div className="text-center"><Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" /><p className="text-muted-foreground">Analyzing data...</p></div></Card>
       )}
 
-      {analysis && (
-        <>
-          {/* Equipment Health Scores */}
-          {structured?.healthScores && (
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-primary" />
-                Equipment Health Scores
-              </h3>
+      {analysis && structured && (
+        <Tabs defaultValue="health" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="health">Health</TabsTrigger>
+            <TabsTrigger value="alerts">Alerts</TabsTrigger>
+            <TabsTrigger value="optimize">Optimize</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="health" className="space-y-4">
+            {structured.healthScores && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {structured.healthScores.map((item: any, idx: number) => (
-                  <Card key={idx} className="p-4 border-2">
-                    <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 mb-2">
-                      <h4 className="font-semibold break-words min-w-0 flex-1">{item.equipment}</h4>
+                  <Card key={idx} className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold">{item.equipment}</h4>
                       {getScoreBadge(item.score)}
                     </div>
-                    <div className="text-3xl font-bold mb-2 flex items-center gap-2">
-                      <span className={getScoreColor(item.score)}>{item.score}</span>
-                      <span className="text-sm text-muted-foreground">/100</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground break-words">{item.explanation}</p>
+                    <div className="text-3xl font-bold mb-2"><span className={getScoreColor(item.score)}>{item.score}</span><span className="text-sm text-muted-foreground">/100</span></div>
+                    <Progress value={item.score} className="mb-2" />
+                    <p className="text-sm text-muted-foreground">{item.explanation}</p>
                   </Card>
                 ))}
               </div>
-            </Card>
-          )}
+            )}
+          </TabsContent>
 
-          {/* Maintenance Alerts */}
-          {structured?.maintenanceAlerts && structured.maintenanceAlerts.length > 0 && (
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                Predictive Maintenance Alerts
-              </h3>
-              <div className="space-y-3">
-                {structured.maintenanceAlerts.map((alert: any, idx: number) => (
-                  <div key={idx} className="flex flex-col xs:flex-row items-start gap-2 xs:gap-3 p-3 border rounded-lg bg-yellow-50 dark:bg-yellow-950/20">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm break-words">{alert.equipment}</p>
-                      <p className="text-sm text-muted-foreground break-words">{alert.issue}</p>
-                      {alert.timeframe && (
-                        <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
-                          Estimated: {alert.timeframe}
-                        </p>
-                      )}
+          <TabsContent value="alerts" className="space-y-4">
+            {structured.maintenanceAlerts?.length > 0 && (
+              <Card className="p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-yellow-600" />Maintenance Alerts</h3>
+                <div className="space-y-3">
+                  {structured.maintenanceAlerts.map((alert: any, idx: number) => (
+                    <div key={idx} className="flex items-start gap-3 p-3 border rounded-lg bg-yellow-50 dark:bg-yellow-950/20">
+                      <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">{alert.equipment}</p>
+                        <p className="text-sm text-muted-foreground">{alert.issue}</p>
+                        {alert.timeframe && <p className="text-xs text-yellow-700 mt-1">Timeframe: {alert.timeframe}</p>}
+                      </div>
+                      <Badge variant={alert.priority === 'high' ? 'destructive' : 'secondary'}>{alert.priority}</Badge>
                     </div>
-                    <Badge variant={alert.priority === 'high' ? 'destructive' : 'secondary'} className="self-start xs:self-auto">
-                      {alert.priority}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-
-          {/* Compliance Warnings */}
-          {structured?.complianceWarnings && structured.complianceWarnings.length > 0 && (
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
-                Compliance Monitoring
-              </h3>
-              <div className="space-y-3">
-                {structured.complianceWarnings.map((warning: any, idx: number) => (
-                  <div key={idx} className="flex items-start gap-3 p-3 border rounded-lg bg-red-50 dark:bg-red-950/20">
-                    <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm break-words">{warning.parameter}</p>
-                      <p className="text-sm text-muted-foreground break-words">{warning.warning}</p>
-                      {warning.currentValue && (
-                        <p className="text-xs text-red-700 dark:text-red-300 mt-1 break-all">
-                          Current: {warning.currentValue} | Threshold: {warning.threshold}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-
-          {/* Optimization Suggestions */}
-          {structured?.optimizationSuggestions && structured.optimizationSuggestions.length > 0 && (
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-green-600" />
-                Efficiency Optimization
-              </h3>
-              <div className="space-y-3">
-                {structured.optimizationSuggestions.map((suggestion: any, idx: number) => (
-                  <div key={idx} className="flex items-start gap-3 p-3 border rounded-lg bg-green-50 dark:bg-green-950/20">
-                    <TrendingUp className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm break-words">{suggestion.area}</p>
-                      <p className="text-sm text-muted-foreground break-words">{suggestion.suggestion}</p>
-                      {suggestion.potentialBenefit && (
-                        <p className="text-xs text-green-700 dark:text-green-300 mt-1 break-words">
-                          Potential Benefit: {suggestion.potentialBenefit}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-
-          {/* Raw AI Analysis (fallback if no structured data) */}
-          {!structured && (
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">AI Analysis</h3>
-              <div className="prose prose-sm max-w-none dark:prose-invert">
-                <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {analysis}
+                  ))}
                 </div>
-              </div>
-            </Card>
-          )}
-        </>
+              </Card>
+            )}
+            {structured.complianceWarnings?.length > 0 && (
+              <Card className="p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-red-600" />Compliance Warnings</h3>
+                <div className="space-y-3">
+                  {structured.complianceWarnings.map((w: any, idx: number) => (
+                    <div key={idx} className="p-3 border rounded-lg bg-red-50 dark:bg-red-950/20"><p className="font-semibold text-sm">{w.parameter}</p><p className="text-sm text-muted-foreground">{w.warning}</p></div>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="optimize" className="space-y-4">
+            {structured.optimizationSuggestions?.length > 0 && (
+              <Card className="p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2"><TrendingUp className="h-5 w-5 text-green-600" />Optimization</h3>
+                <div className="space-y-3">
+                  {structured.optimizationSuggestions.map((s: any, idx: number) => (
+                    <div key={idx} className="p-3 border rounded-lg bg-green-50 dark:bg-green-950/20"><p className="font-semibold text-sm">{s.area}</p><p className="text-sm text-muted-foreground">{s.suggestion}</p></div>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );

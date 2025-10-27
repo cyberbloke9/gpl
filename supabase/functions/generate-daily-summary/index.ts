@@ -53,16 +53,49 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    // Parse request body for date parameters
+    const body = await req.json().catch(() => ({}));
+    const { date, startDate, endDate } = body;
+    
+    let queryStartDate: string;
+    let queryEndDate: string;
+    let periodDescription: string;
+    
+    if (startDate && endDate) {
+      // Date range mode
+      queryStartDate = startDate;
+      queryEndDate = endDate;
+      periodDescription = `${startDate} to ${endDate}`;
+    } else if (date) {
+      // Single date mode
+      queryStartDate = date;
+      queryEndDate = date;
+      periodDescription = date;
+    } else {
+      // Default to today
+      const today = new Date().toISOString().split('T')[0];
+      queryStartDate = today;
+      queryEndDate = today;
+      periodDescription = today;
+    }
 
-    // Get today's date in IST
-    const today = new Date().toISOString().split('T')[0];
+    console.log(`Analyzing data for period: ${periodDescription}`);
 
-    // Fetch today's data from all tables
+    // Fetch data for the specified period
     const [checklistsRes, transformerRes, generatorRes, issuesRes] = await Promise.all([
-      supabase.from('checklists').select('*').eq('date', today),
-      supabase.from('transformer_logs').select('*').eq('date', today),
-      supabase.from('generator_logs').select('*').eq('date', today),
-      supabase.from('flagged_issues').select('*').gte('reported_at', `${today}T00:00:00`),
+      supabase.from('checklists').select('*')
+        .gte('date', queryStartDate)
+        .lte('date', queryEndDate),
+      supabase.from('transformer_logs').select('*')
+        .gte('date', queryStartDate)
+        .lte('date', queryEndDate),
+      supabase.from('generator_logs').select('*')
+        .gte('date', queryStartDate)
+        .lte('date', queryEndDate),
+      supabase.from('flagged_issues').select('*')
+        .gte('reported_at', `${queryStartDate}T00:00:00`)
+        .lte('reported_at', `${queryEndDate}T23:59:59`),
     ]);
 
     const checklists = checklistsRes.data || [];
@@ -76,8 +109,8 @@ serve(async (req) => {
       ? Math.round((checklistsCompleted / checklists.length) * 100) 
       : 0;
     
-    const transformerHours = new Set(transformerLogs.map(l => `${l.transformer_number}-${l.hour}`)).size;
-    const generatorHours = new Set(generatorLogs.map(l => l.hour)).size;
+    const transformerHours = transformerLogs.length;
+    const generatorHours = generatorLogs.length;
     
     const openIssues = issues.filter(i => i.status === 'reported').length;
     const criticalIssues = issues.filter(i => i.severity === 'critical').length;
@@ -91,30 +124,47 @@ serve(async (req) => {
       ? generatorLogs.reduce((sum, l) => sum + (l.gen_frequency || 0), 0) / generatorLogs.length
       : 0;
 
+    // Calculate expected data points
+    const daysDiff = Math.ceil((new Date(queryEndDate).getTime() - new Date(queryStartDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const expectedTransformerHours = daysDiff * 24 * 2; // 2 transformers
+    const expectedGeneratorHours = daysDiff * 24;
+    const expectedChecklists = daysDiff;
+
+    const dataCompleteness = {
+      transformer: ((transformerHours / expectedTransformerHours) * 100).toFixed(1),
+      generator: ((generatorHours / expectedGeneratorHours) * 100).toFixed(1),
+      checklist: ((checklists.length / expectedChecklists) * 100).toFixed(1),
+    };
+
     // Prepare context for AI
     const dataContext = `
-Date: ${today}
+Analysis Period: ${periodDescription} (${daysDiff} day${daysDiff > 1 ? 's' : ''})
+
+DATA COMPLETENESS:
+- Transformer Logs: ${transformerHours}/${expectedTransformerHours} hours (${dataCompleteness.transformer}%)
+- Generator Logs: ${generatorHours}/${expectedGeneratorHours} hours (${dataCompleteness.generator}%)
+- Checklists: ${checklists.length}/${expectedChecklists} expected (${dataCompleteness.checklist}%)
 
 OPERATIONAL METRICS:
 - Checklists: ${checklists.length} started, ${checklistsCompleted} completed (${checklistsCompletion}% completion rate)
-- Transformer Logs: ${transformerHours} hours logged across all transformers
-- Generator Logs: ${generatorHours} hours logged (out of 24 hours)
+- Transformer Hours Logged: ${transformerHours} (expected ${expectedTransformerHours})
+- Generator Hours Logged: ${generatorHours} (expected ${expectedGeneratorHours})
 - Average Generator Power: ${avgGenPower.toFixed(2)} kW
 - Average Generator Frequency: ${avgGenFreq.toFixed(2)} Hz
 
 ISSUES:
-- Total Issues Reported Today: ${issues.length}
+- Total Issues Reported: ${issues.length}
 - Open Issues: ${openIssues}
 - Critical Issues: ${criticalIssues}
 ${issues.length > 0 ? `- Recent Issues: ${issues.slice(0, 5).map(i => `${i.severity}: ${i.description}`).join('; ')}` : ''}
 
-ANOMALIES TO CHECK:
+ALERTS:
 - Generator frequency deviation from 50 Hz: ${Math.abs(50 - avgGenFreq).toFixed(2)} Hz
 - Checklist completion rate ${checklistsCompletion < 80 ? 'below target (80%)' : 'on target'}
-- Generator hours logged ${generatorHours < 20 ? 'below expected (24 hours)' : 'complete'}
+- Data completeness ${Math.min(parseFloat(dataCompleteness.transformer), parseFloat(dataCompleteness.generator)) < 70 ? 'CONCERNING - significant gaps detected' : 'acceptable'}
 `;
 
-    console.log('Sending data to AI:', dataContext);
+    console.log('Sending data to AI for summary generation');
 
     // Call Lovable AI for summary generation
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -128,18 +178,21 @@ ANOMALIES TO CHECK:
         messages: [
           {
             role: 'system',
-            content: `You are an AI assistant for a hydroelectric power plant operations management system. Generate concise, actionable daily executive summaries. Focus on:
-1. Overall operational status (completion rates, coverage)
-2. Key performance indicators (power output, frequency stability)
-3. Critical issues requiring immediate attention
-4. Notable anomalies or deviations from normal operations
-5. Actionable recommendations for management
+            content: `You are an AI assistant for a hydroelectric power plant operations management system. Generate concise, actionable executive summaries. Focus on:
+1. Data completeness and quality (flag if < 70%)
+2. Overall operational status (completion rates, coverage)
+3. Key performance indicators (power output, frequency stability)
+4. Critical issues requiring immediate attention
+5. Notable anomalies or deviations from normal operations
+6. Actionable recommendations for management
 
-Keep the summary concise (200-300 words), professional, and action-oriented. Use bullet points for clarity.`
+If data completeness is below 70%, PRIORITIZE this in your summary and recommend immediate action to fill gaps.
+
+Keep the summary concise (250-350 words), professional, and action-oriented. Use bullet points for clarity.`
           },
           {
             role: 'user',
-            content: `Generate a daily executive summary for the following operational data:\n\n${dataContext}`
+            content: `Generate an executive summary for the following operational data:\n\n${dataContext}`
           }
         ],
       }),
@@ -168,15 +221,16 @@ Keep the summary concise (200-300 words), professional, and action-oriented. Use
     const aiData = await aiResponse.json();
     const summary = aiData.choices[0].message.content;
 
-    console.log('Generated summary:', summary);
+    console.log('Generated summary for period:', periodDescription);
 
     return new Response(
       JSON.stringify({
         summary,
+        period: periodDescription,
         metrics: {
           checklists: { total: checklists.length, completed: checklistsCompleted, completionRate: checklistsCompletion },
-          transformer: { hoursLogged: transformerHours },
-          generator: { hoursLogged: generatorHours, avgPower: avgGenPower, avgFrequency: avgGenFreq },
+          transformer: { hoursLogged: transformerHours, completeness: parseFloat(dataCompleteness.transformer) },
+          generator: { hoursLogged: generatorHours, avgPower: avgGenPower, avgFrequency: avgGenFreq, completeness: parseFloat(dataCompleteness.generator) },
           issues: { total: issues.length, open: openIssues, critical: criticalIssues }
         }
       }),
