@@ -84,16 +84,16 @@ export const PredictiveAnalyticsDashboard = () => {
 
           <TabsContent value="health" className="space-y-4">
             {structured.healthScores && Array.isArray(structured.healthScores) && structured.healthScores.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
                 {structured.healthScores.map((item: any, idx: number) => (
-                  <Card key={idx} className="p-4">
+                  <Card key={idx} className="p-3 sm:p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold">{item.equipment}</h4>
+                      <h4 className="font-semibold text-sm sm:text-base">{item.equipment}</h4>
                       {getScoreBadge(item.score)}
                     </div>
-                    <div className="text-3xl font-bold mb-2"><span className={getScoreColor(item.score)}>{item.score}</span><span className="text-sm text-muted-foreground">/100</span></div>
-                    <Progress value={item.score} className="mb-2" />
-                    <p className="text-sm text-muted-foreground">{item.explanation}</p>
+                    <div className="text-2xl sm:text-3xl font-bold mb-2"><span className={getScoreColor(item.score)}>{item.score}</span><span className="text-xs sm:text-sm text-muted-foreground">/100</span></div>
+                    <Progress value={item.score} className="mb-2 h-2" />
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{item.explanation}</p>
                   </Card>
                 ))}
               </div>

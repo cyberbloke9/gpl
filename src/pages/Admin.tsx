@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -409,19 +410,22 @@ export default function Admin() {
         )}
 
         <Tabs defaultValue="today" className="space-y-4">
-          <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-11 h-auto gap-1 p-1">
-            <TabsTrigger value="today" className="text-xs sm:text-sm px-2 py-1.5">Checklists</TabsTrigger>
-            <TabsTrigger value="transformer" className="text-xs sm:text-sm px-2 py-1.5">Transformer</TabsTrigger>
-            <TabsTrigger value="generator" className="text-xs sm:text-sm px-2 py-1.5">Generator</TabsTrigger>
-            <TabsTrigger value="ai-summary" className="text-xs sm:text-sm px-2 py-1.5">AI Summary</TabsTrigger>
-            <TabsTrigger value="ai-query" className="text-xs sm:text-sm px-2 py-1.5">AI Query</TabsTrigger>
-            <TabsTrigger value="analytics" className="text-xs sm:text-sm px-2 py-1.5">Analytics</TabsTrigger>
-            <TabsTrigger value="history" className="text-xs sm:text-sm px-2 py-1.5">History</TabsTrigger>
-            <TabsTrigger value="users" className="text-xs sm:text-sm px-2 py-1.5">Users</TabsTrigger>
-            <TabsTrigger value="database" className="text-xs sm:text-sm px-2 py-1.5">Database</TabsTrigger>
-            <TabsTrigger value="activity" className="text-xs sm:text-sm px-2 py-1.5">Activity</TabsTrigger>
-            <TabsTrigger value="export" className="text-xs sm:text-sm px-2 py-1.5">Export</TabsTrigger>
-          </TabsList>
+          <ScrollArea className="w-full">
+            <TabsList className="inline-flex w-full min-w-max h-auto p-1">
+              <TabsTrigger value="today" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">Checklists</TabsTrigger>
+              <TabsTrigger value="transformer" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">Transformer</TabsTrigger>
+              <TabsTrigger value="generator" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">Generator</TabsTrigger>
+              <TabsTrigger value="ai-summary" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">AI Summary</TabsTrigger>
+              <TabsTrigger value="ai-query" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">AI Query</TabsTrigger>
+              <TabsTrigger value="analytics" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">Analytics</TabsTrigger>
+              <TabsTrigger value="history" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">History</TabsTrigger>
+              <TabsTrigger value="users" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">Users</TabsTrigger>
+              <TabsTrigger value="database" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">Database</TabsTrigger>
+              <TabsTrigger value="activity" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">Activity</TabsTrigger>
+              <TabsTrigger value="export" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">Export</TabsTrigger>
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           <TabsContent value="today">
             <Card className="p-3 sm:p-6">

@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { Users, Activity } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ActiveUser {
   user_id: string;
@@ -171,42 +172,46 @@ export const UserActivityMonitor = () => {
           {activeSessions.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">No active users</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Module</TableHead>
-                  <TableHead>Last Activity</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {activeSessions.map((session) => (
-                  <TableRow key={session.user_id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>
-                            {session.full_name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">{session.full_name}</div>
-                          {session.employee_id && (
-                            <div className="text-xs text-muted-foreground">{session.employee_id}</div>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{getModuleName(session.module_number)}</Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {formatDistanceToNow(new Date(session.last_activity), { addSuffix: true })}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <ScrollArea className="w-full">
+              <div className="min-w-[500px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Module</TableHead>
+                      <TableHead>Last Activity</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {activeSessions.map((session) => (
+                      <TableRow key={session.user_id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
+                              <AvatarFallback className="text-xs">
+                                {session.full_name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <div className="font-medium text-xs sm:text-sm truncate">{session.full_name}</div>
+                              {session.employee_id && (
+                                <div className="text-xs text-muted-foreground truncate">{session.employee_id}</div>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs">{getModuleName(session.module_number)}</Badge>
+                        </TableCell>
+                        <TableCell className="text-xs sm:text-sm text-muted-foreground">
+                          {formatDistanceToNow(new Date(session.last_activity), { addSuffix: true })}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </ScrollArea>
           )}
         </CardContent>
       </Card>

@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface UserContribution {
   user_id: string;
@@ -25,6 +26,7 @@ export const ContributionAnalytics = () => {
   const [userContributions, setUserContributions] = useState<UserContribution[]>([]);
   const [moduleData, setModuleData] = useState<ModuleContribution[]>([]);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     loadAnalytics();
@@ -126,16 +128,22 @@ export const ContributionAnalytics = () => {
           {userContributions.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">No contributions today</p>
           ) : (
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={isMobile ? 200 : 300}>
               <BarChart data={userContributions}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="full_name" />
-                <YAxis />
+                <XAxis 
+                  dataKey="full_name" 
+                  angle={isMobile ? -45 : 0}
+                  textAnchor={isMobile ? "end" : "middle"}
+                  height={isMobile ? 80 : 30}
+                  tick={{ fontSize: isMobile ? 10 : 12 }}
+                />
+                <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <Tooltip />
-                <Legend />
-                <Bar dataKey="total_actions" fill="#8884d8" name="Total Actions" />
-                <Bar dataKey="modules_completed" fill="#82ca9d" name="Modules Completed" />
-                <Bar dataKey="photos_uploaded" fill="#ffc658" name="Photos Uploaded" />
+                <Legend wrapperStyle={{ fontSize: isMobile ? '12px' : '14px' }} />
+                <Bar dataKey="total_actions" fill="hsl(var(--chart-1))" name="Total Actions" />
+                <Bar dataKey="modules_completed" fill="hsl(var(--chart-2))" name="Modules Completed" />
+                <Bar dataKey="photos_uploaded" fill="hsl(var(--chart-3))" name="Photos Uploaded" />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -152,15 +160,15 @@ export const ContributionAnalytics = () => {
             {moduleData.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">No module activity today</p>
             ) : (
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={isMobile ? 200 : 250}>
                 <PieChart>
                   <Pie
                     data={moduleData}
                     cx="50%"
                     cy="50%"
-                    labelLine={false}
-                    label={({ module_name, percent }) => `${module_name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
+                    labelLine={!isMobile}
+                    label={isMobile ? false : ({ module_name, percent }) => `${module_name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={isMobile ? 60 : 80}
                     fill="#8884d8"
                     dataKey="count"
                   >
@@ -169,6 +177,7 @@ export const ContributionAnalytics = () => {
                     ))}
                   </Pie>
                   <Tooltip />
+                  <Legend wrapperStyle={{ fontSize: isMobile ? '10px' : '12px' }} />
                 </PieChart>
               </ResponsiveContainer>
             )}
@@ -184,22 +193,22 @@ export const ContributionAnalytics = () => {
             {userContributions.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">No activity today</p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {userContributions.slice(0, 5).map((user, index) => (
                   <div key={user.user_id} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                      <div className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-xs sm:text-sm flex-shrink-0">
                         {index + 1}
                       </div>
-                      <div>
-                        <div className="font-medium">{user.full_name}</div>
+                      <div className="min-w-0">
+                        <div className="font-medium text-sm sm:text-base truncate">{user.full_name}</div>
                         {user.employee_id && (
-                          <div className="text-xs text-muted-foreground">{user.employee_id}</div>
+                          <div className="text-xs text-muted-foreground truncate">{user.employee_id}</div>
                         )}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-bold text-lg">{user.total_actions}</div>
+                    <div className="text-right flex-shrink-0 ml-2">
+                      <div className="font-bold text-base sm:text-lg">{user.total_actions}</div>
                       <div className="text-xs text-muted-foreground">actions</div>
                     </div>
                   </div>

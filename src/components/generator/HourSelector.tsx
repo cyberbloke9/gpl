@@ -59,28 +59,33 @@ export function HourSelector({
   };
   
   return (
-    <div className="grid grid-cols-6 gap-2 p-4 bg-muted/50 rounded-lg">
-      {Array.from({ length: 24 }, (_, i) => {
-        const hour = i;
-        const status = getHourStatus(hour);
-        const isDisabled = status === 'future';
-        
-        return (
-          <Button
-            key={hour}
-            variant="outline"
-            className={getHourStyles(hour)}
-            onClick={() => !isDisabled && onHourSelect(hour)}
-            disabled={isDisabled}
-          >
-            <div className="flex flex-col items-center">
-              <span>{hour.toString().padStart(2, '0')}</span>
-              {status === 'completed' && <CheckCircle2 className="h-3 w-3 mt-1" />}
-              {status === 'locked' && <Lock className="h-3 w-3 mt-1" />}
-            </div>
-          </Button>
-        );
-      })}
+    <div className="overflow-x-auto -mx-2 sm:mx-0">
+      <div className="inline-flex gap-2 p-4 bg-muted/50 rounded-lg min-w-full">
+        {Array.from({ length: 24 }, (_, i) => {
+          const hour = i;
+          const status = getHourStatus(hour);
+          const isDisabled = status === 'future';
+          
+          return (
+            <Button
+              key={hour}
+              variant="outline"
+              className={cn(
+                getHourStyles(hour),
+                "flex-shrink-0 w-14 sm:w-16 h-14 sm:h-16"
+              )}
+              onClick={() => !isDisabled && onHourSelect(hour)}
+              disabled={isDisabled}
+            >
+              <div className="flex flex-col items-center">
+                <span className="text-xs sm:text-sm">{hour.toString().padStart(2, '0')}</span>
+                {status === 'completed' && <CheckCircle2 className="h-2 w-2 sm:h-3 sm:w-3 mt-1" />}
+                {status === 'locked' && <Lock className="h-2 w-2 sm:h-3 sm:w-3 mt-1" />}
+              </div>
+            </Button>
+          );
+        })}
+      </div>
     </div>
   );
 }

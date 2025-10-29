@@ -118,11 +118,11 @@ export const AIDailySummary = () => {
       {summary && (
         <div className="space-y-4">
           {metrics && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 bg-muted rounded-lg">
-              <div><p className="text-xs text-muted-foreground">Checklists</p><p className="text-lg font-bold">{metrics.checklists.completed}/{metrics.checklists.total}</p></div>
-              <div><p className="text-xs text-muted-foreground">Transformer Hours</p><p className="text-lg font-bold">{metrics.transformer.hoursLogged}</p></div>
-              <div><p className="text-xs text-muted-foreground">Generator Hours</p><p className="text-lg font-bold">{metrics.generator.hoursLogged}</p></div>
-              <div><p className="text-xs text-muted-foreground">Open Issues</p><p className="text-lg font-bold text-destructive">{metrics.issues.open}</p></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-3 sm:p-4 bg-muted rounded-lg">
+              <div className="min-w-0"><p className="text-xs text-muted-foreground truncate">Checklists</p><p className="text-base sm:text-lg font-bold truncate">{metrics.checklists.completed}/{metrics.checklists.total}</p></div>
+              <div className="min-w-0"><p className="text-xs text-muted-foreground truncate">Transformer Hours</p><p className="text-base sm:text-lg font-bold truncate">{metrics.transformer.hoursLogged}</p></div>
+              <div className="min-w-0"><p className="text-xs text-muted-foreground truncate">Generator Hours</p><p className="text-base sm:text-lg font-bold truncate">{metrics.generator.hoursLogged}</p></div>
+              <div className="min-w-0"><p className="text-xs text-muted-foreground truncate">Open Issues</p><p className="text-base sm:text-lg font-bold text-destructive truncate">{metrics.issues.open}</p></div>
             </div>
           )}
           <div className="prose prose-sm max-w-none dark:prose-invert"><div className="whitespace-pre-wrap text-sm">{summary}</div></div>
