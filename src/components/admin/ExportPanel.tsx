@@ -34,10 +34,18 @@ export const ExportPanel = () => {
 
       if (error) throw error;
 
+      // Fetch flagged issues for these checklists
+      const checklistIds = data.map(c => c.id);
+      const { data: issues } = await supabase
+        .from('flagged_issues')
+        .select('*')
+        .in('checklist_id', checklistIds);
+
       const formattedData = data.map(item => ({
         ...item,
         user_name: item.profiles?.full_name,
         employee_id: item.profiles?.employee_id,
+        flagged_issues: issues?.filter(i => i.checklist_id === item.id) || []
       }));
 
       exportChecklistsToExcel(formattedData, format(dateRange.from, 'yyyy-MM-dd'), format(dateRange.to, 'yyyy-MM-dd'));
