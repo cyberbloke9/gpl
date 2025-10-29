@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          field_name: string | null
+          id: string
+          module_number: number | null
+          new_value: string | null
+          old_value: string | null
+          record_id: string | null
+          table_name: string | null
+          timestamp: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          field_name?: string | null
+          id?: string
+          module_number?: number | null
+          new_value?: string | null
+          old_value?: string | null
+          record_id?: string | null
+          table_name?: string | null
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          field_name?: string | null
+          id?: string
+          module_number?: number | null
+          new_value?: string | null
+          old_value?: string | null
+          record_id?: string | null
+          table_name?: string | null
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       checklists: {
         Row: {
           completion_percentage: number | null
@@ -612,15 +654,56 @@ export type Database = {
           },
         ]
       }
+      user_sessions: {
+        Row: {
+          checklist_id: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_activity: string | null
+          module_number: number | null
+          started_at: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          checklist_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_activity?: string | null
+          module_number?: number | null
+          started_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          checklist_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_activity?: string | null
+          module_number?: number | null
+          started_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sessions_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "checklists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      assign_admin_role: {
-        Args: { _user_email: string }
-        Returns: undefined
-      }
+      assign_admin_role: { Args: { _user_email: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

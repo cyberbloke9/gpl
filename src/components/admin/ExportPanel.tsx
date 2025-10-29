@@ -22,17 +22,24 @@ export const ExportPanel = () => {
   const handleExportChecklists = async () => {
     setLoading('checklists');
     try {
+      // Fetch checklists without join to avoid timeout
       const { data, error } = await supabase
         .from('checklists')
-        .select(`
-          *,
-          profiles!checklists_user_id_fkey(full_name, employee_id)
-        `)
+        .select('*')
         .gte('date', format(dateRange.from, 'yyyy-MM-dd'))
         .lte('date', format(dateRange.to, 'yyyy-MM-dd'))
         .order('date', { ascending: false });
 
       if (error) throw error;
+
+      // Fetch user profiles separately
+      const userIds = [...new Set(data.map(c => c.user_id).filter(Boolean))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, employee_id')
+        .in('id', userIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
 
       // Fetch flagged issues for these checklists
       const checklistIds = data.map(c => c.id);
@@ -43,8 +50,8 @@ export const ExportPanel = () => {
 
       const formattedData = data.map(item => ({
         ...item,
-        user_name: item.profiles?.full_name,
-        employee_id: item.profiles?.employee_id,
+        user_name: profileMap.get(item.user_id)?.full_name,
+        employee_id: profileMap.get(item.user_id)?.employee_id,
         flagged_issues: issues?.filter(i => i.checklist_id === item.id) || []
       }));
 

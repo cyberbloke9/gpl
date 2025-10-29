@@ -17,6 +17,8 @@ import { ExportPanel } from '@/components/admin/ExportPanel';
 import { UserManagementPanel } from '@/components/admin/UserManagementPanel';
 import { DatabaseMonitoring } from '@/components/admin/DatabaseMonitoring';
 import { ActivityLogsPanel } from '@/components/admin/ActivityLogsPanel';
+import { UserActivityMonitor } from '@/components/admin/UserActivityMonitor';
+import { ContributionAnalytics } from '@/components/admin/ContributionAnalytics';
 import { AIDailySummary } from '@/components/admin/AIDailySummary';
 import { AdminQueryInterface } from '@/components/admin/AdminQueryInterface';
 import { PredictiveAnalyticsDashboard } from '@/components/admin/PredictiveAnalyticsDashboard';
@@ -516,7 +518,11 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="activity">
-            <ActivityLogsPanel />
+            <div className="space-y-6">
+              <UserActivityMonitor />
+              <ContributionAnalytics />
+              <ActivityLogsPanel />
+            </div>
           </TabsContent>
 
           <TabsContent value="export">

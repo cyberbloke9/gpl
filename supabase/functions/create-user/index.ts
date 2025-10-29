@@ -12,6 +12,8 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  console.log('Create user function invoked', { method: req.method });
+
   try {
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -24,9 +26,14 @@ serve(async (req) => {
       }
     )
 
+    console.log('Supabase admin client created');
+
     // Verify the requesting user is an admin
     const authHeader = req.headers.get('Authorization')
+    console.log('Authorization header present:', !!authHeader);
+    
     if (!authHeader) {
+      console.error('Missing authorization header');
       return new Response(
         JSON.stringify({ error: 'Missing authorization header' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -36,7 +43,10 @@ serve(async (req) => {
     const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token)
 
+    console.log('User verification:', { userId: user?.id, error: userError?.message });
+
     if (userError || !user) {
+      console.error('Invalid authorization token', userError);
       return new Response(
         JSON.stringify({ error: 'Invalid authorization token' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -50,7 +60,10 @@ serve(async (req) => {
       .eq('user_id', user.id)
       .single()
 
+    console.log('Role check:', { role: roleData?.role, error: roleError?.message });
+
     if (roleError || roleData?.role !== 'admin') {
+      console.error('User is not admin', { roleError, role: roleData?.role });
       return new Response(
         JSON.stringify({ error: 'Only admins can create users' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -58,10 +71,14 @@ serve(async (req) => {
     }
 
     // Parse request body
-    const { email, password, full_name, employee_id, role } = await req.json()
+    const requestBody = await req.json()
+    console.log('Request body received:', { email: requestBody.email, role: requestBody.role });
+    
+    const { email, password, full_name, employee_id, role } = requestBody
 
     // Validate required fields
     if (!email || !password || !full_name || !role) {
+      console.error('Missing required fields', { email: !!email, password: !!password, full_name: !!full_name, role: !!role });
       return new Response(
         JSON.stringify({ error: 'Missing required fields: email, password, full_name, role' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -70,6 +87,7 @@ serve(async (req) => {
 
     // Validate password length
     if (password.length < 8) {
+      console.error('Password too short');
       return new Response(
         JSON.stringify({ error: 'Password must be at least 8 characters long' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -78,6 +96,7 @@ serve(async (req) => {
 
     // Validate role
     if (!['admin', 'operator'].includes(role)) {
+      console.error('Invalid role:', role);
       return new Response(
         JSON.stringify({ error: 'Invalid role. Must be admin or operator' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
