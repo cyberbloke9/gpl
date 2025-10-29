@@ -83,7 +83,7 @@ export const PredictiveAnalyticsDashboard = () => {
           </TabsList>
 
           <TabsContent value="health" className="space-y-4">
-            {structured.healthScores && (
+            {structured.healthScores && Array.isArray(structured.healthScores) && structured.healthScores.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {structured.healthScores.map((item: any, idx: number) => (
                   <Card key={idx} className="p-4">
@@ -97,11 +97,15 @@ export const PredictiveAnalyticsDashboard = () => {
                   </Card>
                 ))}
               </div>
+            ) : (
+              <Card className="p-6">
+                <p className="text-sm text-muted-foreground text-center">No health score data available. The AI may need more data to generate health scores.</p>
+              </Card>
             )}
           </TabsContent>
 
           <TabsContent value="alerts" className="space-y-4">
-            {structured.maintenanceAlerts?.length > 0 && (
+            {structured.maintenanceAlerts && Array.isArray(structured.maintenanceAlerts) && structured.maintenanceAlerts.length > 0 && (
               <Card className="p-6">
                 <h3 className="font-semibold mb-4 flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-yellow-600" />Maintenance Alerts</h3>
                 <div className="space-y-3">
@@ -119,7 +123,7 @@ export const PredictiveAnalyticsDashboard = () => {
                 </div>
               </Card>
             )}
-            {structured.complianceWarnings?.length > 0 && (
+            {structured.complianceWarnings && Array.isArray(structured.complianceWarnings) && structured.complianceWarnings.length > 0 && (
               <Card className="p-6">
                 <h3 className="font-semibold mb-4 flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-red-600" />Compliance Warnings</h3>
                 <div className="space-y-3">
@@ -129,10 +133,16 @@ export const PredictiveAnalyticsDashboard = () => {
                 </div>
               </Card>
             )}
+            {(!structured.maintenanceAlerts || !Array.isArray(structured.maintenanceAlerts) || structured.maintenanceAlerts.length === 0) && 
+             (!structured.complianceWarnings || !Array.isArray(structured.complianceWarnings) || structured.complianceWarnings.length === 0) && (
+              <Card className="p-6">
+                <p className="text-sm text-muted-foreground text-center">No alerts or warnings at this time.</p>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="optimize" className="space-y-4">
-            {structured.optimizationSuggestions?.length > 0 && (
+            {structured.optimizationSuggestions && Array.isArray(structured.optimizationSuggestions) && structured.optimizationSuggestions.length > 0 ? (
               <Card className="p-6">
                 <h3 className="font-semibold mb-4 flex items-center gap-2"><TrendingUp className="h-5 w-5 text-green-600" />Optimization</h3>
                 <div className="space-y-3">
@@ -140,6 +150,10 @@ export const PredictiveAnalyticsDashboard = () => {
                     <div key={idx} className="p-3 border rounded-lg bg-green-50 dark:bg-green-950/20"><p className="font-semibold text-sm">{s.area}</p><p className="text-sm text-muted-foreground">{s.suggestion}</p></div>
                   ))}
                 </div>
+              </Card>
+            ) : (
+              <Card className="p-6">
+                <p className="text-sm text-muted-foreground text-center">No optimization suggestions available at this time.</p>
               </Card>
             )}
           </TabsContent>
