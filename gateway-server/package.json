@@ -1,0 +1,23 @@
+{
+  "name": "hydropower-scada-gateway",
+  "version": "1.0.0",
+  "description": "Modbus/IEC104 to Supabase gateway for hydroelectric plant SCADA integration",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.74.0",
+    "dotenv": "^16.4.5",
+    "modbus-serial": "^8.0.18",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

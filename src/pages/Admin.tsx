@@ -22,6 +22,8 @@ import { ContributionAnalytics } from '@/components/admin/ContributionAnalytics'
 import { AIDailySummary } from '@/components/admin/AIDailySummary';
 import { AdminQueryInterface } from '@/components/admin/AdminQueryInterface';
 import { PredictiveAnalyticsDashboard } from '@/components/admin/PredictiveAnalyticsDashboard';
+import { SCADARealTimeMonitor } from '@/components/admin/SCADARealTimeMonitor';
+import { SCADATagMapping } from '@/components/admin/SCADATagMapping';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -419,6 +421,7 @@ export default function Admin() {
               <TabsTrigger value="ai-query" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">AI Query</TabsTrigger>
               <TabsTrigger value="analytics" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">Analytics</TabsTrigger>
               <TabsTrigger value="history" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">History</TabsTrigger>
+              <TabsTrigger value="scada" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">SCADA</TabsTrigger>
               <TabsTrigger value="users" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">Users</TabsTrigger>
               <TabsTrigger value="database" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">Database</TabsTrigger>
               <TabsTrigger value="activity" className="whitespace-nowrap text-xs sm:text-sm px-2 py-1.5">Activity</TabsTrigger>
@@ -511,6 +514,13 @@ export default function Admin() {
                 </TabsContent>
               </Tabs>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="scada">
+            <div className="space-y-4">
+              <SCADARealTimeMonitor />
+              <SCADATagMapping />
+            </div>
           </TabsContent>
 
           <TabsContent value="users">
