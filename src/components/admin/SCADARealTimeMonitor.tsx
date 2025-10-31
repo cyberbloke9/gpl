@@ -122,27 +122,27 @@ export function SCADARealTimeMonitor() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Activity className="h-5 w-5 text-primary animate-pulse" />
-          Real-Time SCADA Data
-          <Badge variant="outline" className="ml-auto">{readings.length} Tags</Badge>
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="flex flex-wrap items-center gap-2 text-lg sm:text-2xl">
+          <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-primary animate-pulse" />
+          <span className="flex-1 min-w-0">Real-Time SCADA Data</span>
+          <Badge variant="outline" className="text-xs">{readings.length} Tags</Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[600px]">
+      <CardContent className="p-3 sm:p-6 pt-0">
+        <ScrollArea className="h-[400px] sm:h-[600px]">
           <div className="space-y-2">
             {readings.map((reading) => (
               <div
                 key={reading.id}
-                className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
+                className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 rounded-lg border transition-colors gap-3 sm:gap-4 ${
                   reading.is_alarm 
                     ? 'border-destructive bg-destructive/5' 
                     : 'border-border hover:bg-accent/50'
                 }`}
               >
-                <div className="flex-1 min-w-0">
-                  <p className="font-mono text-sm font-medium truncate">
+                <div className="flex-1 min-w-0 w-full sm:w-auto">
+                  <p className="font-mono text-xs sm:text-sm font-medium truncate">
                     {reading.scada_tag_mappings?.tag_name || 'Unknown Tag'}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -152,11 +152,11 @@ export function SCADARealTimeMonitor() {
                     })}
                   </p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
                   <div className="text-right">
-                    <p className="text-2xl font-bold tabular-nums">
+                    <p className="text-xl sm:text-2xl font-bold tabular-nums">
                       {reading.scaled_value.toFixed(2)}
-                      <span className="text-sm font-normal ml-1 text-muted-foreground">
+                      <span className="text-xs sm:text-sm font-normal ml-1 text-muted-foreground">
                         {reading.scada_tag_mappings?.unit}
                       </span>
                     </p>

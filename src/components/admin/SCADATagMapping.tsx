@@ -161,9 +161,9 @@ export function SCADATagMapping() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <CardTitle>SCADA Tag Mappings</CardTitle>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={exportConfig}>
               <Download className="h-4 w-4 mr-2" />
               Export
@@ -175,12 +175,12 @@ export function SCADATagMapping() {
                   Add Tag
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-3xl max-h-[90vh]">
+              <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh]">
                 <DialogHeader>
                   <DialogTitle>{editingTag ? 'Edit' : 'Add'} SCADA Tag</DialogTitle>
                 </DialogHeader>
-                <ScrollArea className="max-h-[70vh] pr-4">
-                  <div className="grid grid-cols-2 gap-4 py-4">
+                <ScrollArea className="max-h-[70vh] pr-2 sm:pr-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 py-4">
                     <div>
                       <Label>Tag Name *</Label>
                       <Input
@@ -334,51 +334,53 @@ export function SCADATagMapping() {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[500px]">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Tag Name</TableHead>
-                <TableHead>Address</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Target</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead>Active</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {tags.map((tag) => (
-                <TableRow key={tag.id}>
-                  <TableCell className="font-mono text-sm">{tag.tag_name}</TableCell>
-                  <TableCell>{tag.modbus_address}</TableCell>
-                  <TableCell className="text-xs">{tag.data_type}</TableCell>
-                  <TableCell className="text-xs">
-                    {tag.target_table}.{tag.target_field}
-                    {tag.transformer_number && ` (T${tag.transformer_number})`}
-                  </TableCell>
-                  <TableCell>{tag.unit}</TableCell>
-                  <TableCell>{tag.is_active ? '✅' : '❌'}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => {
-                        setEditingTag(tag);
-                        setFormData(tag);
-                        setIsDialogOpen(true);
-                      }}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => tag.id && handleDelete(tag.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+      <CardContent className="p-3 sm:p-6">
+        <div className="overflow-x-auto">
+          <ScrollArea className="h-[400px] sm:h-[600px]">
+            <Table className="min-w-[800px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Tag Name</TableHead>
+                  <TableHead>Address</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Target</TableHead>
+                  <TableHead>Unit</TableHead>
+                  <TableHead>Active</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </ScrollArea>
+              </TableHeader>
+              <TableBody>
+                {tags.map((tag) => (
+                  <TableRow key={tag.id}>
+                    <TableCell className="font-mono text-sm">{tag.tag_name}</TableCell>
+                    <TableCell>{tag.modbus_address}</TableCell>
+                    <TableCell className="text-xs">{tag.data_type}</TableCell>
+                    <TableCell className="text-xs">
+                      {tag.target_table}.{tag.target_field}
+                      {tag.transformer_number && ` (T${tag.transformer_number})`}
+                    </TableCell>
+                    <TableCell>{tag.unit}</TableCell>
+                    <TableCell>{tag.is_active ? '✅' : '❌'}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          setEditingTag(tag);
+                          setFormData(tag);
+                          setIsDialogOpen(true);
+                        }}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => tag.id && handleDelete(tag.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   );
