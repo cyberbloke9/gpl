@@ -15,6 +15,7 @@ export interface UserManagementData {
   role: string;
   created_at: string;
   last_sign_in_at: string | null;
+  shift?: string | null;
 }
 
 export interface DatabaseStats {

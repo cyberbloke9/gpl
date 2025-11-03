@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
-import { Search, Users, UserPlus } from 'lucide-react';
+import { Search, Users, UserPlus, Edit } from 'lucide-react';
 import { UserManagementData } from '@/types/admin';
 import { useToast } from '@/hooks/use-toast';
 
@@ -20,7 +20,9 @@ export const UserManagementPanel = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [updating, setUpdating] = useState(false);
   
   // New user form state
   const [newUser, setNewUser] = useState({
@@ -30,6 +32,9 @@ export const UserManagementPanel = () => {
     password: '',
     role: 'operator' as 'admin' | 'operator'
   });
+
+  // Edit user form state
+  const [editUser, setEditUser] = useState<UserManagementData | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -46,43 +51,21 @@ export const UserManagementPanel = () => {
 
   const loadUsers = async () => {
     try {
-      // Get profiles with user roles
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          full_name,
-          employee_id,
-          created_at
-        `);
+      const { data, error } = await supabase.functions.invoke('get-users');
 
-      if (profilesError) throw profilesError;
+      if (error) throw error;
 
-      // Get user roles
-      const { data: rolesData, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role');
-
-      if (rolesError) throw rolesError;
-
-      // Combine data
-      const usersWithRoles = profilesData.map(profile => {
-        const userRole = rolesData.find(role => role.user_id === profile.id);
-        return {
-          id: profile.id,
-          full_name: profile.full_name,
-          employee_id: profile.employee_id,
-          email: 'N/A', // Email not available in profiles
-          role: userRole?.role || 'operator',
-          created_at: profile.created_at,
-          last_sign_in_at: null,
-        };
-      });
-
-      setUsers(usersWithRoles);
-      setFilteredUsers(usersWithRoles);
+      if (data?.users) {
+        setUsers(data.users);
+        setFilteredUsers(data.users);
+      }
     } catch (error) {
       console.error('Error loading users:', error);
+      toast({
+        variant: "destructive",
+        title: "Failed to load users",
+        description: "Could not fetch user data.",
+      });
     } finally {
       setLoading(false);
     }
@@ -136,6 +119,55 @@ export const UserManagementPanel = () => {
     } finally {
       setCreating(false);
     }
+  };
+
+  const handleEditUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editUser) return;
+    
+    setUpdating(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('update-user', {
+        body: {
+          user_id: editUser.id,
+          email: editUser.email,
+          full_name: editUser.full_name,
+          employee_id: editUser.employee_id || null,
+          shift: editUser.shift || null,
+          role: editUser.role
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      toast({
+        title: "User updated successfully",
+        description: `${editUser.full_name}'s information has been updated.`,
+      });
+
+      setEditDialogOpen(false);
+      setEditUser(null);
+      loadUsers();
+    } catch (error: any) {
+      console.error('Error updating user:', error);
+      toast({
+        variant: "destructive",
+        title: "Failed to update user",
+        description: error.message || "An error occurred while updating the user.",
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const openEditDialog = (user: UserManagementData) => {
+    setEditUser({ ...user });
+    setEditDialogOpen(true);
   };
 
   if (loading) {
@@ -263,15 +295,17 @@ export const UserManagementPanel = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead className="whitespace-nowrap text-xs sm:text-sm">Full Name</TableHead>
+                  <TableHead className="whitespace-nowrap text-xs sm:text-sm">Email</TableHead>
                   <TableHead className="hidden sm:table-cell whitespace-nowrap text-xs sm:text-sm">Employee ID</TableHead>
                   <TableHead className="whitespace-nowrap text-xs sm:text-sm">Role</TableHead>
                   <TableHead className="hidden md:table-cell whitespace-nowrap text-xs sm:text-sm">Registration Date</TableHead>
+                  <TableHead className="whitespace-nowrap text-xs sm:text-sm">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8 text-sm">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8 text-sm">
                       No users found
                     </TableCell>
                   </TableRow>
@@ -279,6 +313,7 @@ export const UserManagementPanel = () => {
                   filteredUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium text-sm">{user.full_name}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{user.email}</TableCell>
                       <TableCell className="hidden sm:table-cell text-xs text-muted-foreground">
                         {user.employee_id || 'N/A'}
                       </TableCell>
@@ -290,6 +325,16 @@ export const UserManagementPanel = () => {
                       <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
                         {format(new Date(user.created_at), 'PPp')}
                       </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEditDialog(user)}
+                          className="h-8 px-2"
+                        >
+                          <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -298,6 +343,90 @@ export const UserManagementPanel = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit User Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-[90vw] sm:max-w-[425px]">
+          {editUser && (
+            <form onSubmit={handleEditUser}>
+              <DialogHeader>
+                <DialogTitle className="text-base sm:text-lg">Edit User</DialogTitle>
+                <DialogDescription className="text-xs sm:text-sm">
+                  Update user information and permissions.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-3 sm:gap-4 py-3 sm:py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-fullName" className="text-xs sm:text-sm">Full Name *</Label>
+                  <Input
+                    id="edit-fullName"
+                    value={editUser.full_name}
+                    onChange={(e) => setEditUser({ ...editUser, full_name: e.target.value })}
+                    placeholder="John Doe"
+                    required
+                    className="text-sm"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-email" className="text-xs sm:text-sm">Email *</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={editUser.email}
+                    onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+                    placeholder="user@gayatripower.com"
+                    required
+                    className="text-sm"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-employeeId" className="text-xs sm:text-sm">Employee ID</Label>
+                  <Input
+                    id="edit-employeeId"
+                    value={editUser.employee_id || ''}
+                    onChange={(e) => setEditUser({ ...editUser, employee_id: e.target.value })}
+                    placeholder="EMP001"
+                    className="text-sm"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-shift" className="text-xs sm:text-sm">Shift</Label>
+                  <Input
+                    id="edit-shift"
+                    value={editUser.shift || ''}
+                    onChange={(e) => setEditUser({ ...editUser, shift: e.target.value })}
+                    placeholder="Day/Night"
+                    className="text-sm"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-role" className="text-xs sm:text-sm">Role *</Label>
+                  <Select
+                    value={editUser.role}
+                    onValueChange={(value: 'admin' | 'operator') => setEditUser({ ...editUser, role: value })}
+                  >
+                    <SelectTrigger className="text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="operator" className="text-sm">Operator</SelectItem>
+                      <SelectItem value="admin" className="text-sm">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)} className="text-xs sm:text-sm">
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={updating} className="text-xs sm:text-sm">
+                  {updating ? 'Updating...' : 'Update User'}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
