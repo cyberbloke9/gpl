@@ -11,3 +11,9 @@ verify_jwt = true
 
 [functions.create-user]
 verify_jwt = true
+
+[functions.get-users]
+verify_jwt = true
+
+[functions.update-user]
+verify_jwt = true
