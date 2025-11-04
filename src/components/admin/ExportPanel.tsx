@@ -58,7 +58,7 @@ export const ExportPanel = () => {
       exportChecklistsToExcel(formattedData, format(dateRange.from, 'yyyy-MM-dd'), format(dateRange.to, 'yyyy-MM-dd'));
       toast.success('Checklists exported successfully');
     } catch (error) {
-      console.error('Export error:', error);
+      console.error('Export failed', { type: 'checklists', timestamp: Date.now() });
       toast.error('Failed to export checklists');
     } finally {
       setLoading(null);
@@ -90,7 +90,7 @@ export const ExportPanel = () => {
       exportTransformerLogsToExcel(formattedData, format(dateRange.from, 'yyyy-MM-dd'), format(dateRange.to, 'yyyy-MM-dd'));
       toast.success('Transformer logs exported successfully');
     } catch (error) {
-      console.error('Export error:', error);
+      console.error('Export failed', { type: 'transformer', timestamp: Date.now() });
       toast.error('Failed to export transformer logs');
     } finally {
       setLoading(null);
@@ -128,7 +128,7 @@ export const ExportPanel = () => {
       exportGeneratorLogsToExcel(formattedData, format(dateRange.from, 'yyyy-MM-dd'), format(dateRange.to, 'yyyy-MM-dd'));
       toast.success('Generator logs exported successfully');
     } catch (error) {
-      console.error('Export error:', error);
+      console.error('Export failed', { type: 'generator', timestamp: Date.now() });
       toast.error('Failed to export generator logs');
     } finally {
       setLoading(null);
@@ -159,7 +159,7 @@ export const ExportPanel = () => {
       exportIssuesToExcel(formattedData, format(dateRange.from, 'yyyy-MM-dd'), format(dateRange.to, 'yyyy-MM-dd'));
       toast.success('Issues exported successfully');
     } catch (error) {
-      console.error('Export error:', error);
+      console.error('Export failed', { type: 'issues', timestamp: Date.now() });
       toast.error('Failed to export issues');
     } finally {
       setLoading(null);

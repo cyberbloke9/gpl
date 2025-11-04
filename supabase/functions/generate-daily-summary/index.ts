@@ -80,7 +80,7 @@ serve(async (req) => {
       periodDescription = today;
     }
 
-    console.log(`Analyzing data for period: ${periodDescription}`);
+    console.log('Analyzing operational data', { period: periodDescription, timestamp: Date.now() });
 
     // Fetch data for the specified period
     const [checklistsRes, transformerRes, generatorRes, issuesRes] = await Promise.all([
@@ -164,7 +164,20 @@ ALERTS:
 - Data completeness ${Math.min(parseFloat(dataCompleteness.transformer), parseFloat(dataCompleteness.generator)) < 70 ? 'CONCERNING - significant gaps detected' : 'acceptable'}
 `;
 
-    console.log('Sending data to AI for summary generation');
+    console.log('Generating AI summary', { recordCount: checklists.length + transformerLogs.length + generatorLogs.length, timestamp: Date.now() });
+
+    // Log summary generation action
+    try {
+      await supabase.from('admin_audit_log').insert({
+        admin_id: user.id,
+        action: 'generate_summary',
+        details: { period: periodDescription, dataRecords: checklists.length + transformerLogs.length + generatorLogs.length },
+        ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
+        user_agent: req.headers.get('user-agent')
+      });
+    } catch (e) {
+      console.error('Audit log failed', { timestamp: Date.now() });
+    }
 
     // Call Lovable AI for summary generation
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -221,7 +234,7 @@ Keep the summary concise (250-350 words), professional, and action-oriented. Use
     const aiData = await aiResponse.json();
     const summary = aiData.choices[0].message.content;
 
-    console.log('Generated summary for period:', periodDescription);
+    console.log('Summary generated successfully', { timestamp: Date.now() });
 
     return new Response(
       JSON.stringify({
@@ -239,7 +252,7 @@ Keep the summary concise (250-350 words), professional, and action-oriented. Use
       }
     );
   } catch (error) {
-    console.error('Error generating daily summary:', error);
+    console.error('Summary generation error', { type: error instanceof Error ? error.name : 'unknown', timestamp: Date.now() });
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       {

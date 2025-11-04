@@ -6,6 +6,28 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Audit logging helper
+const logAdminAction = async (
+  supabaseClient: any,
+  adminId: string,
+  action: string,
+  details: any,
+  req: Request
+) => {
+  try {
+    await supabaseClient.from('admin_audit_log').insert({
+      admin_id: adminId,
+      action,
+      target_user_id: null,
+      details,
+      ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown',
+      user_agent: req.headers.get('user-agent') || 'unknown'
+    });
+  } catch (error) {
+    console.error('Audit log failed', { timestamp: Date.now() });
+  }
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -57,6 +79,22 @@ serve(async (req) => {
       );
     }
 
+    // Parse request body for pagination and search parameters
+    let page = 1;
+    let per_page = 50;
+    let search = '';
+
+    try {
+      const body = await req.json().catch(() => ({}));
+      page = body.page || 1;
+      per_page = Math.min(body.per_page || 50, 100); // Max 100 per page
+      search = body.search || '';
+    } catch (e) {
+      // Use defaults if parsing fails
+    }
+
+    console.log('Fetching users', { page, per_page, hasSearch: !!search, timestamp: Date.now() });
+
     // Fetch all users with their auth data
     const { data: authUsers, error: authError } = await supabaseClient.auth.admin.listUsers();
 
@@ -82,7 +120,7 @@ serve(async (req) => {
     }
 
     // Combine all data
-    const usersWithDetails = authUsers.users.map(authUser => {
+    let usersWithDetails = authUsers.users.map(authUser => {
       const profile = profiles?.find(p => p.id === authUser.id);
       const role = roles?.find(r => r.user_id === authUser.id);
 
@@ -98,12 +136,50 @@ serve(async (req) => {
       };
     });
 
+    // Apply search filter if provided
+    if (search) {
+      const searchLower = search.toLowerCase();
+      usersWithDetails = usersWithDetails.filter(u =>
+        u.email?.toLowerCase().includes(searchLower) ||
+        u.full_name?.toLowerCase().includes(searchLower) ||
+        u.employee_id?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    const totalCount = usersWithDetails.length;
+    const totalPages = Math.ceil(totalCount / per_page);
+    const offset = (page - 1) * per_page;
+
+    // Paginate results
+    const paginatedUsers = usersWithDetails.slice(offset, offset + per_page);
+
+    // Log the user listing action
+    await logAdminAction(supabaseClient, user.id, 'list_users', 
+      { 
+        page, 
+        per_page, 
+        search: search || null,
+        resultCount: paginatedUsers.length,
+        totalCount 
+      }, req);
+
+    console.log('Users fetched', { count: paginatedUsers.length, total: totalCount, timestamp: Date.now() });
+
     return new Response(
-      JSON.stringify({ users: usersWithDetails }),
+      JSON.stringify({ 
+        users: paginatedUsers,
+        pagination: {
+          page,
+          per_page,
+          total_count: totalCount,
+          total_pages: totalPages
+        }
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
+    console.error('Error fetching users', { type: error instanceof Error ? error.name : 'unknown', timestamp: Date.now() });
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'An unexpected error occurred' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

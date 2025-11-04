@@ -63,7 +63,7 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log('Processing query:', query);
+    console.log('Processing AI query', { hasQuery: !!query, timestamp: Date.now() });
 
     // Fetch recent data to provide context for AI
     const today = new Date().toISOString().split('T')[0];
@@ -149,7 +149,20 @@ ISSUES:
 - By Severity: Critical=${issueStats.bySeverity.critical}, High=${issueStats.bySeverity.high}, Medium=${issueStats.bySeverity.medium}, Low=${issueStats.bySeverity.low}
 `;
 
-    console.log('Sending query to AI with context');
+    console.log('Sending query to AI', { recordCount: checklists.length + transformerLogs.length + generatorLogs.length, timestamp: Date.now() });
+
+    // Log admin query action
+    try {
+      await supabase.from('admin_audit_log').insert({
+        admin_id: user.id,
+        action: 'ai_query',
+        details: { queryLength: query.length, dataRecords: checklists.length + transformerLogs.length + generatorLogs.length },
+        ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
+        user_agent: req.headers.get('user-agent')
+      });
+    } catch (e) {
+      console.error('Audit log failed', { timestamp: Date.now() });
+    }
 
     // Call Lovable AI
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -196,7 +209,7 @@ ISSUES:
     const aiData = await aiResponse.json();
     const answer = aiData.choices[0].message.content;
 
-    console.log('Generated answer:', answer);
+    console.log('AI response received', { answerLength: answer?.length || 0, timestamp: Date.now() });
 
     return new Response(
       JSON.stringify({
@@ -214,7 +227,7 @@ ISSUES:
       }
     );
   } catch (error) {
-    console.error('Error processing query:', error);
+    console.error('Query processing error', { type: error instanceof Error ? error.name : 'unknown', timestamp: Date.now() });
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       {

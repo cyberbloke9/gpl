@@ -1,19 +1,26 @@
 project_id = "uijhwhckkwpgfjvodxfm"
 
+# Rate limiting configuration for admin edge functions
 [functions.generate-daily-summary]
 verify_jwt = true
+rate_limit = 5  # AI-powered, limit to 5 requests per minute
 
 [functions.admin-query]
 verify_jwt = true
+rate_limit = 10  # AI queries limited to 10 per minute
 
 [functions.predictive-analytics]
 verify_jwt = true
+rate_limit = 5  # AI-powered analytics limited to 5 per minute
 
 [functions.create-user]
 verify_jwt = true
+rate_limit = 5  # User creation limited to 5 per minute
 
 [functions.get-users]
 verify_jwt = true
+rate_limit = 15  # User listing limited to 15 per minute
 
 [functions.update-user]
 verify_jwt = true
+rate_limit = 20  # User updates limited to 20 per minute

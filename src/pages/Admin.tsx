@@ -24,6 +24,7 @@ import { AdminQueryInterface } from '@/components/admin/AdminQueryInterface';
 import { PredictiveAnalyticsDashboard } from '@/components/admin/PredictiveAnalyticsDashboard';
 import { SCADARealTimeMonitor } from '@/components/admin/SCADARealTimeMonitor';
 import { SCADATagMapping } from '@/components/admin/SCADATagMapping';
+import { AdminAuditDashboard } from '@/components/admin/AdminAuditDashboard';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

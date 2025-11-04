@@ -32,7 +32,7 @@ serve(async (req) => {
     const startDateStr = startDate.toISOString().split('T')[0];
     const endDateStr = endDate.toISOString().split('T')[0];
 
-    console.log(`Analyzing ${daysInRange} days from ${startDateStr} to ${endDateStr}`);
+    console.log('Analyzing predictive data', { days: daysInRange, period: `${startDateStr} to ${endDateStr}`, timestamp: Date.now() });
 
     const [transformerRes, generatorRes, issuesRes] = await Promise.all([
       supabase.from('transformer_logs').select('*').gte('date', startDateStr).lte('date', endDateStr).order('date', { ascending: true }),
@@ -44,7 +44,26 @@ serve(async (req) => {
     const generatorLogs = generatorRes.data || [];
     const issues = issuesRes.data || [];
 
-    console.log(`Analyzing ${transformerLogs.length} transformer logs, ${generatorLogs.length} generator logs, ${issues.length} issues`);
+    console.log('Data fetched for analytics', { records: transformerLogs.length + generatorLogs.length + issues.length, timestamp: Date.now() });
+
+    // Log predictive analytics action
+    if (authHeader) {
+      try {
+        const token = authHeader.replace('Bearer ', '');
+        const { data: { user } } = await supabase.auth.getUser(token);
+        if (user) {
+          await supabase.from('admin_audit_log').insert({
+            admin_id: user.id,
+            action: 'predictive_analytics',
+            details: { days: daysInRange, records: transformerLogs.length + generatorLogs.length + issues.length },
+            ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
+            user_agent: req.headers.get('user-agent')
+          });
+        }
+      } catch (e) {
+        console.error('Audit log failed', { timestamp: Date.now() });
+      }
+    }
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -73,7 +92,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ analysis, structured }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Analytics error', { type: error instanceof Error ? error.name : 'unknown', timestamp: Date.now() });
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
