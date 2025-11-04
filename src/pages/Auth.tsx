@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
+import { clearServiceWorkerCache, checkAppVersion } from '@/lib/sw-utils';
 
 const signInSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -24,10 +25,21 @@ export default function Auth() {
     timeRemaining: 0 
   });
 
-  // Redirect if already logged in
+  // Redirect if already logged in and clear old cache
   useEffect(() => {
     if (user) {
       navigate('/');
+    }
+
+    // Clear service worker cache on auth page mount to ensure fresh content
+    clearServiceWorkerCache();
+
+    // Check if user has old version cached
+    const isCurrentVersion = checkAppVersion();
+    if (!isCurrentVersion) {
+      toast.warning('Please refresh this page to get the latest version', {
+        duration: 10000
+      });
     }
   }, [user, navigate]);
 

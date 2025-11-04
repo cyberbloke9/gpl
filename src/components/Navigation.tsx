@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { APP_VERSION } from '@/lib/sw-utils';
 import { 
   ClipboardCheck, 
   Gauge, 
@@ -117,9 +119,14 @@ export const Navigation = () => {
       <div className="container mx-auto px-2 sm:px-4">
         <div className="flex h-14 sm:h-16 items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-6">
-            <Link to="/" className="text-base sm:text-xl font-bold truncate">
-              Gayatri Power
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link to="/" className="text-base sm:text-xl font-bold truncate">
+                Gayatri Power
+              </Link>
+              <Badge variant="outline" className="text-xs">
+                v{APP_VERSION}
+              </Badge>
+            </div>
             {/* Desktop Navigation */}
             <div className="hidden md:flex">
               <NavLinks />

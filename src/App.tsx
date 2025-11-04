@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SplashScreen } from "@/components/SplashScreen";
+import { toast } from "sonner";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import Checklist from "./pages/Checklist";
@@ -26,6 +27,27 @@ const App = () => {
     const splashShown = sessionStorage.getItem("splashShown");
     if (splashShown) {
       setShowSplash(false);
+    }
+
+    // Listen for service worker updates
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(registration => {
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          newWorker?.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              toast.info('New version available!', {
+                description: 'Refresh to get the latest updates.',
+                action: {
+                  label: 'Refresh',
+                  onClick: () => window.location.reload()
+                },
+                duration: Infinity
+              });
+            }
+          });
+        });
+      });
     }
   }, []);
 
