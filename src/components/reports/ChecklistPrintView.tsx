@@ -120,7 +120,7 @@ export const ChecklistPrintView = forwardRef<HTMLDivElement, ChecklistPrintViewP
         {/* Module 4 - CORRECT TITLE */}
         <div className="mb-8 page-break-before">
           <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2 mb-4">Module 4: Electrical Systems</h2>
-          <Module4DataDisplay data={checklist.module4_data || {}} flaggedIssues={flaggedIssues} />
+          <Module4DataDisplay data={checklist.module4_data || {}} flaggedIssues={flaggedIssues} isPrintView={true} />
         </div>
 
         {/* Footer */}

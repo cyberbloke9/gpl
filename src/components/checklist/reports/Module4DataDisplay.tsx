@@ -5,9 +5,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 interface Module4DataDisplayProps {
   data: any;
   flaggedIssues?: Map<string, any>;
+  isPrintView?: boolean;
 }
 
-export const Module4DataDisplay = ({ data, flaggedIssues }: Module4DataDisplayProps) => {
+export const Module4DataDisplay = ({ data, flaggedIssues, isPrintView = false }: Module4DataDisplayProps) => {
   if (!data || Object.keys(data).length === 0) {
     return <p className="text-muted-foreground">No data recorded</p>;
   }
@@ -191,6 +192,35 @@ export const Module4DataDisplay = ({ data, flaggedIssues }: Module4DataDisplayPr
     );
   };
 
+  // Print view - show all sections expanded without accordions
+  if (isPrintView) {
+    return (
+      <div className="w-full space-y-6">
+        {data.section1_od_yard && (
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold text-gray-800 border-b-2 border-gray-300 pb-2">
+              OD Yard Section
+            </h3>
+            <Card className="p-4">
+              {renderSection(data.section1_od_yard, 'OD Yard Section')}
+            </Card>
+          </div>
+        )}
+        {data.section2_control_room && (
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold text-gray-800 border-b-2 border-gray-300 pb-2">
+              Control Room Section
+            </h3>
+            <Card className="p-4">
+              {renderSection(data.section2_control_room, 'Control Room Section')}
+            </Card>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Interactive view - use accordions
   return (
     <Accordion type="multiple" className="w-full" defaultValue={["od-yard", "control-room"]}>
       {data.section1_od_yard && (
