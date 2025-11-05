@@ -1,5 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface Module4DataDisplayProps {
   data: any;
@@ -172,9 +173,7 @@ export const Module4DataDisplay = ({ data, flaggedIssues }: Module4DataDisplayPr
     if (!sectionData) return null;
 
     return (
-      <Card className="p-4 space-y-4">
-        <h4 className="font-semibold text-lg border-b pb-2">{sectionName}</h4>
-        
+      <div className="space-y-4">
         {Object.entries(sectionData).map(([key, value]: [string, any]) => {
           // Handle nested objects (like ptr, diesel_gen, battery_bank, etc.)
           if (value !== null && typeof value === 'object' && !Array.isArray(value) && !key.includes('photo')) {
@@ -188,17 +187,36 @@ export const Module4DataDisplay = ({ data, flaggedIssues }: Module4DataDisplayPr
             </div>
           );
         })}
-      </Card>
+      </div>
     );
   };
 
   return (
-    <div className="space-y-4">
-      {/* OD Yard Section */}
-      {data.section1_od_yard && renderSection(data.section1_od_yard, 'OD Yard Section')}
-      
-      {/* Control Room Section */}
-      {data.section2_control_room && renderSection(data.section2_control_room, 'Control Room Section')}
-    </div>
+    <Accordion type="multiple" className="w-full" defaultValue={["od-yard", "control-room"]}>
+      {data.section1_od_yard && (
+        <AccordionItem value="od-yard">
+          <AccordionTrigger className="text-lg font-semibold">
+            OD Yard Section
+          </AccordionTrigger>
+          <AccordionContent>
+            <Card className="p-4">
+              {renderSection(data.section1_od_yard, 'OD Yard Section')}
+            </Card>
+          </AccordionContent>
+        </AccordionItem>
+      )}
+      {data.section2_control_room && (
+        <AccordionItem value="control-room">
+          <AccordionTrigger className="text-lg font-semibold">
+            Control Room Section
+          </AccordionTrigger>
+          <AccordionContent>
+            <Card className="p-4">
+              {renderSection(data.section2_control_room, 'Control Room Section')}
+            </Card>
+          </AccordionContent>
+        </AccordionItem>
+      )}
+    </Accordion>
   );
 };

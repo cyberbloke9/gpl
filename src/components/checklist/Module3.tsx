@@ -11,9 +11,10 @@ interface Module3Props {
   userId: string;
   data: any;
   onSave: (data: any) => void;
+  isSaved?: boolean;
 }
 
-export const ChecklistModule3 = ({ checklistId, userId, data, onSave }: Module3Props) => {
+export const ChecklistModule3 = ({ checklistId, userId, data, onSave, isSaved = false }: Module3Props) => {
   const [formData, setFormData] = useState(data);
   const isInitialized = useRef(false);
 
@@ -172,10 +173,10 @@ export const ChecklistModule3 = ({ checklistId, userId, data, onSave }: Module3P
         }} 
         size="lg" 
         className="w-full" 
-        disabled={!isModule3Complete()}
+        disabled={!isModule3Complete() || isSaved}
         type="button"
       >
-        Save Module 3
+        {isSaved ? "Module 3 Saved ✓" : "Save Module 3"}
       </Button>
     </div>
   );

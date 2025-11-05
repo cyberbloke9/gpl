@@ -41,6 +41,7 @@ export default function Checklist() {
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
+  const [moduleSaved, setModuleSaved] = useState({ 1: false, 2: false, 3: false, 4: false });
 
   useEffect(() => {
     loadOrCreateTodayChecklist();
@@ -132,41 +133,59 @@ export default function Checklist() {
     // Calculate progress and update problem tracking
     const progress = calculateProgress();
     
-    // Fetch current contributors
-    const { data: currentChecklist } = await supabase
-      .from('checklists')
-      .select('contributors')
-      .eq('id', currentChecklistId)
-      .single();
+    try {
+      // Fetch current contributors
+      const { data: currentChecklist, error: fetchError } = await supabase
+        .from('checklists')
+        .select('contributors')
+        .eq('id', currentChecklistId)
+        .single();
 
-    const contributors: any = (currentChecklist as any)?.contributors || {};
-    const moduleKey = `module${moduleNum}`;
-    
-    // Add current user to contributors for this module
-    if (!contributors[moduleKey]) {
-      contributors[moduleKey] = [];
+      if (fetchError) {
+        console.error('Error fetching checklist:', fetchError);
+        toast.error('Failed to save module: ' + (fetchError.message || 'Unknown error'));
+        setIsSaving(false);
+        return;
+      }
+
+      const contributors: any = (currentChecklist as any)?.contributors || {};
+      const moduleKey = `module${moduleNum}`;
+      
+      // Add current user to contributors for this module
+      if (!contributors[moduleKey]) {
+        contributors[moduleKey] = [];
+      }
+      if (!contributors[moduleKey].includes(user.id)) {
+        contributors[moduleKey].push(user.id);
+      }
+      
+      const { error } = await supabase
+        .from('checklists')
+        .update({ 
+          [updateField]: data,
+          contributors: contributors,
+          problem_fields: problemFields,
+          problem_count: problemFields.length,
+          completion_percentage: progress,
+        } as any)
+        .eq('id', currentChecklistId);
+
+      if (error) {
+        console.error('RLS Error saving module:', error);
+        toast.error(`Failed to save Module ${moduleNum}: ${error.message}`);
+        setModuleSaved(prev => ({ ...prev, [moduleNum]: false }));
+      } else {
+        toast.success(`Module ${moduleNum} saved successfully`);
+        setModuleSaved(prev => ({ ...prev, [moduleNum]: true }));
+        setOverallProgress(progress);
+      }
+    } catch (err: any) {
+      console.error('Unexpected error saving module:', err);
+      toast.error('An unexpected error occurred');
+      setModuleSaved(prev => ({ ...prev, [moduleNum]: false }));
     }
-    if (!contributors[moduleKey].includes(user.id)) {
-      contributors[moduleKey].push(user.id);
-    }
-    
-    const { error } = await supabase
-      .from('checklists')
-      .update({ 
-        [updateField]: data,
-        contributors: contributors,
-        problem_fields: problemFields,
-        problem_count: problemFields.length,
-        completion_percentage: progress,
-      } as any)
-      .eq('id', currentChecklistId);
 
     setIsSaving(false);
-    if (error) {
-      toast.error('Failed to save module data');
-    } else {
-      toast.success(`Module ${moduleNum} saved`);
-    }
   };
 
   // Auto-save with debounce
@@ -278,6 +297,7 @@ export default function Checklist() {
                     setModule1Data(data);
                     saveModuleData(1, data);
                   }}
+                  isSaved={moduleSaved[1]}
                 />
               )}
             </TabsContent>
@@ -298,6 +318,7 @@ export default function Checklist() {
                     setModule2Data(data);
                     saveModuleData(2, data);
                   }}
+                  isSaved={moduleSaved[2]}
                 />
               )}
             </TabsContent>
@@ -318,6 +339,7 @@ export default function Checklist() {
                     setModule3Data(data);
                     saveModuleData(3, data);
                   }}
+                  isSaved={moduleSaved[3]}
                 />
               )}
             </TabsContent>
@@ -338,6 +360,7 @@ export default function Checklist() {
                     setModule4Data(data);
                     saveModuleData(4, data);
                   }}
+                  isSaved={moduleSaved[4]}
                 />
               )}
             </TabsContent>
