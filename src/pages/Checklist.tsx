@@ -221,7 +221,25 @@ export default function Checklist() {
     if (!currentChecklistId) return;
 
     try {
+      // First, verify checklist is still unsubmitted
+      const { data: currentState, error: checkError } = await supabase
+        .from('checklists')
+        .select('submitted, status')
+        .eq('id', currentChecklistId)
+        .single();
+
+      if (checkError) throw checkError;
+
+      if (currentState?.submitted) {
+        toast.error('This checklist has already been submitted');
+        await loadOrCreateTodayChecklist();
+        setShowSubmitDialog(false);
+        return;
+      }
+
       const submissionTime = istToUTC(new Date());
+
+      // Add constraint to only update if still unsubmitted
       const { error } = await supabase
         .from('checklists')
         .update({
@@ -235,9 +253,18 @@ export default function Checklist() {
           module3_data: module3Data,
           module4_data: module4Data,
         })
-        .eq('id', currentChecklistId);
+        .eq('id', currentChecklistId)
+        .eq('submitted', false);
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          toast.error('Checklist was submitted by another operator');
+          await loadOrCreateTodayChecklist();
+          setShowSubmitDialog(false);
+          return;
+        }
+        throw error;
+      }
       
       await loadOrCreateTodayChecklist();
       setShowSubmitDialog(false);
@@ -245,7 +272,11 @@ export default function Checklist() {
       setActiveModule('history');
     } catch (error: any) {
       console.error('Submission error:', error);
-      toast.error('Failed to submit: ' + error.message);
+      if (error.message?.includes('row-level security')) {
+        toast.error('Permission denied. You may not have the required operator role.');
+      } else {
+        toast.error('Failed to submit: ' + error.message);
+      }
     }
   };
 

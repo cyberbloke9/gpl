@@ -29,7 +29,7 @@ export const clearServiceWorkerCache = async (): Promise<void> => {
   }
 };
 
-export const APP_VERSION = "2.0.0";
+export const APP_VERSION = "2.1.0";
 
 export const checkAppVersion = (): boolean => {
   const storedVersion = localStorage.getItem('app_version');

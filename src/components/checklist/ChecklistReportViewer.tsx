@@ -211,7 +211,7 @@ export const ChecklistReportViewer = ({ checklist, isOpen, onClose, userName, em
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold">Module 4: Electrical Systems</h3>
                 {checklist.module4_data && Object.keys(checklist.module4_data).length > 0 ? (
-                  <Module4DataDisplay data={checklist.module4_data} flaggedIssues={issueMap} />
+                  <Module4DataDisplay data={checklist.module4_data} flaggedIssues={issueMap} isPrintView={true} />
                 ) : (
                   <p className="text-muted-foreground text-center py-8">No data available for Module 4</p>
                 )}

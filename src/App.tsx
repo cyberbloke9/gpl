@@ -29,6 +29,27 @@ const App = () => {
       setShowSplash(false);
     }
 
+    // Check version and clear cache if needed
+    const checkVersion = async () => {
+      const { checkAppVersion, clearServiceWorkerCache, APP_VERSION } = await import('@/lib/sw-utils');
+      
+      const isCurrentVersion = checkAppVersion();
+      if (!isCurrentVersion) {
+        console.log('New version detected, clearing cache...');
+        await clearServiceWorkerCache();
+        toast.info(`Updated to version ${APP_VERSION}`, {
+          description: 'Cache cleared for fresh content',
+          action: {
+            label: 'Reload',
+            onClick: () => window.location.reload()
+          },
+          duration: 10000
+        });
+      }
+    };
+    
+    checkVersion();
+
     // Listen for service worker updates
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then(registration => {
